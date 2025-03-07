@@ -16,8 +16,17 @@ csrf = CSRFProtect(app)
 @app.route("/", methods=["GET", "POST"])
 @app.route("/index")
 def index():
-    return render_template("index.html")
-    
+    return render_template("mainClientes.html")
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+@app.route("/galletas", methods=["GET", "POST"])
+def galletas():
+    return render_template("galletas.html")
+
 if __name__ == '__main__':
     csrf.init_app(app)
     db.init_app(app)

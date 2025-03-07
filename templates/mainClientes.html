@@ -1,0 +1,97 @@
+{% extends "index.html"%}
+{% block container %}
+
+    <!--* Main  -->
+    <div>
+        <div class="text-center py-5 bg-secondary-custom text-primary-custom">
+            <div class="container">
+                <h2 class="font-Spartan"><b>Bienvenidos a Dulce Rebaño</b></h2>
+                <p class="lead">Las mejores galletas artesanales hechas con amor y dedicación.</p>
+                <a href="" class="btn btn-color btn-hover text-white font-Spartan">Ver Productos</a>
+            </div>
+        </div>
+
+        <!--* Seleccion de Productos mas populares -->
+            <!--! hay que agregar mas -->
+        <div class="py-5">
+            <div class="container">
+                <h2 class="font-Spartan text-center text-primary-custom"><b>Nuestros Productos</b></h2>
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <img src="static/img/donGalleto1.png" class="card-img-top" alt="Galleta 1">
+                            <div class="card-body text-center">
+                                <h5 class="card-title font-Spartan text-primary-custom"><b>Galleta de Chocolate</b></h5>
+                                <p class="card-text">Galleta de chocolate con chispas de chocolate.</p>
+                                <a href="" class="btn btn-color btn-hover text-white font-Spartan">Comprar</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <img src="static/img/donGalleto2.png" class="card-img-top" alt="Galleta 2">
+                            <div class="card-body text-center">
+                                <h5 class="card-title font-Spartan text-primary-custom"><b>Galleta de Vainilla</b></h5>
+                                <p class="card-text">Galleta suave y deliciosa con sabor a vainilla.</p>
+                                <a href="" class="btn btn-color btn-hover text-white font-Spartan">Comprar</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <img src="static/img/donGalleto3.png" class="card-img-top" alt="Galleta 3">
+                            <div class="card-body text-center">
+                                <h5 class="card-title font-Spartan text-primary-custom"><b>Galleta de Coco</b></h5>
+                                <p class="card-text">Galleta crujiente con un toque de coco.</p>
+                                <a href="" class="btn btn-color btn-hover text-white font-Spartan">Comprar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--* Acerca de nosotros -->
+        <div class="py-5 bg-light">
+            <div class="container">
+                <h2 class="font-Spartan text-center text-primary-custom"><b>Sobre Nosotros</b></h2>
+                <p class="lead text-center">En Dulce Rebaño, nos dedicamos a crear las mejores galletas artesanales con ingredientes de alta calidad. Nuestro compromiso es ofrecer productos deliciosos y frescos para nuestros clientes.</p>
+            </div>
+        </div>
+
+        <!--* Contantos -->
+        <div class="py-5">
+            <div class="container">
+                <h2 class="font-Spartan text-center text-primary-custom"><b>Contacto</b></h2>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <form>
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label font-Spartan">Nombre</label>
+                                <input type="text" class="form-control" id="nombre" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="correo" class="form-label font-Spartan">Correo</label>
+                                <input type="email" class="form-control" id="correo" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="mensaje" class="form-label font-Spartan">Mensaje</label>
+                                <textarea class="form-control" id="mensaje" rows="3" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-color btn-hover text-white font-Spartan">Enviar</button>
+                        </form>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="font-Spartan text-primary-custom"><b>Visítanos</b></h5>
+                        <p class="lead">Calle Falsa 123, Ciudad, País</p>
+                        <h5 class="font-Spartan text-primary-custom"><b>Llámanos</b></h5>
+                        <p class="lead">+123 456 7890</p>
+                        <h5 class="font-Spartan text-primary-custom"><b>Correo</b></h5>
+                        <p class="lead">contacto@dulcerebano.com</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
