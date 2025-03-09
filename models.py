@@ -84,3 +84,5 @@ class DetallesPedido(db.Model):
     idPedido = db.Column(db.Integer, db.ForeignKey('pedidos.idPedido'))
     idProducto = db.Column(db.Integer, db.ForeignKey('productosterminados.idProducto'))
     cantidad = db.Column(db.Integer)
+    
+    
