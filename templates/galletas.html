@@ -1,123 +1,125 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Dulce Rebaño</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css"/>
-        <link rel="stylesheet" href="static/bootstrap/css/bootstrap-utilities.min.css"/>
-        <link rel="stylesheet" href="static/bootstrap/css/bootstrap-grid.min.css"/>
-        <link rel="stylesheet" href="static/sweetalert2/sweetalert2.min.css">
-        <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.css"/>
-        <style>
-            .font-Spartan{
-                font-family: 'League-spartan',sans-serif;
-            }
-            .btn-color{
-                background-color: #542E02;
-            }
-            .btn-hover:hover{
-                background-color: #371E01;
-            }
-            .btn-del{
-                background-color: #FF0000;
-            }
-            .btn-del-hover:hover{
-                background-color: #D90000;
-            }
-            .bg-danger-light{
-                background-color: rgba(255, 0, 0, 0.1); /* Rojo suave */
-            }
-            .buyButtons{
-                background-color: #FFD700;
-            }
-        </style>
-    </head>
-    <body class="" style="background-color: #e1e1e1">
-        <!-- Header -->
-        <header class="p-2" style="background-color: #532d02;">
-            <div class="ms-4 d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-                <img src="static/img/donGalleto4.png" class="ms-2" alt="" width="70px"/>
-                <ul class="pt-2 nav col-12 col-lg-auto">
-                    <h1 class="ms-4 text-white font-Spartan"><b>Dulce Rebaño</b></h1>
-                </ul>
-            </div>
-        </header>
+<head>
+    <title>Dulce Rebaño</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="static/bootstrap/css/bootstrap-utilities.min.css"/>
+    <link rel="stylesheet" href="static/bootstrap/css/bootstrap-grid.min.css"/>
+    <link rel="stylesheet" href="static/sweetalert2/sweetalert2.min.css">
+    <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <style>
+        .font-Spartan {
+            font-family: 'Roboto', sans-serif;
+        }
+        .btn-color {
+            background-color: #542E02;
+        }
+        .btn-hover:hover {
+            background-color: #371E01;
+        }
+        .btn-del {
+            background-color: #FF0000;
+        }
+        .btn-del-hover:hover {
+            background-color: #D90000;
+        }
+        .bg-danger-light {
+            background-color: rgba(255, 0, 0, 0.1); /* Rojo suave */
+        }
+        .buyButtons {
+            background-color: #FFD700;
+        }
+    </style>
+</head>
+<body class="" style="background-color: #e1e1e1">
+    <!-- Header -->
+    <header class="p-2" style="background-color: #532d02;">
+        <div class="ms-4 d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+            <img src="static/img/donGalleto4.png" class="ms-2" alt="" width="70px"/>
+            <ul class="pt-2 nav col-12 col-lg-auto">
+                <h1 class="ms-4 text-white font-Spartan"><b>Dulce Rebaño</b></h1>
+            </ul>
+        </div>
+    </header>
 
-        <div class="container-fluid">
-            <div class="row vh-100">
-                <!-- Navbar Lateral -->
-                <nav class="col-md-1 col-lg-1 d-md-block sidebar text-center" style="background-color: #532d02; opacity: 50%">
-                    <div class="position-sticky pt-3">
-                        <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px;">
-                            <i class="fa fa-2x fa-cookie-bite"></i><br>
-                            <b>Ventas</b>
-                        </button>
-                        <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
-                            <i class="fa fa-2x fa-box-open"></i><br>
-                            <b>Inventario</b>
-                        </button>
-                        <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
-                            <i class="fa fa-2x fa-layer-group"></i><br>
-                            <b>Insumos</b>
-                        </button>
-                        <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
-                            <i class="fa fa-2x fa-file-clipboard"></i><br>
-                            <b>Reportes</b>
-                        </button>
-                    </div>
-                </nav>
-                
-                <!-- Main -->
-                <div class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 mt-5 p-1">
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="card border-0 rounded-3">
-                                <div class="card-header border-0 rounded-top-3 text-center bg-warning opacity-50">
-                                    <b class="text-center font-Spartan">Galletas</b>
+    <div class="container-fluid">
+        <div class="row vh-100">
+            <!-- Navbar Lateral -->
+            <nav class="col-md-1 col-lg-1 d-md-block sidebar text-center" style="background-color: #532d02; opacity: 50%">
+                <div class="position-sticky pt-3">
+                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px;">
+                        <i class="fa fa-2x fa-cookie-bite"></i><br>
+                        <b>Ventas</b>
+                    </button>
+                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
+                        <i class="fa fa-2x fa-box-open"></i><br>
+                        <b>Inventario</b>
+                    </button>
+                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
+                        <i class="fa fa-2x fa-layer-group"></i><br>
+                        <b>Insumos</b>
+                    </button>
+                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
+                        <i class="fa fa-2x fa-file-clipboard"></i><br>
+                        <b>Reportes</b>
+                    </button>
+                </div>
+            </nav>
+            
+            <!-- Main -->
+            <div class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 mt-5 p-1">
+                <div class="row">
+                    {% with message = get_flashed_messages() %}
+                        {% if message %}
+                            {% for messages in message %}
+                                <div class="alert alert-success bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                                    {{ messages }}
                                 </div>
-                                <table class="table-borderless rounded-3 text-center">
-                                    <thead>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    <div class="col-6">
+                        <div class="card border-0 shadow-sm rounded-3">
+                            <div class="card-header border-0 rounded-top-3 text-center bg-warning card-warning text-white">
+                                <b class="text-center font-Spartan">Galletas</b>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped text-center mb-0 table-borderless">
+                                    <thead class="bg-warning text-dark">
                                         <tr>
                                             <th>N°Lote</th>
-                                            <th>sabor</th>
-                                            <th>tipo</th>
-                                            <th>fecha</th>
+                                            <th>Sabor</th>
+                                            <th>Tipo</th>
+                                            <th>Fecha</th>
                                             <th>Cantidad</th>
                                             <th></th>
                                         </tr>
                                     </thead>
-                                    <tbody id="tBodyInventario">
-                                        <!-- Contenido de la tabla -->
-                                    </tbody>
-                                </table>
-                                <div class="card-footer border-0 rounded-bottom-3"></div>
-                            </div>
-                            <!-- Paquetes -->
-                            <div class="card border-0 rounded-3 mt-3">
-                                <div class="card-header rounded-top-3 border-0 text-center bg-warning opacity-50">
-                                    <b class="text-center font-Spartan">Paquetes</b>
-                                </div>
-                                <table class="rounded-3 text-center">
-                                    <thead>
+                                    <tbody id="productosTableBody">
+                                        {% for producto in productos %}
                                         <tr>
-                                            <th>N°lote</th>
-                                            <th>sabor</th>
-                                            <th>tipo</th>
-                                            <th>fecha</th>
-                                            <th>Cantidad</th>
-                                            <th></th>
+                                            <td>{{ producto.idProducto }}</td>
+                                            <td>{{ producto.nombre }}</td>
+                                            <td>{{ producto.tipoProducto }}</td>
+                                            <td>{{ producto.fechaCaducidad.strftime('%d-%m-%Y') }}</td>
+                                            <td>{{ producto.cantidadDisponible }}</td>
+                                            <td class=""><a href="">i</a></td>
                                         </tr>
-                                    </thead>
-                                    <tbody id="tBodyPaquetes">
-                                        <!-- Contenido de la tabla -->
+                                        {% endfor %}
                                     </tbody>
                                 </table>
-                                <div class="card-footer border-0 rounded-bottom-3"></div>
                             </div>
+                            <div class="card-footer border-0 rounded-bottom-3"></div>
                         </div>
-                        <div class="col-6">
-                            <div class="row" style="display: none">
+                    </div>
+                    <div class="col-6">
+                        <form id="formLote" method="POST" action="{{ url_for('guardarLote') }}">
+                            {{ form.hidden_tag() }}
+                            <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-floating">
                                         <input type="text" class="form-control border-0" id="txtIdGalleta" placeholder="" disabled="">
@@ -131,49 +133,16 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row mt-2">
+                            <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-floating">
-                                        <select id="txtSabor" class="form-select border-0">
-                                            <option value="">Seleccione un sabor</option>
-                                            <option value="Chocolate">Chocolate</option>
-                                            <option value="Vainilla">Vainilla</option>
-                                            <option value="Coco">Coco</option>
-                                            <option value="Chispas">Chispas</option>
-                                            <option value="Naranja">Naranja</option>
-                                            <option value="Integrales">Integrales</option>
-                                            <option value="Especiales">Especiales</option>
-                                        </select> 
+                                        {{ form.sabor(class="form-select border-0", id="txtSabor") }}
                                         <label for="txtSabor">Sabor</label>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-md-12" style="display: none ">
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control border-0" id="txtTipo" placeholder="" disabled="">
-                                        <label for="txtTipo">Tipo Galleta</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12" style="display: none ">
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control border-0" id="txtCantidad" placeholder="" disabled="">
-                                        <label for="txtCantidad">Cantidad</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12" style="display: none ">
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control border-0" id="txtFecha" placeholder="" disabled="">
-                                        <label for="txtFecha">Fecha Caducidad</label>
-                                    </div>
-                                </div>
-                            </div>
                             <div class="row mt-2">
-                                <!-- Botón Nuevo Paquete -->
+                                <!--* Botones -->
                                 <div class="col-4">
                                     <div class="form-floating text-end">
                                         <button class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan" type="button" data-bs-toggle="modal" data-bs-target="#modalNuevoPaquete"><b>Nuevo Paquete</b><i class="fa fa-plus ms-1"></i></button>
@@ -181,116 +150,148 @@
                                 </div>
                                 <div class="col-4">
                                     <div class="form-floating text-end">
-                                        <button class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan" onclick="clearForm();"><b>Nuevo Lote</b><i class="fa fa-plus ms-1"></i> </button>
+                                        <button class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan" type="button" onclick="nuevoLote()"><b>Nuevo Lote</b><i class="fa fa-plus ms-1"></i> </button>
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <div class="form-floating text-end">
-                                        <button class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan" onclick="saveGalleta()"><b>Guardar</b></button>
+                                        <button class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan" type="button" onclick="guardarLote()"><b>Guardar</b></button>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row mt-2">
-                                <div class="col-12">
-                                    <div class="form-floating text-end">
-                                        <button class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap"><b>Mermar</b><i class="fa fa-trash-alt ms-2"></i></button>
-                                    </div>
+                        </form>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <div class="form-floating text-end">
+                                    <button class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap"><b>Mermar</b><i class="fa fa-trash-alt ms-2"></i></button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Modal Merma -->
-                <div class="modal fade mt-5" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content border-0">
-                            <div class="modal-header border-0" style="background-color: #eee">
-                                <h1 class="modal-title fs-5 font-Spartan" id="exampleModalLabel"><b>Merma de Productos</b></h1>
-                                <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body" style="background-color: #eee">
-                                <form>
-                                    <div class="col-md-12 mt-3">
-                                        <div class="form-floating">
-                                            <input type="text" class="form-control border-0" id="mdlCantidad" placeholder="">
-                                            <label for="mdlCantidad">Cantidad a mermar:</label>
-                                        </div>
-                                    </div>
-                                    <div class="form-check mt-2">
-                                        <input class="form-check-input border-1 shadow-lg" type="checkbox" value="" id="flexCheckIndeterminate">
-                                        <label class="form-check-label font-Spartan" for="flexCheckIndeterminate">
-                                            Mermar Todo
-                                        </label>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="modal-footer border-0" style="background-color: #eee">
-                                <button type="button" class="btn btn-warning font-Spartan text-white" onclick="mermar()">Mermar</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Modal Nuevo Paquete -->
-                <div class="modal fade mt-5" id="modalNuevoPaquete" tabindex="-1" aria-labelledby="modalNuevoPaqueteLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content border-0">
-                            <div class="modal-header border-0" style="background-color: #eee">
-                                <h1 class="modal-title fs-5 font-Spartan" id="modalNuevoPaqueteLabel"><b>Nuevo Paquete</b></h1>
-                                <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body" style="background-color: #eee">
-                                <form id="formNuevoPaquete">
-                                    <div class="col-md-12" style="display: none ">
-                                        <div class="form-floating">
-                                            <input type="text" class="form-control border-0" id="mdlIdGalletas" placeholder="" disabled="">
-                                            <label for="mdlIdGalletas">id</label>
-                                        </div>
-                                    </div>
-                                    <div class="card pt-2 pb-2 pe-0 ps-0 border-0 rounded-3">
-                                        <table class="table-borderless table table-hover table-sm rounded-3 text-center">
-                                            <thead>
-                                                <tr>
-                                                    <th>sabor</th>
-                                                    <th>tipo</th>
-                                                    <th>Cantidad</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="tBodyGalletas">
-                                                <!-- Contenido de la tabla -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div class="col-md-12 mt-2">
-                                        <div class="form-floating">
-                                            <input type="number" class="form-control border-0" id="mdlCantidadPkg" placeholder="">
-                                            <label for="mdlCantidadPkg">Cantidad</label>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="modal-footer border-0" style="background-color: #eee">
-                                <button type="button" class="btn btn-warning font-Spartan text-white" onclick="savePaquete()">Guardar</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--
-                    !luego veo q pdo con esto
-
-                    <script>
-                        document.addEventListener("DOMContentLoaded", function () {
-                            const checkbox = document.getElementById("flexCheckIndeterminate");
-                            const input = document.getElementById("mdlCantidad");
-    
-                            checkbox.addEventListener("change", function () {
-                                input.disabled = checkbox.checked; // Deshabilita el input si el checkbox está seleccionado
-                            });
-                        });
-                    </script>
-                -->
             </div>
+
+            <!--* Modal Merma -->
+            <div class="modal fade mt-5" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content border-0">
+                        <div class="modal-header border-0" style="background-color: #eee">
+                            <h1 class="modal-title fs-5 font-Spartan" id="exampleModalLabel"><b>Merma de Productos</b></h1>
+                            <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" style="background-color: #eee">
+                            <form>
+                                <div class="col-md-12 mt-3">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control border-0" id="mdlCantidad" placeholder="">
+                                        <label for="mdlCantidad">Cantidad a mermar:</label>
+                                    </div>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input border-1 shadow-lg" type="checkbox" value="" id="flexCheckIndeterminate">
+                                    <label class="form-check-label font-Spartan" for="flexCheckIndeterminate">
+                                        Mermar Todo
+                                    </label>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer border-0" style="background-color: #eee">
+                            <button type="button" class="btn btn-warning font-Spartan text-white" onclick="mermar()">Mermar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--* Modal Nuevo Paquete -->
+            <div class="modal fade mt-5" id="modalNuevoPaquete" tabindex="-1" aria-labelledby="modalNuevoPaqueteLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content border-0">
+                        <div class="modal-header border-0" style="background-color: #eee">
+                            <h1 class="modal-title fs-5 font-Spartan" id="modalNuevoPaqueteLabel"><b>Nuevo Paquete</b></h1>
+                            <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" style="background-color: #eee">
+                            <form id="formNuevoPaquete">
+                                <div class="col-md-12" style="display: none;">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control border-0" id="mdlIdGalletas" placeholder="" disabled="">
+                                        <label for="mdlIdGalletas">ID</label>
+                                    </div>
+                                </div>
+                                <div class="card pt-2 pb-2 pe-0 ps-0 border-0 rounded-3">
+                                    <table class="table-borderless table table-hover table-sm rounded-3 text-center">
+                                        <thead>
+                                            <tr>
+                                                <th>Sabor</th>
+                                                <th>Tipo</th>
+                                                <th>Cantidad</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tBodyGalletas">
+                                            <!-- Contenido de la tabla -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-md-12 mt-2">
+                                    <div class="form-floating">
+                                        <input type="number" class="form-control border-0" id="mdlCantidadPkg" placeholder="">
+                                        <label for="mdlCantidadPkg">Cantidad</label>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer border-0" style="background-color: #eee">
+                            <button type="button" class="btn btn-warning font-Spartan text-white" onclick="savePaquete()">Guardar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
+
+            <script>
+                function getCookie(name) {
+                    let cookieValue = null;
+                    if (document.cookie && document.cookie !== '') {
+                        const cookies = document.cookie.split(';');
+                        for (let i = 0; i < cookies.length; i++) {
+                            const cookie = cookies[i].trim();
+                            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                break;
+                            }
+                        }
+                    }
+                    return cookieValue;
+                }
+
+                function guardarLote() {
+                    var sabor = $('#txtSabor').val();
+                    var csrfToken = $('meta[name="csrf-token"]').attr('content');
+                    if (sabor) {
+                        $.ajax({
+                            url: '/guardarLote',
+                            type: 'POST',
+                            data: { sabor: sabor, csrf_token: csrfToken },
+                            success: function(response) {
+                                if (response.success) {
+                                    alert(response.message);
+                                } else {
+                                    alert(response.message);
+                                }
+                            },
+                            error: function() {
+                                alert('Error al guardar el lote.');
+                            }
+                        });
+                    } else {
+                        alert('Por favor, seleccione un sabor.');
+                    }
+                }
+            </script>
         </div>
-    </body>
+    </div>
+</body>
 </html>
