@@ -1,7 +1,9 @@
 {% extends "admin/index.html" %}
 {% block container %}
+{% import "admin/_macros.html" as macro %}
+
 <!--* Main -->
-<div class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 mt-5 p-1">
+<div class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 p-1">
     <div class="row">
         {% with message = get_flashed_messages() %}
             {% if message %}
@@ -13,12 +15,12 @@
             {% endif %}
         {% endwith %}
         <div class="col-6">
-            <div class="card border-0 shadow-sm rounded-3">
-                <div class="card-header border-0 rounded-top-3 text-center card-warning">
+            <div class="card border-0 shadow-sm rounded-3 bg-white">
+                <div class="card-header border-0 rounded-top-3 text-center bg-white">
                     <b class="text-center font-Spartan">Galletas</b>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped text-center mb-0 table-borderless">
+                    <table class="table table-hover text-center mb-0 table-borderless">
                         <thead class="text-dark">
                             <tr>
                                 <th>N°Lote</th>
@@ -31,7 +33,7 @@
                         </thead>
                         <tbody id="productosTableBody">
                             {% for producto in productos %}
-                            <tr>
+                            <tr onclick="selectProduct('{{ producto.idProducto }}', '{{ producto.estatus }}')">
                                 <td>{{ producto.idProducto }}</td>
                                 <td>{{ producto.nombre }}</td>
                                 <td>{{ producto.tipoProducto }}</td>
@@ -43,24 +45,18 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="card-footer border-0 rounded-bottom-3"></div>
+                <div class="card-footer border-0 rounded-bottom-3 bg-white pt-0"></div>
             </div>
         </div>
         <div class="col-6">
-            <form id="formLote" method="POST" action="{{ url_for('guardarLote') }}">
+            <form id="formLote" method="POST" action="{{ url_for('guardarLote') }}" novalidate>
                 {{ form.hidden_tag() }}
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="form-floating">
-                            <input type="text" class="form-control border-0" id="txtIdGalleta" placeholder="" disabled="">
-                            <label for="txtIdGalleta">ID</label>
-                        </div>
+                        {{ macro.datos('txtIdGalleta', '', 'text', disabled=true) }}
                     </div>
                     <div class="col-md-6">
-                        <div class="form-floating">
-                            <input type="text" class="form-control border-0" id="txtEstatus" placeholder="" disabled="">
-                            <label for="txtEstatus">Estatus</label>
-                        </div>
+                        {{ macro.datos('txtEstatus', '', 'text', disabled=true) }}
                     </div>
                 </div>
                 <div class="row">
@@ -111,23 +107,14 @@
                 <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" style="background-color: #eee">
-                <form>
-                    <div class="col-md-12 mt-3">
-                        <div class="form-floating">
-                            <input type="text" class="form-control border-0" id="mdlCantidad" placeholder="">
-                            <label for="mdlCantidad">Cantidad a mermar:</label>
-                        </div>
-                    </div>
-                    <div class="form-check mt-2">
-                        <input class="form-check-input border-1 shadow-lg" type="checkbox" value="" id="flexCheckIndeterminate">
-                        <label class="form-check-label font-Spartan" for="flexCheckIndeterminate">
-                            Mermar Todo
-                        </label>
-                    </div>
+                <form id="formMerma" method="POST" action="{{ url_for('mermar') }}">
+                    {{ form.hidden_tag() }}
+                    {{ macro.merma('mdlCantidad', 'Cantidad a mermar:', 'flexCheckIndeterminate', 'Mermar Todo') }}
+                    <input type="hidden" id="mdlIdProducto" name="idProducto">
                 </form>
             </div>
             <div class="modal-footer border-0" style="background-color: #eee">
-                <button type="button" class="btn btn-warning font-Spartan text-white" onclick="mermar()">Mermar</button>
+                <button type="submit" class="btn btn-warning font-Spartan text-white" form="formMerma">Mermar</button>
             </div>
         </div>
     </div>

@@ -1,14 +1,13 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 from flask_wtf import CSRFProtect
 from config import DevelopmentConfig
 from models import db, ProductosTerminados
-from forms import LoteForm
+from forms import LoteForm, MermaForm
 from sqlalchemy import text
-
 
 app = Flask(__name__)
 app.config.from_object(DevelopmentConfig)
-csrf = CSRFProtect(app)
+csrf = CSRFProtect()
 
 @app.route("/", methods=["GET", "POST"])
 @app.route("/index")
@@ -33,10 +32,47 @@ def guardarLote():
         return jsonify({'success': True, 'message': 'Lote guardado Correctamente'})
     return jsonify({'success': False, 'message': 'Error al guardar'})
 
-#   @app.route("/eliminarPaquete")
-#       def guardarPaquete():
-#           if form.validate
-#
+@app.route("/mermar", methods=["POST"])
+def mermar():
+    form = MermaForm()
+    if form.validate_on_submit():
+        id_producto = form.idProducto.data
+        cantidad = form.cantidad.data
+        mermar_todo = form.mermar_todo.data
+        
+        print(f"Cantidad recibida: {cantidad} (Tipo: {type(cantidad)})")
+        print(f"Mermar todo: {mermar_todo}")
+        
+        if mermar_todo:
+            cantidad = None
+        elif cantidad is None or cantidad == '':
+            flash('Debe ingresar una cantidad válida', 'danger')
+            return redirect(url_for('galletas'))
+        
+        if cantidad is not None:
+            cantidad = int(cantidad)
+            if cantidad <= 0:
+                flash('La cantidad debe ser mayor a 0', 'danger')
+                return redirect(url_for('galletas'))
+        
+        producto = ProductosTerminados.query.get(id_producto)
+        if not producto:
+            flash('Producto no encontrado', 'danger')
+            return redirect(url_for('galletas'))
+        
+        if cantidad is None or cantidad >= producto.cantidadDisponible:
+            producto.cantidadDisponible = 0
+            producto.estatus = 0
+        else:
+            producto.cantidadDisponible -= cantidad
+
+        db.session.commit()
+        flash('Producto mermado correctamente', 'success')
+        return redirect(url_for('galletas'))
+
+    flash('Error al mermar el producto', 'danger')
+    return redirect(url_for('galletas'))
+
 
 #!=============== Modulo de Insumos ===============#
 

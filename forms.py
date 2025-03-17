@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import SelectField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms import SelectField, SubmitField, StringField, IntegerField, widgets, validators, BooleanField
+from wtforms.validators import DataRequired, Regexp, Optional
 
 class LoteForm(FlaskForm):
     sabor = SelectField('Sabor', choices=[
@@ -14,3 +14,9 @@ class LoteForm(FlaskForm):
         ('Especiales', 'Especiales')
     ], validators=[DataRequired()])
     submit = SubmitField('Guardar')
+
+class MermaForm(FlaskForm):
+    idProducto = StringField('ID Producto', validators=[DataRequired()])
+    cantidad = IntegerField('Cantidad', validators=[Optional()])
+    mermar_todo = BooleanField('Mermar Todo')
+    submit = SubmitField('Mermar')
