@@ -1,5 +1,5 @@
 //! esta madre va a deshabilitar el input si el check esta habilitado
-document.addEventListener("DOMContentLoaded", function () {
+/*document.addEventListener("DOMContentLoaded", function () {
     const checkbox = document.getElementById("flexCheckIndeterminate");
     const input = document.getElementById("mdlCantidad");
 
@@ -7,7 +7,9 @@ document.addEventListener("DOMContentLoaded", function () {
         input.disabled = checkbox.checked;
     });
 });
+*/
 
+/*
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -22,6 +24,7 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+*/
 
 //!  Funcion guardarLote
 function guardarLote() {
@@ -47,3 +50,14 @@ function guardarLote() {
         alert('Por favor, seleccione un sabor.');
     }
 }
+
+//! esta funciona toma el id del producto que seleccionemos de la tabla
+function selectProduct(id, estatus) {
+    document.getElementById('txtIdGalleta').value = id;
+    document.getElementById('txtEstatus').value = estatus;
+    document.getElementById('mdlIdProducto').value = id;
+}
+
+document.getElementById('flexCheckIndeterminate').addEventListener('change', function() {
+    document.getElementById('mdlCantidad').disabled = this.checked;
+});
