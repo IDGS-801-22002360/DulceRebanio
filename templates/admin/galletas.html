@@ -3,7 +3,7 @@
 {% import "admin/_macros.html" as macro %}
 
 <!--* Main -->
-<div class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 p-1">
+<div class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 p-1 mt-5">
     <div class="row">
         {% with message = get_flashed_messages() %}
             {% if message %}
@@ -35,7 +35,7 @@
                             {% for producto in productos %}
                             <tr onclick="selectProduct('{{ producto.idProducto }}', '{{ producto.estatus }}')">
                                 <td>{{ producto.idProducto }}</td>
-                                <td>{{ producto.nombre }}</td>
+                                <td>{{ producto.nombreSabor }}</td>
                                 <td>{{ producto.tipoProducto }}</td>
                                 <td>{{ producto.fechaCaducidad.strftime('%d-%m-%Y') }}</td>
                                 <td>{{ producto.cantidadDisponible }}</td>
