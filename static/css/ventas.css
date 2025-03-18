@@ -1,0 +1,431 @@
+body {
+    font-family: 'League Spartan', 'League Gothic';
+    background-color: #d9d9d9;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+
+.header {
+    background-color: #5B331E;
+    padding: 5px 15px;
+    text-align: left;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+}
+
+.header h1 {
+    color: white;
+    margin: 0;
+    font-size: 50px;
+}
+
+.header img {
+    height: 100px;
+    margin-right: 10px;
+}
+
+nav {
+    background-color: #a98e71;
+    padding: 7px 15px;
+}
+
+nav button {
+    background-color: #f5dc2d;
+    color: #5B331E;
+    border: none;
+    padding: 12px 25px;
+    margin: 5px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    font-family: 'League Spartan';
+    transition: background-color 0.3s ease;
+}
+
+nav button:hover {
+    background-color: #D4B45D;
+}
+
+.content {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 40px 20px;
+    background-color: #ECECEC;
+    min-height: 100vh;
+}
+
+.left-side {
+    width: 50%;
+}
+
+.right-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+table {
+    width: 100%;  /* O el tamaño que desees para la tabla */
+    height: 60%;
+    border-collapse: collapse;
+    background-color: #FFF;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Botones dentro de las celdas de la tabla */
+.table-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.table-buttons button {
+    background-color: #b36f04;
+    color: #FFF;
+    border: 2px solid transparent;
+    padding: 5px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-family: 'League Spartan', sans-serif;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.table-buttons button:hover {
+    background-color: #FFD700;
+    transform: scale(1.1);
+}
+
+input[type="number"] {
+    width: 50px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 1rem;
+    font-family: 'League Spartan', sans-serif;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+table, th, td {
+    border: 1px solid #ccc;
+}
+
+th, td {
+    padding: 12px 20px;
+    text-align: center;
+}
+
+th {
+    background-color: #F0E68C;
+    color: #5B331E;
+    font-size: 1.1rem;
+}
+
+td {
+    background-color: #fff;
+}
+
+.product-buttons,
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-left: 30px; /* Esto asegura que los demás elementos estén a la derecha de la tabla */
+    justify-content: flex-start;
+}
+
+.product-buttons button,
+.options select,
+.options input,
+#add-button,
+#buy-button {
+    background-color: #b36f04;
+    color: #FFF;
+    border: 2px solid transparent;
+    padding: 15px 30px; /* Incremento del tamaño */
+    margin: 12px 8px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 22px; /* Texto más grande */
+    font-family: 'League Spartan';
+    transition: background-color 0.3s, transform 0.3s ease;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+}
+
+.product-buttons button:hover,
+#add-button:hover,
+#buy-button:hover {
+    transform: scale(1.05);
+}
+
+#add-button {
+    background-color: #FFD700;
+    color: white;
+}
+
+#buy-button {
+    background-color: #FFD700;
+    color: white;
+    padding: 15px 30px;
+    margin-top: 30px;
+    font-size: 1.2rem;
+    border-radius: 30px;
+}
+
+.product-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.options {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    justify-content: center;
+    width: 100%;
+}
+
+.options select,
+.options input {
+    background-color: #FFF;
+    color: #333;
+    border: 2px solid #ccc;
+    border-radius: 14px;
+    padding: 15px 25px;
+    font-size: 1.1rem; /* Tamaño de texto más grande */
+    width: 400px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+    transition: border-color 0.3s ease;
+    text-align: left;
+}
+
+.options select:focus,
+.options input:focus {
+    border-color: #FFD700;
+    outline: none;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+select {
+    cursor: pointer;
+}
+
+.sidebar {
+    width: 200px;
+    background-color: #baaa99;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding-top: 20px;
+}
+.sidebar button {
+    background: #b09578;
+    border: none;
+    color: white;
+    padding: 15px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.3s;
+}
+.sidebar button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    background-color: #d9d9d9;
+    overflow-y: auto;
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #e1e1e1;
+    margin: 10% auto;
+    width: 50%;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.modal-header {
+    background-color: #a78e6f; /* color cafecito */
+    padding: 15px;
+    border-radius: 10px 10px 0 0;
+    color: black;
+    font-size: 30px;
+    height: 30px;
+}
+
+.modal-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Añade más espacio entre los elementos */
+}
+
+.inputs-container {
+    display: flex;
+    flex-wrap: wrap; /* Permite que los inputs se ajusten en varias líneas si es necesario */
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.input-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 200px; /* Asegura que los inputs tengan un tamaño adecuado */
+}
+
+
+label {
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+input[type="number"], input[type="text"], select {
+    width: 30%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    box-sizing: border-box; /* Asegura que el padding no rompa el ancho */
+}
+
+/* Modal Footer */
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding: 10px 0;
+}
+
+.footer-left {
+    text-align: left;
+}
+
+.footer-right {
+    text-align: right;
+}
+
+
+
+select {
+    background-color: #b77918;
+    color: black;
+    border: none;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #F0A500;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+button:hover {
+    background-color: #e68900;
+}
+
+.modal-header .close {
+    position: absolute;
+    right: 20px; /* Ajusta la distancia según lo necesites */
+    top: 10px; /* Ajusta la distancia desde la parte superior si es necesario */
+    font-size: 50px; /* Ajusta el tamaño del icono */
+    color: #391f01; /* Color del icono */
+    cursor: pointer;
+}
+
+#descuento {
+    position: absolute;
+    right: 20px; /* Ajusta la distancia desde la derecha */
+    bottom: 90px; /* Ajusta la distancia desde la parte inferior */
+}
+
+/* Fondo blanco para los spans */
+#totalVenta, #cambio {
+    background-color: white;  /* Fondo blanco */
+    padding: 5px 10px; /* Espaciado dentro del span */
+    border-radius: 5px; /* Esquinas redondeadas */
+}
+
+/* Botón Confirmar Compra */
+#confirmarCompra {
+    margin-top: 30px;
+}
+
+/* Estilos adicionales */
+#dineroRecibido {
+    margin-bottom: 10px; /* Separación entre los campos */
+}
+
+/* Contenedor de los elementos para alinearlos en una fila */
+.row-container {
+    display: flex;
+    justify-content: space-between; /* Espacio entre los elementos */
+    gap: 20px; /* Espacio entre los elementos */
+    align-items: center; /* Alinea verticalmente los elementos */
+}
+
+.row-container p {
+    margin-bottom: 10px; /* Espacio entre cada párrafo */
+}
+
+.row-container span, .row-container input {
+    display: block; /* Asegura que se muestre debajo del texto */
+    margin-top: 5px; /* Un poco de margen entre el texto y los campos */
+    font-size: 20px;
+    width: 150px;
+}
+
+/* Estilo para el input de dinero recibido */
+#dineroRecibido {
+    padding: 10px;
+    font-size: 20px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 150px; /* Ancho adecuado para el input */
+}
+
+.center {
+    padding: 20px; /* Ajusta el relleno según lo necesario */
+}

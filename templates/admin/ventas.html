@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Don Galleto - Punto de Venta</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ventas.css') }}" />
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=League+Gothic&family=League+Spartan:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+  </head>
+
+  <body>
+    <div class="container-fluid">
+      <!-- Header -->
+      <div class="header">
+        <img src="{{ url_for('static', filename='img/donGalleto1.png') }}" alt="Logo Don Galleto" />
+        <h1>Don Galleto</h1>
+      </div>
+
+      <div class="row" style="display: flex">
+        <!-- Sidebar -->
+        <nav
+          class="col-md-2 col-lg-2 d-md-block sidebar text-center"
+          style="background-color: #baaa99; min-height: calc(100vh - 100px); flex: 0 0 200px;"
+        >
+          <div class="position-sticky pt-3">
+            <button
+              class="btn border-0 rounded-4 text-white btn-hover font-Spartan"
+              style="width: 100%; height: 115px"
+            >
+              <i class="fa fa-2x fa-cookie-bite"></i><br />
+              <b>Ventas</b>
+            </button>
+            <button
+              class="btn border-0 rounded-4 text-white btn-hover font-Spartan"
+              style="width: 100%; height: 115px"
+            >
+              <i class="fa fa-2x fa-box-open"></i><br />
+              <b>Inventario</b>
+            </button>
+            <button
+              class="btn border-0 rounded-4 text-white btn-hover font-Spartan"
+              style="width: 100%; height: 115px"
+            >
+              <i class="fa fa-2x fa-layer-group"></i><br />
+              <b>Insumos</b>
+            </button>
+            <button
+              class="btn border-0 rounded-4 text-white btn-hover font-Spartan"
+              style="width: 100%; height: 115px"
+            >
+              <i class="bi bi-clipboard-data-fill"></i><br />
+              <b>Reportes</b>
+            </button>
+          </div>
+        </nav>
+
+        <!-- Content -->
+        <div class="content" style="flex: 1">
+          <div class="left-side">
+            <!-- Tabla de productos de la venta actual -->
+            <table id="productosTable">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Tipo</th>
+                  <th>Cantidad</th>
+                  <th>Precio</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for prod in venta %}
+                <tr>
+                  <td>{{ prod.sabor }}</td>
+                  <td>{{ prod.tipo }}</td>
+                  <td>{{ prod.cantidad }}</td>
+                  <td>${{ prod.precio_total }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+
+            <!-- Tabla adicional de sabores (productos en inventario) -->
+            <div class="flavor-tables">
+              <h3>Productos</h3>
+              <table id="saboresTable2">
+                <thead>
+                  <tr>
+                    <th>Sabor</th>
+                    <th>Cantidad</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for sabor in sabores %}
+                  <tr>
+                    <td>{{ sabor.sabor }}</td>
+                    <td>{{ sabor.cantidad }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="right-side">
+            <div class="product-buttons">
+              <!-- Botones opcionales para productos predefinidos -->
+              <button id="productoX1">Producto X</button>
+              <button id="productoX2">Producto X</button>
+              <button id="productoX3">Producto X</button>
+              <button id="productoX4">Producto X</button>
+              <button id="productoX5">Producto X</button>
+              <button id="productoX6">Producto X</button>
+            </div>
+
+            <div class="options">
+              <!-- Formulario para agregar un producto a la venta -->
+              <form method="POST" action="{{ url_for('puntoVenta') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="accion" value="agregar">
+                <select id="flavor" name="idSabor" required>
+                  <option value="">Selecciona un sabor</option>
+                  {% for sabor in sabores %}
+                  <option value="{{ sabor.idSabor }}">{{ sabor.sabor }}</option>
+                  {% endfor %}
+                </select>
+                <select id="type" name="idTipoVenta" required>
+                  <option value="">Selecciona tipo de venta</option>
+                  {% for tipo in tiposVenta %}
+                  <option value="{{ tipo.idTipoVenta }}">{{ tipo.tipo }}</option>
+                  {% endfor %}
+                </select>
+                <input
+                  type="number"
+                  id="quantity"
+                  name="cantidad"
+                  placeholder="Cantidad"
+                  min="1"
+                  required
+                />
+                <button type="submit" id="add-button">Agregar</button>
+              </form>
+              <!-- Botón para mostrar el modal de confirmación -->
+              <button id="buy-button" onclick="mostrarModal()">Comprar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal de confirmación de compra -->
+        <div id="modal" class="modal" style="display: none;">
+          <div class="modal-content">
+            <div class="modal-header">
+              <span class="close" onclick="cerrarModal()">&times;</span>
+            </div>
+            <form method="POST" action="{{ url_for('puntoVenta') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="accion" value="confirmar">
+              <div class="center">
+                <div class="row-container">
+                  <p style="font-weight: bold">
+                    Cobro: <span id="totalVenta">${{ total if total else "0.00" }}</span>
+                  </p>
+                  <p style="font-weight: bold">
+                    Recibido:
+                    <input
+                      type="number"
+                      name="dinero_recibido"
+                      id="dineroRecibido"
+                      placeholder="Ingresa el dinero recibido"
+                      step="0.01"
+                      required
+                    />
+                  </p>
+                  <p style="font-weight: bold">
+                    Cambio: <span id="cambio">$0.00</span>
+                  </p>
+                </div>
+                <br /><br /><br /><br />
+                <label>
+                  <input type="checkbox" id="imprimirTicket" name="imprimirTicket" value="1" /> Imprimir ticket
+                </label>
+                <select id="descuento" name="descuento">
+                  <option value="0">Sin descuento</option>
+                  <option value="5">5%</option>
+                  <option value="10">10%</option>
+                  <option value="15">15%</option>
+                  <option value="20">20%</option>
+                </select>
+              </div>
+              <button type="submit" id="confirmarCompra">Confirmar Compra</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Funciones básicas para mostrar y cerrar el modal
+      function mostrarModal() {
+        document.getElementById('modal').style.display = 'block';
+      }
+      function cerrarModal() {
+        document.getElementById('modal').style.display = 'none';
+      }
+    </script>
+  </body>
+</html>
