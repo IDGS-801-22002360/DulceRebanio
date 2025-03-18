@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dulce Rebaño</title>
+    <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css" />
+    <link
+      rel="stylesheet"
+      href="static/fontawesome-free-6.4.0-web/css/all.css"
+    />
+  </head>
+  <style>
+    .navbar {
+      background-color: #e1e1e1 !important;
+      padding: 1.5rem 0;
+    }
+
+    .navbar-brand img {
+      max-height: 70px;
+    }
+
+    .nav-link {
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: #703d02 !important;
+      padding: 0.8rem 1.5rem;
+    }
+
+    .nav-link:hover {
+      color: #f5dc2d !important;
+    }
+
+    .nav-tabs .nav-link {
+      color: black !important;
+    }
+
+    .nav-tabs .nav-link.active {
+      color: black !important;
+    }
+
+    .offcanvas-body {
+      color: black !important;
+      font-size: 1.1rem;
+    }
+
+    .form-label {
+      color: black !important;
+    }
+
+    .btn-login {
+      border-radius: 20px;
+      padding: 15px 30px;
+      font-size: 0.9rem;
+      color: #703d02;
+      border: 2px solid #703d02;
+      background-color: transparent;
+      outline: none;
+    }
+
+    .btn {
+      background-color: #703d02;
+      color: #e1e1e1;
+      font-size: 0.9rem;
+      padding: 0.8rem 1.5rem;
+    }
+
+    .btn-login:hover {
+      background-color: #703d02;
+      color: #f5dc2d;
+      border-color: #f5dc2d;
+    }
+
+    .btn-login:focus {
+      outline: none;
+      box-shadow: none;
+    }
+
+    .offcanvas-header h5 {
+      color: black !important;
+      font-size: 1.5rem;
+    }
+
+    .form-label,
+    .btn-success {
+      color: #e1e1e1;
+    }
+
+    .offcanvas-end {
+      width: 550px !important;
+    }
+
+    .nav-tabs .nav-link {
+      font-size: 1.2rem;
+      padding: 10px 20px;
+    }
+    html,
+    body {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .content {
+      flex: 1;
+    }
+
+    footer {
+      background-color: #e1e1e1;
+      padding: 20px 0;
+    }
+  </style>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
+      <div class="container">
+        <a class="navbar-brand" href="#">
+          <img src="../static/img/donGalleto2.png" alt="Dulce Rebaño" />
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link" href="#">Inicio</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">Productos</a></li>
+            <li class="nav-item"><a class="nav-link" href="#">Contacto</a></li>
+          </ul>
+
+          <button
+            class="btn-login"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#offcanvasAuth"
+          >
+            <i class="fa fa-user"></i>
+          </button>
+        </div>
+      </div>
+    </nav>
+    {% block container %} {% endblock %}
+
+    <br />
+
+    <footer class="container mt-4">
+      <div class="row" style="background-color: #ffffff; padding: 20px 0">
+        <div class="col-md-4">
+          <h5 class="fw-bold text-dark">Contáctanos</h5>
+          <hr class="border-2 w-50" />
+          <p class="text-dark">¡Ponte en contacto con nosotros!</p>
+          <p class="text-dark">
+            <i class="fas fa-map-marker-alt" style="color: #703d02"></i> Río
+            Papaloapan 74, Nave 16, Sanctórum, Puebla
+          </p>
+          <p class="text-dark">
+            <i class="fas fa-phone" style="color: #703d02"></i> +52 (222) 210
+            6012
+          </p>
+          <p class="text-dark">
+            <i class="fas fa-envelope" style="color: #703d02"></i>
+            contacto@dulcerebaño.com
+          </p>
+        </div>
+        <div class="col-md-4">
+          <h5 class="fw-bold text-dark">Categorías</h5>
+          <hr class="border-2 w-50" />
+          <p>
+            <a href="#" class="text-secondary text-decoration-none">Inicio</a>
+          </p>
+          <p>
+            <a href="#" class="text-secondary text-decoration-none"
+              >¿Quiénes Somos?</a
+            >
+          </p>
+          <p>
+            <a href="#" class="text-secondary text-decoration-none"
+              >¿Qué Hacemos?</a
+            >
+          </p>
+          <p>
+            <a href="/login" class="text-secondary text-decoration-none"
+              >Usuarios</a
+            >
+          </p>
+        </div>
+
+        <div class="d-flex justify-content-end mt-4 col-md-4">
+          <div
+            class="p-3 border border-2 rounded"
+            style="border-color: #703d02"
+          >
+            <h2 class="text" style="font-family: cursive; color: #703d02">
+              Dulce Rebaño
+            </h2>
+            <p class="text-dark">
+              Nuestra marca de galletería y panificación propia es el sello y
+              compromiso por entregar siempre los mejores productos directamente
+              al consumidor.
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
