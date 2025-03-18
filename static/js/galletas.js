@@ -1,0 +1,49 @@
+//! esta madre va a deshabilitar el input si el check esta habilitado
+document.addEventListener("DOMContentLoaded", function () {
+    const checkbox = document.getElementById("flexCheckIndeterminate");
+    const input = document.getElementById("mdlCantidad");
+
+    checkbox.addEventListener("change", function () {
+        input.disabled = checkbox.checked;
+    });
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+//!  Funcion guardarLote
+function guardarLote() {
+    var sabor = $('#txtSabor').val();
+    var csrfToken = $('meta[name="csrf-token"]').attr('content');
+    if (sabor) {
+        $.ajax({
+            url: '/guardarLote',
+            type: 'POST',
+            data: { sabor: sabor, csrf_token: csrfToken },
+            success: function (response) {
+                if (response.success) {
+                    alert(response.message);
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function () {
+                alert('Error al guardar el lote.');
+            }
+        });
+    } else {
+        alert('Por favor, seleccione un sabor.');
+    }
+}
