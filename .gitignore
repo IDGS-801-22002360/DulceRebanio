@@ -1,5 +1,4 @@
-**/config.py
-**/models.py
+models.py
 env
 .env
 .vscode
