@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dulce Rebaño</title>
+    <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="static/sweetalert2/sweetalert2.min.css">
+    <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <style>
+        /* Estilos Generales */
+        body {
+            background-color: #e1e1e1;
+            font-family: 'Roboto', sans-serif;
+        }
+        .font-Spartan {
+            font-family: 'League Spartan', sans-serif;
+        }
+        .btn-color {
+            background-color: #542E02;
+        }
+        .btn-hover:hover {
+            background-color: #371E01;
+        }
+        .btn-del {
+            background-color: #FF0000;
+        }
+        .btn-del-hover:hover {
+            background-color: #D90000;
+        }
+        .buyButtons {
+            background-color: #FFD700;
+        }
+
+        /* Navbar Lateral */
+        .sidebar {
+            background-color: #532d02;
+            opacity: 50%;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 120px;
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .sidebar button {
+            width: 100%;
+            height: 115px;
+            color: white;
+            border: none;
+            background: none;
+            font-family: 'League Spartan', sans-serif;
+            text-align: center;
+        }
+        .sidebar button:hover {
+            background-color: #371E01;
+        }
+
+        /* Contenido Principal */
+        .content {
+            margin-left: 130px; /* Margen para evitar superposición con el navbar */
+            padding: 20px;
+        }
+        .titulo-productos {
+            font-family: cursive;
+            font-weight: bold;
+            font-size: 28px;
+            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row vh-100">
+            <!-- Navbar Lateral -->
+            <nav class="col-md-1 col-lg-1 d-md-block sidebar text-center">
+                <div class="position-sticky pt-3">
+                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px;">
+                        <i class="fa fa-2x fa-home"></i><br>
+                        <b>Inicio</b>
+                    </button>
+                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
+                        <i class="fa fa-2x fa-user"></i><br>
+                        <b>Iniciar sesion</b>
+                    </button>
+                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
+                        <i class="fa fa-2x fa-shopping-cart"></i><br>
+                        <b>Carrito</b>
+                    </button>                    
+                </div>
+            </nav>
+
+            <!-- Contenido Principal -->
+            <div class="col-md-11 col-lg-11 content">
+                <h2 class="text-center titulo-productos">Productos</h2>
+                <div class="row mt-4">
+                    <div class="col-md-3">
+                        <div class="card shadow-sm">
+                            <img src="../../static/img/donGalleto1.png" class="card-img-top" alt="Producto">
+                            <div class="card-body text-center">
+                                <h5 class="card-title fw-bold">Galleta de Chocolate</h5>
+                                <p class="text-muted">$20.00 c/u</p>
+                                <div class="d-flex flex-column align-items-center">
+                                    <label for="opciones" class="fw-bold">Seleccionar cantidad:</label>
+                                    <select class="form-select w-75 mt-2" id="opciones">
+                                        <option value="unidad">Unidad</option>
+                                        <option value="gramos">Gramos</option>
+                                        <option value="kilogramos">Kilogramos</option>
+                                    </select>
+                                </div>                                
+                                <button class="btn btn-warning w-100 mt-3 fw-bold">
+                                    <i class="fas fa-cart-plus"></i> Añadir al carrito
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div> 
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="static/sweetalert2/sweetalert2.all.min.js"></script>
+    <script src="static/fontawesome-free-6.4.0-web/js/all.js"></script>
+</body>
+</html>

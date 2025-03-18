@@ -10,10 +10,16 @@ app = Flask(__name__)
 app.config.from_object(DevelopmentConfig)
 csrf = CSRFProtect(app)
 
+#!=============== Modulo de Clientes ===============#  
+
 @app.route("/", methods=["GET", "POST"])
 @app.route("/index")
 def index():
     return render_template("client/mainClientes.html")
+
+@app.route("/clientes", methods=["GET", "POST"])
+def clientes():
+    return render_template("client/clientes.html")
 
 #!=============== Modulo de Productos ===============#  
 
