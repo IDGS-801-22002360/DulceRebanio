@@ -1,6 +1,8 @@
 from logger import error_logger, action_logger
 
-#! esta mdre solo es de prueba para ver que si genera los logs, se va a cambiar mas adelante
+#!  esta mdre solo es de prueba para ver que si genera los logs, se va 
+#!  a cambiar mas adelante por uno que guarde bien los datos y las acciones
+#!  de la aplicacion
 
 def test_logging():
     # Generar un log de acción

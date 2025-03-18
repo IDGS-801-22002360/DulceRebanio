@@ -1,6 +1,4 @@
 models.py
-action.log
-error.log
 env
 .env
 .vscode
