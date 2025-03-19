@@ -1,20 +1,18 @@
+from typing import Optional
 from flask_wtf import FlaskForm
-from wtforms import DateField, DecimalField, EmailField, IntegerField, SelectField, StringField, SubmitField, Form, validators
+from wtforms import BooleanField, DateField, DecimalField, EmailField, IntegerField, SelectField, StringField, SubmitField, Form, validators
 from wtforms.validators import DataRequired
 
 #!======================= Modulo de Galletas =======================#  
 class LoteForm(FlaskForm):
-    sabor = SelectField('Sabor', choices=[
-        ('', 'Seleccione un sabor'),
-        ('Chocolate', 'Chocolate'),
-        ('Vainilla', 'Vainilla'),
-        ('Coco', 'Coco'),
-        ('Chispas', 'Chispas'),
-        ('Naranja', 'Naranja'),
-        ('Integrales', 'Integrales'),
-        ('Especiales', 'Especiales')
-    ], validators=[DataRequired()])
+    sabor = SelectField('Sabor', validators=[DataRequired()])
     submit = SubmitField('Guardar')
+
+class MermaForm(FlaskForm):
+    idProducto = StringField('ID Producto', validators=[DataRequired()])
+    cantidad = IntegerField('Cantidad', validators=[Optional()])
+    mermar_todo = BooleanField('Mermar Todo')
+    submit = SubmitField('Mermar')
 
 #!======================= Modulo de Insumos =======================#  
 class InsumoForm(Form):
@@ -45,3 +43,11 @@ class CompraInsumoForm(Form):
     cantidad = IntegerField("Cantidad", validators=[DataRequired(message="El campo es requerido")])
     fecha = DateField("Fecha de Compra", format="%Y-%m-%d", validators=[DataRequired(message="El campo es requerido")])
     totalCompra = DecimalField("Total Compra", validators=[DataRequired(message="El campo es requerido")])
+    sabor = SelectField('Sabor', validators=[DataRequired()])
+    submit = SubmitField('Guardar')
+
+class MermaForm(FlaskForm):
+    idProducto = StringField('ID Producto', validators=[DataRequired()])
+    cantidad = IntegerField('Cantidad', validators=[Optional()])
+    mermar_todo = BooleanField('Mermar Todo')
+    submit = SubmitField('Mermar')

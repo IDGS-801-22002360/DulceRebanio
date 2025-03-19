@@ -48,13 +48,24 @@ class IngredientesReceta(db.Model):
     idMateriaPrima = db.Column(db.Integer, db.ForeignKey('materiasprimas.idMateriaPrima'))
     cantidadNecesaria = db.Column(db.Numeric(10, 2))
 
+class Sabores(db.Model):
+    __tablename__ = 'sabores'
+    idSabor = db.Column(db.Integer, primary_key=True)
+    nombreSabor = db.Column(db.String(100), unique=True, nullable=False)
+
+class DetallesProducto(db.Model):
+    __tablename__ = 'detallesproducto'
+    idDetalle = db.Column(db.Integer, primary_key=True)
+    tipoProducto = db.Column(db.String(30), unique=True, nullable=False)
+    precio = db.Column(db.Numeric(10, 2), nullable=False)
+
 class ProductosTerminados(db.Model):
     __tablename__ = 'productosterminados'
     idProducto = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(100))
+    idSabor = db.Column(db.Integer, db.ForeignKey('sabores.idSabor'), nullable=False)
     cantidadDisponible = db.Column(db.Integer)
     fechaCaducidad = db.Column(db.Date)
-    tipoProducto = db.Column(db.String(30))
+    idDetalle = db.Column(db.Integer, db.ForeignKey('detallesproducto.idDetalle'), nullable=False)
     estatus = db.Column(db.Integer, default=1)
 
 class Ventas(db.Model):
