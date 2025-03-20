@@ -1,4 +1,4 @@
-from typing import Optional
+from wtforms.validators import Optional
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, DateField, DecimalField, EmailField, IntegerField, SelectField, StringField, SubmitField, Form, validators
 from wtforms.validators import DataRequired

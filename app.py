@@ -92,6 +92,7 @@ def mermar():
 
 
 #!============================== Modulo de Insumos ==============================#
+#INSERCIÓN INSUMOS
 @app.route("/insumos", methods=["GET", "POST"])
 def insumos():
     form = InsumoForm(request.form)
