@@ -3,7 +3,7 @@ import forms
 from flask_wtf import CSRFProtect
 from config import DevelopmentConfig
 from models import db, ProductosTerminados, Sabores, DetallesProducto
-from forms import LoteForm, MermaForm, MiFormulario
+from forms import LoteForm, MermaForm
 from sqlalchemy import text
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, SubmitField
