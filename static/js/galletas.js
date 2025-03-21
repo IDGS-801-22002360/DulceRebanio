@@ -29,12 +29,13 @@ function getCookie(name) {
 //!  Funcion guardarLote
 function guardarLote() {
     var sabor = $('#txtSabor').val();
-    var csrfToken = $('meta[name="csrf-token"]').attr('content');
+    var csrfToken = $('input[name="csrf_token"]').val(); // Obtener el token CSRF del campo oculto
+
     if (sabor) {
         $.ajax({
             url: '/guardarLote',
             type: 'POST',
-            data: { sabor: sabor, csrf_token: csrfToken },
+            data: { sabor: sabor, csrf_token: csrfToken }, // Incluir el token CSRF en los datos
             success: function (response) {
                 if (response.success) {
                     alert(response.message);

@@ -3,17 +3,19 @@
 {% import "admin/_macros.html" as macro %}
 
 <!--* Main -->
-<div class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 p-1 mt-5">
+<div class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 p-1 mt-3">
     <div class="row">
-        {% with message = get_flashed_messages() %}
-            {% if message %}
-                {% for messages in message %}
-                    <div class="alert alert-success bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                        {{ messages }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+        <div class="card border-0 gb mb-3" style="height: 58px; background-color: #e1e1e1">
+            {% with message = get_flashed_messages() %}
+                {% if message %}
+                    {% for messages in message %}
+                        <div class="alert alert-success bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                            {{ messages }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
         <div class="col-6">
             <div class="card border-0 shadow-sm rounded-3 bg-white">
                 <div class="card-header border-0 rounded-top-3 text-center bg-white">

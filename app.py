@@ -4,6 +4,7 @@ from config import DevelopmentConfig
 from models import db, ProductosTerminados, Sabores, DetallesProducto
 from forms import LoteForm, MermaForm
 from sqlalchemy import text
+import datetime
 
 app = Flask(__name__)
 app.config.from_object(DevelopmentConfig)
@@ -34,17 +35,31 @@ def galletas():
     
     return render_template("admin/galletas.html", productos=productos, form=form)
 
-
 @app.route("/guardarLote", methods=["POST"])
 def guardarLote():
     form = LoteForm()
     form.sabor.choices = [(sabor.idSabor, sabor.nombreSabor) for sabor in Sabores.query.all()]
+    
     if form.validate_on_submit():
-        sabor = form.sabor.data
-        db.session.execute(text("CALL saveLote(:sabor)"), {'sabor': sabor})
+        sabor_id = form.sabor.data
+        id_detalle = 1
+
+        nuevo_producto = ProductosTerminados(
+            idSabor=sabor_id,
+            cantidadDisponible=150,
+            fechaCaducidad=datetime.date.today() + datetime.timedelta(days=7),
+            idDetalle=id_detalle,
+            estatus=1
+        )
+        db.session.add(nuevo_producto)
         db.session.commit()
-        return jsonify({'success': True, 'message': 'Lote guardado Correctamente'})
-    return jsonify({'success': False, 'message': 'Error al guardar'})
+
+        flash('Lote guardado correctamente', 'success')
+        return redirect(url_for('galletas'))
+
+    flash('Error al guardar el lote', 'danger')
+    return redirect(url_for('galletas'))
+
 
 @app.route("/mermar", methods=["POST"])
 def mermar():
