@@ -1,4 +1,268 @@
-body {
+/* Reset básico y tipografía */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'League Spartan', 'League Gothic', sans-serif;
+    background-color: #d9d9d9;
+    color: #333;
+  }
+  
+  /* Header */
+  .header {
+    background-color: #5B331E;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .header h1 {
+    color: #fff;
+    font-size: 50px;
+    margin-left: 10px;
+  }
+  
+  .header img {
+    height: 100px;
+  }
+  
+  /* Layout principal */
+  .content {
+    display: flex;
+    flex-direction: row;
+    padding: 40px 20px;
+    background-color: #ECECEC;
+    min-height: 100vh;
+    gap: 20px;
+  }
+  
+  /* Izquierda: tabla de venta actual */
+  .left-side {
+    flex: 1;
+  }
+  
+  /* Tablas */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #FFF;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+  
+  th, td {
+    border: 1px solid #ccc;
+    padding: 12px 20px;
+    text-align: center;
+  }
+  
+  th {
+    background-color: #F0E68C;
+    color: #5B331E;
+    font-size: 1.1rem;
+  }
+  
+  td {
+    background-color: #fff;
+  }
+  
+  /* Contenedor derecho: formulario y tabla de inventario scrollable */
+  .right-side {
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  /* Scrollable para inventario */
+  .scroll-container {
+    overflow: auto;
+    max-height: 300px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+    padding: 5px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  
+  /* Inventario: tabla interna */
+  #inventarioTable {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  #inventarioTable th,
+  #inventarioTable td {
+    border: 1px solid #ddd;
+    padding: 6px;
+    font-size: 14px;
+    text-align: center;
+  }
+  
+  #inventarioTable th {
+    background-color: #f0f0f0;
+  }
+  
+  /* Opciones: formulario para agregar productos */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .options form,
+  .options button {
+    width: 90%;
+    padding: 10px;
+    border: none;
+    border-radius: 30px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 1.2rem;
+    font-family: 'League Spartan', sans-serif;
+    transition: background-color 0.3s, transform 0.3s ease;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+  }
+  
+  .options form:hover,
+  .options button:hover {
+    transform: scale(1.03);
+  }
+  
+  .options form select,
+  .options form input {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #ccc;
+    border-radius: 14px;
+    font-size: 1.1rem;
+    margin: 5px 0;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+    transition: border-color 0.3s ease;
+  }
+  
+  .options form select:focus,
+  .options form input:focus {
+    border-color: #FFD700;
+    outline: none;
+  }
+  
+  /* Quitar spin a number */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+  
+  /* Botón de compra */
+  #buy-button {
+    margin-top: 30px;
+    background-color: #FFD700;
+    color: #fff;
+  }
+  
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .modal-content {
+    background-color: #e1e1e1;
+    width: 320px;
+    border-radius: 10px;
+    position: relative;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  }
+  
+  .modal-header {
+    background-color: #a78e6f;
+    padding: 15px;
+    border-radius: 10px 10px 0 0;
+    color: #000;
+    font-size: 30px;
+    position: relative;
+  }
+  
+  .modal-header .close {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    font-size: 50px;
+    color: #391f01;
+    cursor: pointer;
+  }
+  
+  .modal-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .row-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: center;
+  }
+  
+  .row-container p {
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+  }
+  
+  .row-container span,
+  .row-container input {
+    display: block;
+    margin-top: 5px;
+    font-size: 1.2rem;
+    width: 150px;
+  }
+  
+  #dineroRecibido {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 150px;
+  }
+  
+  #totalVenta, #cambio {
+    background-color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+  
+  /* Botón Confirmar Compra */
+  #confirmarCompra {
+    margin-top: 30px;
+  }
+  
+  /* Footer del Modal (si lo requieres) */
+  .modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+  }
+
+  body {
     font-family: 'League Spartan', 'League Gothic';
     background-color: #d9d9d9;
     color: #333;
@@ -27,28 +291,6 @@ body {
     margin-right: 10px;
 }
 
-nav {
-    background-color: #a98e71;
-    padding: 7px 15px;
-}
-
-nav button {
-    background-color: #f5dc2d;
-    color: #5B331E;
-    border: none;
-    padding: 12px 25px;
-    margin: 5px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 20px;
-    font-family: 'League Spartan';
-    transition: background-color 0.3s ease;
-}
-
-nav button:hover {
-    background-color: #D4B45D;
-}
-
 .content {
     display: flex;
     flex-direction: row;
@@ -65,7 +307,7 @@ nav button:hover {
 .right-side {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    min-width: 100px;
 }
 
 table {

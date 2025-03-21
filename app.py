@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, Response
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 from flask_wtf import CSRFProtect
 from flask_wtf.csrf import CSRFProtect
 from sqlalchemy import text
@@ -8,15 +8,14 @@ import datetime
 
 # Importación de configuración, base de datos y formularios
 from config import DevelopmentConfig
-from models import db, ProductosTerminados
-from forms import LoteForm
-
-
+from models import DetallesVenta, Ventas, db, ProductosTerminados, Sabores, DetallesProducto
+from forms import LoteForm, MermaForm
+from sqlalchemy import text
 
 app = Flask(__name__)
 app.secret_key = "dongalleto" 
 app.config.from_object(DevelopmentConfig)
-csrf = CSRFProtect(app)
+csrf = CSRFProtect()
 
 @app.route("/", methods=["GET", "POST"])
 @app.route("/index")
@@ -29,12 +28,26 @@ def index():
 @app.route("/galletas", methods=["GET", "POST"])
 def galletas():
     form = LoteForm()
-    productos = db.session.execute(text("SELECT * FROM productosTerminados WHERE estatus=1")).fetchall()
+    form.sabor.choices = [(sabor.idSabor, sabor.nombreSabor) for sabor in Sabores.query.all()]
+    
+    productos = db.session.query(
+        ProductosTerminados.idProducto,
+        Sabores.nombreSabor,
+        DetallesProducto.tipoProducto,
+        ProductosTerminados.fechaCaducidad,
+        ProductosTerminados.cantidadDisponible,
+        ProductosTerminados.estatus
+    ).join(Sabores, ProductosTerminados.idSabor == Sabores.idSabor)\
+    .join(DetallesProducto, ProductosTerminados.idDetalle == DetallesProducto.idDetalle)\
+    .filter(ProductosTerminados.estatus == 1).all()
+    
     return render_template("admin/galletas.html", productos=productos, form=form)
+
 
 @app.route("/guardarLote", methods=["POST"])
 def guardarLote():
     form = LoteForm()
+    form.sabor.choices = [(sabor.idSabor, sabor.nombreSabor) for sabor in Sabores.query.all()]
     if form.validate_on_submit():
         sabor = form.sabor.data
         db.session.execute(text("CALL saveLote(:sabor)"), {'sabor': sabor})
@@ -42,15 +55,47 @@ def guardarLote():
         return jsonify({'success': True, 'message': 'Lote guardado Correctamente'})
     return jsonify({'success': False, 'message': 'Error al guardar'})
 
-#   @app.route("/guardarPaquete")
-#       def guardarPaquete():
-#           
+@app.route("/mermar", methods=["POST"])
+def mermar():
+    form = MermaForm()
+    if form.validate_on_submit():
+        id_producto = form.idProducto.data
+        cantidad = form.cantidad.data
+        mermar_todo = form.mermar_todo.data
+        
+        print(f"Cantidad recibida: {cantidad} (Tipo: {type(cantidad)})")
+        print(f"Mermar todo: {mermar_todo}")
+        
+        if mermar_todo:
+            cantidad = None
+        elif cantidad is None or cantidad == '':
+            flash('Debe ingresar una cantidad válida', 'danger')
+            return redirect(url_for('galletas'))
+        
+        if cantidad is not None:
+            cantidad = int(cantidad)
+            if cantidad <= 0:
+                flash('La cantidad debe ser mayor a 0', 'danger')
+                return redirect(url_for('galletas'))
+        
+        producto = ProductosTerminados.query.get(id_producto)
+        if not producto:
+            flash('Producto no encontrado', 'danger')
+            return redirect(url_for('galletas'))
+        
+        if cantidad is None or cantidad >= producto.cantidadDisponible:
+            producto.cantidadDisponible = 0
+            producto.estatus = 0
+        else:
+            producto.cantidadDisponible -= cantidad
 
+        db.session.commit()
+        flash('Producto mermado correctamente', 'success')
+        return redirect(url_for('galletas'))
 
-#   @app.route("/eliminarPaquete")
-#       def guardarPaquete():
-#           if form.validate
-#
+    flash('Error al mermar el producto', 'danger')
+    return redirect(url_for('galletas'))
+
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -62,33 +107,22 @@ def page_not_found(e):
 def page_not_found(e):
     return render_template('admin/404.html'), 404
     
-
 #!=============== Modulo de Ventas ===============#
 
-# Datos locales simulados por mientras porque jaja si
-sabores = [
-    {"idSabor": 1, "sabor": "Chocolate", "cantidad": 100},
-    {"idSabor": 2, "sabor": "Vainilla", "cantidad": 80},
-    {"idSabor": 3, "sabor": "Fresa", "cantidad": 60}
-]
-
-tiposVenta = [
-    {"idTipoVenta": 1, "tipo": "Paquete", "precio": 2.5, "cantidad": 30},
-    {"idTipoVenta": 2, "tipo": "Caja", "precio": 4.0, "cantidad": 15},
-    {"idTipoVenta": 3, "tipo": "Individual", "precio": 0.5, "cantidad": 1},
-    {"idTipoVenta": 4, "tipo": "Especial", "precio": 3.0, "cantidad": 10},
-    {"idTipoVenta": 5, "tipo": "Premium", "precio": 5.0, "cantidad": 8}
-]
-
-# Venta actual: lista de productos agregados a la venta
-venta_actual = []  # Cada elemento es un diccionario con detalles del producto para que amarre el guardado 
+# Venta actual (lista de productos en la venta)
+venta_actual = []
 
 @app.route("/puntoVenta", methods=["GET", "POST"])
 def puntoVenta():
+    sabores = Sabores.query.all()
+    tiposVenta = DetallesProducto.query.all()
+    
+    print("Sabores cargados:", sabores)
+    print("Tipos de venta cargados:", tiposVenta)
+    
     if request.method == "POST":
         accion = request.form.get("accion")
-        
-        # Agregar producto a la venta
+
         if accion == "agregar":
             try:
                 idSabor = int(request.form.get("idSabor"))
@@ -97,35 +131,34 @@ def puntoVenta():
             except (ValueError, TypeError):
                 flash("Datos inválidos para agregar producto.")
                 return redirect(url_for("puntoVenta"))
-            
-            # Buscar el sabor y tipo de venta seleccionados
-            flavor = next((s for s in sabores if s["idSabor"] == idSabor), None)
-            sale_type = next((t for t in tiposVenta if t["idTipoVenta"] == idTipoVenta), None)
-            
-            if not flavor or not sale_type or cantidad <= 0:
+
+            sabor = Sabores.query.get(idSabor)
+            tipo_venta = DetallesProducto.query.get(idTipoVenta)
+
+            if not sabor or not tipo_venta or cantidad <= 0:
                 flash("Producto o cantidad inválida.")
                 return redirect(url_for("puntoVenta"))
-            
-            # Verificar si el producto ya se encuentra en la venta
+
             for prod in venta_actual:
                 if prod["idSabor"] == idSabor and prod["idTipoVenta"] == idTipoVenta:
                     flash("El producto ya está en la venta.")
                     return redirect(url_for("puntoVenta"))
-            
-            precio_total = sale_type["precio"] * cantidad
+
+            # Guarda los datos del producto para su venta
+            precio_total = float(tipo_venta.precio) * cantidad
             producto = {
-                "idSabor": flavor["idSabor"],
-                "sabor": flavor["sabor"],
-                "idTipoVenta": sale_type["idTipoVenta"],
-                "tipo": sale_type["tipo"],
+                "idSabor": sabor.idSabor,
+                "sabor": sabor.nombreSabor,
+                "idTipoVenta": tipo_venta.idDetalle,
+                "tipo": tipo_venta.tipoProducto,
                 "cantidad": cantidad,
-                "precio_unitario": sale_type["precio"],
+                "precio_unitario": float(tipo_venta.precio),
                 "precio_total": precio_total
             }
             venta_actual.append(producto)
             flash("Producto agregado correctamente.")
             return redirect(url_for("puntoVenta"))
-        
+
         # Confirmar compra
         elif accion == "confirmar":
             try:
@@ -134,40 +167,71 @@ def puntoVenta():
             except (ValueError, TypeError):
                 flash("Datos de confirmación inválidos.")
                 return redirect(url_for("puntoVenta"))
-            
+
             total = sum(prod["precio_total"] for prod in venta_actual)
             total_con_descuento = total - (total * (descuento / 100))
-            
+
             if dinero_recibido < total_con_descuento:
                 flash("El dinero recibido no es suficiente.")
                 return redirect(url_for("puntoVenta"))
-            
-            # Actualizar inventario: para cada producto se descuenta (multiplicador * cantidad vendida)
+
+            # Actualizar inventario en la BD usando la cantidadDisponible en ProductosTerminados
             for prod in venta_actual:
-                sale_type = next((t for t in tiposVenta if t["idTipoVenta"] == prod["idTipoVenta"]), None)
-                if sale_type:
-                    cantidad_a_restar = sale_type["cantidad"] * prod["cantidad"]
-                    for s in sabores:
-                        if s["idSabor"] == prod["idSabor"]:
-                            if s["cantidad"] < cantidad_a_restar:
-                                flash(f"Inventario insuficiente para {s['sabor']}.")
-                                return redirect(url_for("puntoVenta"))
-                            s["cantidad"] -= cantidad_a_restar
-                            break
+                # Buscamos el producto terminado que corresponda al idSabor y al idDetalle (tipo de venta)
+                productoTerminado = ProductosTerminados.query.filter_by(
+                    idSabor=prod["idSabor"],
+                    idDetalle=prod["idTipoVenta"]
+                ).first()
+                if productoTerminado is None:
+                    flash(f"Producto terminado no encontrado para {prod['sabor']}.")
+                    return redirect(url_for("puntoVenta"))
+                if productoTerminado.cantidadDisponible < prod["cantidad"]:
+                    flash(f"Inventario insuficiente para {prod['sabor']}.")
+                    return redirect(url_for("puntoVenta"))
+                productoTerminado.cantidadDisponible -= prod["cantidad"]
             
+            db.session.commit()
+
+            nueva_venta = Ventas(total=total_con_descuento)
+            db.session.add(nueva_venta)
+            db.session.flush() 
+
+            for prod in venta_actual:
+                productoTerminado = ProductosTerminados.query.filter_by(
+                    idSabor=prod["idSabor"],
+                    idDetalle=prod["idTipoVenta"]
+                ).first()
+                detalle = DetallesVenta(
+                    idVenta=nueva_venta.idVenta,
+                    idProducto=productoTerminado.idProducto,
+                    cantidad=prod["cantidad"],
+                    subtotal=prod["precio_total"]
+                )
+                db.session.add(detalle)
+            db.session.commit() 
+
             # Generar el ticket en PDF
             pdf_path = generar_pdf(venta_actual, descuento, dinero_recibido, total_con_descuento)
             flash("Venta confirmada. Ticket generado en: " + pdf_path)
-            venta_actual.clear()  # Limpiar venta para nueva operación
+            venta_actual.clear()  
             return redirect(url_for("puntoVenta"))
-    
-    # Método GET: renderizamos la página con los datos actuales
+
+    sabores = Sabores.query.all()
+    tiposVenta = DetallesProducto.query.all()
     total = sum(prod["precio_total"] for prod in venta_actual)
+    
+    inventario = {}
+    productos = ProductosTerminados.query.all()
+    for producto in productos:
+        inventario[(producto.idSabor, producto.idDetalle)] = producto.cantidadDisponible
+
     return render_template("admin/ventas.html",
                            sabores=sabores,
                            tiposVenta=tiposVenta,
                            venta=venta_actual,
-                           total=total)
+                           total=total,
+                           inventario=inventario)
+
 
 def generar_pdf(venta, descuento, dinero_recibido, total_con_descuento):
     pdf = FPDF()
@@ -189,14 +253,12 @@ def generar_pdf(venta, descuento, dinero_recibido, total_con_descuento):
     pdf.cell(30, 10, "Precio", border=1, align="R")
     pdf.ln()
     pdf.set_font("Helvetica", "", 12)
-    total = 0
     for prod in venta:
         pdf.cell(50, 10, prod["sabor"], border=1)
         pdf.cell(50, 10, prod["tipo"], border=1)
         pdf.cell(30, 10, str(prod["cantidad"]), border=1, align="R")
         pdf.cell(30, 10, f"${prod['precio_total']:.2f}", border=1, align="R")
         pdf.ln()
-        total += prod["precio_total"]
     pdf.ln(5)
     if descuento > 0:
         pdf.cell(0, 10, f"Descuento aplicado: {descuento}%", ln=True)
@@ -207,10 +269,11 @@ def generar_pdf(venta, descuento, dinero_recibido, total_con_descuento):
     pdf.ln(10)
     pdf.set_font("Helvetica", "B", 10)
     pdf.cell(0, 10, "¡Gracias por su compra!", ln=True, align="C")
-    
+
     path = "ticket.pdf"
     pdf.output(path)
     return path
+
 
 if __name__ == '__main__':
     csrf.init_app(app)
