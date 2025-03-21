@@ -1,0 +1,168 @@
+{% extends "admin/index.html" %} 
+{% block container %}
+
+<style>
+  #productosTable {
+    width: 90%; /* Ajusta el ancho */
+    height: 80%;
+    background-color: white; /* Fondo blanco */
+    border-collapse: collapse;
+    margin: auto;
+  }
+
+  #productosTable th, #productosTable td {
+    padding: 5px;
+    text-align: left;
+    border: 1px solid #ddd;
+  }
+
+  .left-side {
+    width: 40%; /* Ajusta el tamaño del contenedor de la tabla */
+  }
+
+  .right-side {
+    width: 60%;
+  }
+</style>
+
+<!-- Content -->
+<div class="content" style="flex: 1; display: flex;">
+  <div class="left-side">
+    <!-- Tabla de productos de la venta actual -->
+    <table id="productosTable">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Tipo</th>
+          <th>Cantidad</th>
+          <th>Precio</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for prod in venta %}
+        <tr>
+          <td>{{ prod.sabor }}</td>
+          <td>{{ prod.tipo }}</td>
+          <td>{{ prod.cantidad }}</td>
+          <td>${{ prod.precio_total }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="right-side" style="min-width: 320px;">
+    <!-- Contenedor scrollable para la tabla de inventario -->
+    <div class="scroll-container" style="margin-top: 10px; overflow: auto; max-height: 300px;">
+      <h3 style="font-size: 16px; margin-bottom: 5px;">Inventario</h3>
+      <table id="inventarioTable" style="font-size: 14px; width: 100%;">
+        <thead>
+          <tr>
+            <th>Sabor</th>
+            <th>Tipo</th>
+            <th>Cant.</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sabor in sabores %}
+            {% for tipo in tiposVenta %}
+              <tr>
+                <td>{{ sabor.nombreSabor }}</td>
+                <td>{{ tipo.tipoProducto }}</td>
+                <td>{{ inventario.get((sabor.idSabor, tipo.idDetalle), 'No disp.') }}</td>
+              </tr>
+            {% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="options" style="margin-top: 15px;">
+      <!-- Formulario para agregar un producto a la venta -->
+      <form method="POST" action="{{ url_for('puntoVenta') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="accion" value="agregar">
+        <select id="flavor" name="idSabor" required>
+          <option value="">Selecciona un sabor</option>
+          {% for sabor in sabores %}
+          <option value="{{ sabor.idSabor }}">{{ sabor.nombreSabor }}</option>
+          {% endfor %}
+        </select>
+        <select id="type" name="idTipoVenta" required>
+          <option value="">Selecciona tipo de venta</option>
+          {% for tipo in tiposVenta %}
+          <option value="{{ tipo.idDetalle }}">{{ tipo.tipoProducto }} - ${{ tipo.precio }}</option>
+          {% endfor %}
+        </select>
+        <input
+          type="number"
+          id="quantity"
+          name="cantidad"
+          placeholder="Cantidad"
+          min="1"
+          required
+        />
+        <button type="submit" id="add-button">Agregar</button>
+      </form>
+      <!-- Botón para mostrar el modal de confirmación -->
+      <button id="buy-button" onclick="mostrarModal()">Comprar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmación de compra -->
+<div id="modal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="close" onclick="cerrarModal()">&times;</span>
+    </div>
+    <form method="POST" action="{{ url_for('puntoVenta') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="accion" value="confirmar">
+      <div class="center">
+        <div class="row-container">
+          <p style="font-weight: bold">
+            Cobro: <span id="totalVenta">${{ total if total else "0.00" }}</span>
+          </p>
+          <p style="font-weight: bold">
+            Recibido:
+            <input
+              type="number"
+              name="dinero_recibido"
+              id="dineroRecibido"
+              placeholder="Ingresa el dinero recibido"
+              step="0.01"
+              required
+            />
+          </p>
+          <p style="font-weight: bold">
+            Cambio: <span id="cambio">$0.00</span>
+          </p>
+        </div>
+        <br /><br /><br /><br />
+        <label>
+          <input type="checkbox" id="imprimirTicket" name="imprimirTicket" value="1" /> Imprimir ticket
+        </label>
+        <select id="descuento" name="descuento">
+          <option value="0">Sin descuento</option>
+          <option value="5">5%</option>
+          <option value="10">10%</option>
+          <option value="15">15%</option>
+          <option value="20">20%</option>
+        </select>
+      </div>
+      <button type="submit" id="confirmarCompra">Confirmar Compra</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  function mostrarModal() {
+    document.getElementById('modal').style.display = 'block';
+  }
+  function cerrarModal() {
+    document.getElementById('modal').style.display = 'none';
+  }
+</script>
+
+{% endblock %}

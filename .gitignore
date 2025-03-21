@@ -1,6 +1,11 @@
+<<<<<<< HEAD
+=======
 models.py
+>>>>>>> 61c28a02cc4e1cc8527139e0b5804308c7a42b51
 env
 .env
 .vscode
 .DS_Store
+config.py
+models.py
 __pycache__
