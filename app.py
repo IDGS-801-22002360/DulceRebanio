@@ -12,6 +12,7 @@ from config import DevelopmentConfig
 from models import DetallesVenta, Ventas, ComprasInsumos, DetallesProducto, Proveedores, Sabores, db, ProductosTerminados, MateriasPrimas
 from forms import CompraInsumoForm, LoteForm, InsumoForm, MermaForm, ProveedorForm
 from sqlalchemy import text
+import datetime
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, SubmitField
 from decimal import Decimal
@@ -24,7 +25,6 @@ csrf = CSRFProtect()
 @app.route("/", methods=["GET", "POST"])
 @app.route("/index")
 def index():
-
     return render_template("client/mainClientes.html")
 
 @app.route("/clientes", methods=["GET", "POST"])
@@ -114,17 +114,31 @@ def galletas():
     
     return render_template("admin/galletas.html", productos=productos, form=form)
 
-
 @app.route("/guardarLote", methods=["POST"])
 def guardarLote():
     form = LoteForm()
     form.sabor.choices = [(sabor.idSabor, sabor.nombreSabor) for sabor in Sabores.query.all()]
+    
     if form.validate_on_submit():
-        sabor = form.sabor.data
-        db.session.execute(text("CALL saveLote(:sabor)"), {'sabor': sabor})
+        sabor_id = form.sabor.data
+        id_detalle = 1
+
+        nuevo_producto = ProductosTerminados(
+            idSabor=sabor_id,
+            cantidadDisponible=150,
+            fechaCaducidad=datetime.date.today() + datetime.timedelta(days=7),
+            idDetalle=id_detalle,
+            estatus=1
+        )
+        db.session.add(nuevo_producto)
         db.session.commit()
-        return jsonify({'success': True, 'message': 'Lote guardado Correctamente'})
-    return jsonify({'success': False, 'message': 'Error al guardar'})
+
+        flash('Lote guardado correctamente', 'success')
+        return redirect(url_for('galletas'))
+
+    flash('Error al guardar el lote', 'danger')
+    return redirect(url_for('galletas'))
+
 
 @app.route("/mermar", methods=["POST"])
 def mermar():
@@ -502,11 +516,11 @@ def puntoVenta():
         inventario[(producto.idSabor, producto.idDetalle)] = producto.cantidadDisponible
 
     return render_template("admin/ventas.html",
-                           sabores=sabores,
-                           tiposVenta=tiposVenta,
-                           venta=venta_actual,
-                           total=total,
-                           inventario=inventario)
+                            sabores=sabores,
+                            tiposVenta=tiposVenta,
+                            venta=venta_actual,
+                            total=total,
+                            inventario=inventario)
 
 
 def generar_pdf(venta, descuento, dinero_recibido, total_con_descuento):

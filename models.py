@@ -18,7 +18,12 @@ class MateriasPrimas(db.Model):
     cantidadDisponible = db.Column(db.Numeric(10, 2))
     unidadMedida = db.Column(db.String(100))
     fechaCaducidad = db.Column(db.Date)
+<<<<<<< HEAD
+    estatus = db.Column(db.Integer, default=1)
+
+=======
     estatus = db.Column(db.Integer, default=1) #AGREGUÉ ESTATUS A MATERIAS PRIMAS -Oscar
+>>>>>>> cbdf442a8f7560a7d7b8eb8aaae3844d893720d6
 
 class Proveedores(db.Model):
     __tablename__ = 'proveedores'
@@ -26,7 +31,12 @@ class Proveedores(db.Model):
     nombreProveedor = db.Column(db.String(100))
     correo = db.Column(db.String(100))
     telefono = db.Column(db.String(20))
+<<<<<<< HEAD
+    estatus = db.Column(db.Integer, default=1)
+
+=======
     estatus = db.Column(db.Integer, default=1) #AGREGUÉ ESTATUS A PROVEEDORES -Oscar
+>>>>>>> cbdf442a8f7560a7d7b8eb8aaae3844d893720d6
 
 class ComprasInsumos(db.Model):
     __tablename__ = 'comprasinsumos'
@@ -48,6 +58,7 @@ class IngredientesReceta(db.Model):
     idMateriaPrima = db.Column(db.Integer, db.ForeignKey('materiasprimas.idMateriaPrima'))
     cantidadNecesaria = db.Column(db.Numeric(10, 2))
 
+
 class Sabores(db.Model):
     __tablename__ = 'sabores'
     idSabor = db.Column(db.Integer, primary_key=True)
@@ -67,6 +78,7 @@ class ProductosTerminados(db.Model):
     fechaCaducidad = db.Column(db.Date)
     idDetalle = db.Column(db.Integer, db.ForeignKey('detallesproducto.idDetalle'), nullable=False)
     estatus = db.Column(db.Integer, default=1)
+
 
 class Ventas(db.Model):
     __tablename__ = 'ventas'
