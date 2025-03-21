@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="static/sweetalert2/sweetalert2.min.css">
     <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.css"/>
     <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.min.css"/>
+    <link rel="stylesheet" href="static/css/ventas.css">
 
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700&display=swap" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -68,6 +69,16 @@
                         <b>Dashboard</b>
                     </button>
                 </div>
+            </body>
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script src="static/bootstrap/js/bootstrap.esm.min.js"></script>
+            <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
+            <script src="static/sweetalert2/sweetalert2.all.min.js"></script>
+            <script src="static/fontawesome-free-6.4.0-web/js/all.js"></script>
+            <script src="static/js/galletas.js"></script>
+            <script src="static/js/insumos.js"></script>
+            <script src="{{url_for('static', filename='js/galletas.js')}}"></script>
+            </html>
             </nav>
             {% block container %}
             
@@ -80,5 +91,5 @@
 <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="static/sweetalert2/sweetalert2.all.min.js"></script>
 <script src="static/fontawesome-free-6.4.0-web/js/all.js"></script>
-<script src="{{url_for('static', filename='js/galletas.js')}}""></script>
+<script src="{{url_for('static', filename='js/galletas.js')}}"></script>
 </html>
