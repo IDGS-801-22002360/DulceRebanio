@@ -68,6 +68,16 @@
                         <b>Dashboard</b>
                     </button>
                 </div>
+            </body>
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script src="static/bootstrap/js/bootstrap.esm.min.js"></script>
+            <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
+            <script src="static/sweetalert2/sweetalert2.all.min.js"></script>
+            <script src="static/fontawesome-free-6.4.0-web/js/all.js"></script>
+            <script src="static/js/galletas.js"></script>
+            <script src="static/js/insumos.js"></script>
+            <script src="{{url_for('static', filename='js/galletas.js')}}"></script>
+            </html>
             </nav>
             {% block container %}
             
@@ -80,5 +90,5 @@
 <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="static/sweetalert2/sweetalert2.all.min.js"></script>
 <script src="static/fontawesome-free-6.4.0-web/js/all.js"></script>
-<script src="{{url_for('static', filename='js/galletas.js')}}""></script>
+<script src="{{url_for('static', filename='js/galletas.js')}}"></script>
 </html>
