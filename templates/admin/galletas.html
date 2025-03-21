@@ -130,6 +130,8 @@
             </div>
             <div class="modal-body" style="background-color: #eee">
                 <form id="formNuevoPaquete">
+                    {{form.csrf_token}}
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <div class="col-md-12" style="display: none;">
                         <div class="form-floating">
                             <input type="text" class="form-control border-0" id="mdlIdGalletas" placeholder="" disabled="">
