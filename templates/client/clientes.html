@@ -61,16 +61,24 @@
         .sidebar button:hover {
             background-color: #371E01;
         }
-
-        /* Contenido Principal */
         .content {
-            margin-left: 130px; /* Margen para evitar superposición con el navbar */
+            margin-left: 130px; 
             padding: 20px;
         }
         .titulo-productos {
-            font-family: cursive;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
             font-weight: bold;
-            font-size: 28px;
+            font-weight: bold;
+            font-size: 50px;
+            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
+        }
+        .subtitulo-productos {
+            font-family: 'League Spartan', sans-serif;
+            font-style: italic;
+            font-weight: bold;
+            font-weight: bold;
+            font-size: 20px;
             text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
         }
     </style>
@@ -86,48 +94,123 @@
                         <i class="fa fa-2x fa-home"></i><br>
                         <b>Inicio</b>
                     </button>
+                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan position-relative" style="width: 100%; height: 115px" data-bs-toggle="offcanvas" href="#modalCarrito">
+                        <i class="fas fa-2x fa-shopping-cart"></i> 
+                        {% if carrito|length > 0 %}
+                            <span class="position-absolute top-0 start-100 badge rounded-pill bg-danger d-flex align-items-center justify-content-center" 
+                                style="font-size: 0.8rem; width: 22px; height: 22px; transform: translate(-20px, -50%);">
+                                {{ carrito|length }} 
+                            </span>
+                        {% endif %}
+                        <br><b>Carrito</b>
+                    </button>          
                     <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
-                        <i class="fa fa-2x fa-user"></i><br>
-                        <b>Iniciar sesion</b>
-                    </button>
-                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
-                        <i class="fa fa-2x fa-shopping-cart"></i><br>
-                        <b>Carrito</b>
-                    </button>                    
+                        <i class="fa fa-2x fa-history"></i><br>
+                        <b>Historial</b>
+                    </button>                                      
                 </div>
             </nav>
 
             <!-- Contenido Principal -->
             <div class="col-md-11 col-lg-11 content">
-                <h2 class="text-center titulo-productos">Productos</h2>
-                <div class="row mt-4">
-                    <div class="col-md-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="text-center titulo-productos">
+                        Productos <span>dulce rebaño</span>
+                    </h2>
+                    <img src="../../static/img/donGalleto2.png" alt="Logo" class="img-fluid ms-3" style="max-width: 100px; height: auto;">
+                </div>
+                <h5 class="subtitulo-productos">¿Que quieres comprar hoy?</h5>            
+                <div class="row mt-5">
+                    {% for sabor in sabores %}
+                    <div class="col-md-3 mb-3">
                         <div class="card shadow-sm">
-                            <img src="../../static/img/donGalleto1.png" class="card-img-top" alt="Producto">
                             <div class="card-body text-center">
-                                <h5 class="card-title fw-bold">Galleta de Chocolate</h5>
-                                <p class="text-muted">$20.00 c/u</p>
-                                <div class="d-flex flex-column align-items-center">
-                                    <label for="opciones" class="fw-bold">Seleccionar cantidad:</label>
-                                    <select class="form-select w-75 mt-2" id="opciones">
-                                        <option value="unidad">Unidad</option>
-                                        <option value="gramos">Gramos</option>
-                                        <option value="kilogramos">Kilogramos</option>
+                                <img src="../../static/img/{{ sabor.nombreSabor | lower }}.jpg" alt="{{ sabor.nombreSabor }}" class="w-100 img-fluid" style="height: 200px; object-fit: cover; border-radius: 10px;">
+                                <h5 class="card-title fw-bold">{{ sabor.nombreSabor }}</h5>
+                                
+                                <form action="{{ url_for('agregar_carrito') }}" method="POST">
+                                    <input type="hidden" name="sabor_id" value="{{ sabor.idSabor }}">
+                                    <h5 class="fw-bold mt-2" style="color: #532d02;"> <span class="precio">${{ detalles_productos[0].precio }}</span></h5>
+                                    <label for="tipo_producto" class="fw-bold">Tipo de producto:</label>
+                                    <select name="tipo_producto" class="form-control">
+                                        {% for detalle in detalles_productos %}
+                                            <option value="{{ detalle.idDetalle }}" data-precio="{{ detalle.precio }}">
+                                                {{ detalle.tipoProducto }}
+                                            </option>
+                                        {% endfor %}
                                     </select>
-                                </div>                                
-                                <button class="btn btn-warning w-100 mt-3 fw-bold">
-                                    <i class="fas fa-cart-plus"></i> Añadir al carrito
-                                </button>
+                                    <label for="cantidad" class="fw-bold mt-2">Cantidad:</label>
+                                    <input type="number" name="cantidad" class="form-control" min="1" value="1" required>
+                                    <br>
+                                    <form method="POST" action="/agregar_carrito">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-warning font-Spartan text-white">
+                                            <i class="fas fa-cart-plus fa-lg"></i> Agregar al carrito
+                                        </button>
+                                        
+                                </form>
                             </div>
                         </div>
                     </div>
+                    {% endfor %}
                 </div>
-            </div> 
-        </div> 
-    </div>
+            </div>
+
+            <div id="modalCarrito" class="offcanvas offcanvas-end" tabindex="-1" aria-labelledby="modalCarritoLabel">
+                <div class="offcanvas-header">
+                    <h5 id="modalCarritoLabel">Carrito de Compras</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <ul class="list-group">
+                        {% set total_general = 0 %}
+                        {% for item in session["carrito"] %}
+                            {% set subtotal = item.cantidad * item.precio %}
+                            {% set total_general = subtotal + subtotal %}
+                            <li class="list-group-item d-flex align-items-center">
+                                <img src="../../static/img/{{ item.nombre | lower }}.jpg" alt="{{ item.nombre }}" class="me-3" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+                                <div class="flex-grow-1">
+                                    <strong>{{ item.nombre }}</strong> - <span class="text-muted">{{ item.tipo }}</span>
+                                    <div>
+                                        <span>Cantidad:</span>
+                                        <span class="mx-2">{{ item.cantidad }}</span>
+                                    </div>
+                                    <div class="mt-1"><strong>Subtotal: ${{ "%.2f"|format(subtotal) }}</strong></div>
+                                </div>
+                                <form action="{{ url_for('eliminar_carrito', item_id=item.id) }}" method="POST">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button class="btn btn-danger btn-sm">Eliminar</button>
+                                </form>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <div class="mt-3 text-end">
+                        <h5><strong>Total: ${{ "%.2f"|format(session.get("total_general", 0)) }}</strong></h5>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-primary w-100">Proceder al Pago</button>
+                    </div>
+                </div>
+            </div>  
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="static/sweetalert2/sweetalert2.all.min.js"></script>
     <script src="static/fontawesome-free-6.4.0-web/js/all.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll("select[name='tipo_producto']").forEach(select => {
+                select.addEventListener("change", function () {
+                    let precioSeleccionado = this.options[this.selectedIndex].getAttribute("data-precio");
+                    let precioElemento = this.closest(".card-body").querySelector(".precio");
+    
+                    if (precioElemento) {
+                        precioElemento.textContent = `$${precioSeleccionado}`;
+                    }
+                });
+            });
+        });
+    </script>
+    
+
 </body>
 </html>

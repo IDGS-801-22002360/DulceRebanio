@@ -11,3 +11,4 @@ class MermaForm(FlaskForm):
     cantidad = IntegerField('Cantidad', validators=[Optional()])
     mermar_todo = BooleanField('Mermar Todo')
     submit = SubmitField('Mermar')
+    

@@ -96,4 +96,3 @@ class DetallesPedido(db.Model):
     idProducto = db.Column(db.Integer, db.ForeignKey('productosterminados.idProducto'))
     cantidad = db.Column(db.Integer)
     
-    
