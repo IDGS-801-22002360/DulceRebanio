@@ -13,7 +13,27 @@ class MermaForm(FlaskForm):
     cantidad = IntegerField('Cantidad', validators=[Optional()])
     mermar_todo = BooleanField('Mermar Todo')
     submit = SubmitField('Mermar')
-    
+
+class PaqueteForm(FlaskForm):
+    tipo_producto = SelectField(
+        "Tipo de Producto",
+        choices=[
+            (2, "Kilo"),
+            (3, "Medio Kilo")
+        ],
+        coerce=int,  # Convierte el valor seleccionado a un entero
+        validators=[DataRequired(message="El campo es requerido")]
+    )
+    cantidad = IntegerField(
+        "Cantidad",
+        validators=[
+            DataRequired(message="El campo es requerido"),
+            validators.NumberRange(min=1, message="La cantidad debe ser mayor a 0")
+        ]
+    )
+    submit = SubmitField("Guardar")
+
+
 #!======================= Modulo de Insumos =======================#  
 class InsumoForm(Form):
     materiaPrima = StringField("Materia Prima", validators=[

@@ -1,3 +1,5 @@
+from models import DetallesVenta, Ventas, ComprasInsumos, DetallesProducto, Proveedores, Sabores, db, ProductosTerminados, MateriasPrimas
+from forms import CompraInsumoForm, LoteForm, InsumoForm, MermaForm, ProveedorForm, PaqueteForm
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash,session
 import forms
 from flask_wtf import CSRFProtect
@@ -7,20 +9,16 @@ from fpdf import FPDF
 import os
 import datetime
 
-# Importación de configuración, base de datos y formularios
 from config import DevelopmentConfig
-from models import DetallesVenta, Ventas, ComprasInsumos, DetallesProducto, Proveedores, Sabores, db, ProductosTerminados, MateriasPrimas
-from forms import CompraInsumoForm, LoteForm, InsumoForm, MermaForm, ProveedorForm
-from sqlalchemy import text
-import datetime
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, SubmitField
 from decimal import Decimal
 
 app = Flask(__name__)
-app.secret_key = "dongalleto" 
 app.config.from_object(DevelopmentConfig)
 csrf = CSRFProtect()
+
+#!============================== Modulo Clientes ==============================#
 
 @app.route("/", methods=["GET", "POST"])
 @app.route("/index")
@@ -34,10 +32,8 @@ def clientes():
 
     if "carrito" not in session:
         session["carrito"] = []
-
     return render_template("client/clientes.html", sabores=sabores, detalles_productos=detalles_productos, carrito=session["carrito"])
 
-from decimal import Decimal
 
 @app.route("/agregar_carrito", methods=["POST"])
 def agregar_carrito():
@@ -77,8 +73,8 @@ def agregar_carrito():
 
         session["carrito"] = carrito  
         session.modified = True  
-
     return redirect(url_for("clientes"))
+
 
 @app.route("/eliminar_carrito/<int:item_id>", methods=["POST"])
 def eliminar_carrito(item_id):
@@ -89,18 +85,40 @@ def eliminar_carrito(item_id):
     session.modified = True  
     return redirect(url_for("clientes"))
 
-#!=============== Modulo dashboard ===============# 
+#!============================== Modulo dashboard ==============================# 
+
 @app.route("/dashboard", methods=["GET", "POST"])
 def dashboard():
     return render_template("admin/dashboard.html")
 
-#!=============== Modulo de Productos ===============#  
+
+#!============================== Modulo de Productos ==============================#  
 
 @app.route("/galletas", methods=["GET", "POST"])
 def galletas():
     form = LoteForm()
+    paquete_form = PaqueteForm()
     form.sabor.choices = [(sabor.idSabor, sabor.nombreSabor) for sabor in Sabores.query.all()]
     
+    #* Estas son unicamente las galletas a granel
+    productos_granel = db.session.query(
+        ProductosTerminados.idProducto,
+        Sabores.nombreSabor,
+        DetallesProducto.tipoProducto,
+        ProductosTerminados.cantidadDisponible
+    ).join(Sabores, ProductosTerminados.idSabor == Sabores.idSabor)\
+    .join(DetallesProducto, ProductosTerminados.idDetalle == DetallesProducto.idDetalle)\
+    .filter(ProductosTerminados.idDetalle == 1, ProductosTerminados.estatus == 1).all()
+    
+    #* Verificar si estamos en temporada navideña
+    today = datetime.date.today()
+    is_christmas_season = today.month == 12
+    
+    #* Ajuste de mínimo stock según la temporada
+    min_galletas = 60 if is_christmas_season else 30
+    min_paquetes = 6 if is_christmas_season else 3
+
+    #* Obtener todos los productos y marcar los de bajo stock
     productos = db.session.query(
         ProductosTerminados.idProducto,
         Sabores.nombreSabor,
@@ -110,9 +128,52 @@ def galletas():
         ProductosTerminados.estatus
     ).join(Sabores, ProductosTerminados.idSabor == Sabores.idSabor)\
     .join(DetallesProducto, ProductosTerminados.idDetalle == DetallesProducto.idDetalle)\
-    .filter(ProductosTerminados.estatus == 1).all()
+    .filter(ProductosTerminados.estatus == 1)\
+    .order_by(ProductosTerminados.idDetalle.asc()).all()
     
-    return render_template("admin/galletas.html", productos=productos, form=form)
+    #* Verificar productos con bajo stock
+    productos_bajo_stock = db.session.query(
+        ProductosTerminados.idProducto,
+        Sabores.nombreSabor,
+        DetallesProducto.tipoProducto,
+        ProductosTerminados.cantidadDisponible
+    ).join(Sabores, ProductosTerminados.idSabor == Sabores.idSabor)\
+    .join(DetallesProducto, ProductosTerminados.idDetalle == DetallesProducto.idDetalle)\
+    .filter(
+        ProductosTerminados.estatus == 1,
+        (ProductosTerminados.idDetalle == 1) & (ProductosTerminados.cantidadDisponible < min_galletas) |
+        (ProductosTerminados.idDetalle.in_([2, 3]) & (ProductosTerminados.cantidadDisponible < min_paquetes))
+    ).all()
+
+    #* Generar alertas para productos con bajo stock
+    for producto in productos_bajo_stock:
+        flash(f"¡Alerta! Bajo stock: {producto.nombreSabor} ({producto.tipoProducto}) - Cantidad: {producto.cantidadDisponible}", "warning")
+
+    #* Marcar los productos con bajo stock
+    productos_marcados = []
+    for producto in productos:
+        bajo_stock = (
+            (producto.tipoProducto == "Granel" and producto.cantidadDisponible < min_galletas) or
+            (producto.tipoProducto in ["Kilo", "Med. Kilo"] and producto.cantidadDisponible < min_paquetes)
+        )
+        productos_marcados.append({
+            "idProducto": producto.idProducto,
+            "nombreSabor": producto.nombreSabor,
+            "tipoProducto": producto.tipoProducto,
+            "fechaCaducidad": producto.fechaCaducidad,
+            "cantidadDisponible": producto.cantidadDisponible,
+            "estatus": producto.estatus,
+            "bajo_stock": bajo_stock
+        })
+
+    return render_template(
+        "admin/galletas.html",
+        productos=productos_marcados,
+        productos_granel=productos_granel,
+        form=form,
+        paquete_form=paquete_form
+    )
+
 
 @app.route("/guardarLote", methods=["POST"])
 def guardarLote():
@@ -120,23 +181,26 @@ def guardarLote():
     form.sabor.choices = [(sabor.idSabor, sabor.nombreSabor) for sabor in Sabores.query.all()]
     
     if form.validate_on_submit():
-        sabor_id = form.sabor.data
-        id_detalle = 1
+        try:
+            sabor_id = form.sabor.data
+            id_detalle = 1
 
-        nuevo_producto = ProductosTerminados(
-            idSabor=sabor_id,
-            cantidadDisponible=150,
-            fechaCaducidad=datetime.date.today() + datetime.timedelta(days=7),
-            idDetalle=id_detalle,
-            estatus=1
-        )
-        db.session.add(nuevo_producto)
-        db.session.commit()
+            nuevo_producto = ProductosTerminados(
+                idSabor=sabor_id,
+                cantidadDisponible=150,
+                fechaCaducidad=datetime.date.today() + datetime.timedelta(days=7),
+                idDetalle=id_detalle,
+                estatus=1
+            )
+            db.session.add(nuevo_producto)
+            db.session.commit()
 
-        flash('Lote guardado correctamente', 'success')
+            flash('Lote guardado correctamente', 'success')
+        except Exception as e:
+            flash(f'Error al guardar el lote: {str(e)}', 'danger')
         return redirect(url_for('galletas'))
 
-    flash('Error al guardar el lote', 'danger')
+    flash('Error al guardar el lote. Verifica los datos ingresados.', 'danger')
     return redirect(url_for('galletas'))
 
 
@@ -181,10 +245,56 @@ def mermar():
     flash('Error al mermar el producto', 'danger')
     return redirect(url_for('galletas'))
 
+@app.route("/guardar_paquete", methods=["POST"])
+def guardar_paquete():
+    paquete_form = PaqueteForm()
+    if paquete_form.validate_on_submit():
+        
+        #* Obtener datos del formulario
+        tipo_producto = paquete_form.tipo_producto.data  # 2 = Kilo, 3 = Medio Kilo
+        cantidad_paquetes = paquete_form.cantidad.data
+        id_producto = request.form.get("txtIdGalletaGranel")  #* ID del lote seleccionado
 
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
+        producto = ProductosTerminados.query.get(id_producto)
+        if not producto:
+            flash("El lote seleccionado no existe.", "danger")
+            return redirect(url_for("galletas"))
+
+        galletas_por_paquete = 24 if tipo_producto == 2 else 12
+        galletas_necesarias = galletas_por_paquete * cantidad_paquetes
+
+        if producto.cantidadDisponible < galletas_necesarias:
+            flash("No hay suficientes galletas en el lote seleccionado.", "danger")
+            return redirect(url_for("galletas"))
+
+        producto.cantidadDisponible -= galletas_necesarias
+        if producto.cantidadDisponible == 0:
+            producto.estatus = 0
+
+        #* Crear el nuevo paquete
+        nuevo_paquete = ProductosTerminados(
+            idSabor=producto.idSabor,
+            cantidadDisponible=cantidad_paquetes,
+            fechaCaducidad=producto.fechaCaducidad,
+            idDetalle=tipo_producto,
+            estatus=1
+        )
+        db.session.add(nuevo_paquete)
+
+        db.session.commit()
+
+        flash(f"Paquete creado correctamente: {cantidad_paquetes} paquetes de tipo {tipo_producto}.", "success")
+        return redirect(url_for("galletas"))
+
+    flash("Error al guardar el paquete. Verifica los datos ingresados.", "danger")
+    return redirect(url_for("galletas"))
+
+
+
+#!============================== Modulo de Recetas ==============================#  
+
+
+
 
 #!============================== Modulo de Insumos ==============================#
 #INSERCIÓN INSUMOS
@@ -263,64 +373,6 @@ def mermar_insumo(id, merma):
     return redirect(url_for("insumos"))
 
 
-
-
-#Endpoint para proveedores
-@app.route("/proveedores", methods=["GET", "POST"])
-def proveedores():
-    form = ProveedorForm(request.form)
-    if request.method == "POST" and form.validate():
-        # Si existe un id en el formulario, se trata de una edición
-        id_prov = request.form.get("idProveedor")
-        if id_prov:
-            # Redirige al endpoint de edición
-            return redirect(url_for("editar_proveedor"))
-        else:
-            # Inserción de un nuevo proveedor
-            nuevo_proveedor = Proveedores(
-                nombreProveedor=form.nombreProveedor.data,
-                correo=form.correo.data,
-                telefono=form.telefono.data,
-                estatus=1  # Activo
-            )
-            db.session.add(nuevo_proveedor)
-            db.session.commit()
-            flash("Proveedor creado correctamente", "success")
-            return redirect(url_for("proveedores"))
-    # Consulta de proveedores activos (estatus distinto de 0)
-    proveedores_lista = Proveedores.query.filter(Proveedores.estatus != 0).all()
-    return render_template("admin/proveedores.html", proveedores=proveedores_lista, form=form)
-
-@app.route("/editar_proveedor", methods=["POST"])
-def editar_proveedor():
-    form = ProveedorForm(request.form)
-    id_prov = request.form.get("idProveedor")
-    if id_prov and form.validate():
-        proveedor = Proveedores.query.get(id_prov)
-        if proveedor:
-            proveedor.nombreProveedor = form.nombreProveedor.data
-            proveedor.correo = form.correo.data
-            proveedor.telefono = form.telefono.data
-            db.session.commit()
-            flash("Proveedor actualizado correctamente", "success")
-        else:
-            flash("Proveedor no encontrado", "danger")
-    else:
-        flash("Error en la validación del formulario", "danger")
-    return redirect(url_for("proveedores"))
-
-@app.route("/eliminar_proveedor/<int:id>", methods=["GET"])
-def eliminar_proveedor(id):
-    proveedor = Proveedores.query.get(id)
-    if proveedor:
-        proveedor.estatus = 0  # Eliminación lógica
-        db.session.commit()
-        flash("Proveedor eliminado correctamente", "success")
-    else:
-        flash("Proveedor no encontrado", "danger")
-    return redirect(url_for("proveedores"))
-
-
 #COMPRAS INSUMOS
 @app.route("/comprasInsumos", methods=["GET", "POST"])
 def comprasInsumos():
@@ -396,9 +448,66 @@ def editar_compraInsumo():
         flash("ID no proporcionado", "danger")
     
     return redirect(url_for("comprasInsumos"))
-#!================= Inicio de app =================#    
-#!=============== Modulo de Ventas ===============#
 
+
+#!============================== Modulo de Proveedores ==============================#
+
+#Endpoint para proveedores
+@app.route("/proveedores", methods=["GET", "POST"])
+def proveedores():
+    form = ProveedorForm(request.form)
+    if request.method == "POST" and form.validate():
+        # Si existe un id en el formulario, se trata de una edición
+        id_prov = request.form.get("idProveedor")
+        if id_prov:
+            # Redirige al endpoint de edición
+            return redirect(url_for("editar_proveedor"))
+        else:
+            # Inserción de un nuevo proveedor
+            nuevo_proveedor = Proveedores(
+                nombreProveedor=form.nombreProveedor.data,
+                correo=form.correo.data,
+                telefono=form.telefono.data,
+                estatus=1  # Activo
+            )
+            db.session.add(nuevo_proveedor)
+            db.session.commit()
+            flash("Proveedor creado correctamente", "success")
+            return redirect(url_for("proveedores"))
+    # Consulta de proveedores activos (estatus distinto de 0)
+    proveedores_lista = Proveedores.query.filter(Proveedores.estatus != 0).all()
+    return render_template("admin/proveedores.html", proveedores=proveedores_lista, form=form)
+
+@app.route("/editar_proveedor", methods=["POST"])
+def editar_proveedor():
+    form = ProveedorForm(request.form)
+    id_prov = request.form.get("idProveedor")
+    if id_prov and form.validate():
+        proveedor = Proveedores.query.get(id_prov)
+        if proveedor:
+            proveedor.nombreProveedor = form.nombreProveedor.data
+            proveedor.correo = form.correo.data
+            proveedor.telefono = form.telefono.data
+            db.session.commit()
+            flash("Proveedor actualizado correctamente", "success")
+        else:
+            flash("Proveedor no encontrado", "danger")
+    else:
+        flash("Error en la validación del formulario", "danger")
+    return redirect(url_for("proveedores"))
+
+@app.route("/eliminar_proveedor/<int:id>", methods=["GET"])
+def eliminar_proveedor(id):
+    proveedor = Proveedores.query.get(id)
+    if proveedor:
+        proveedor.estatus = 0  # Eliminación lógica
+        db.session.commit()
+        flash("Proveedor eliminado correctamente", "success")
+    else:
+        flash("Proveedor no encontrado", "danger")
+    return redirect(url_for("proveedores"))
+
+#!============================== Modulo de Ventas ==============================#
 # Venta actual (lista de productos en la venta)
 venta_actual = []
 
@@ -563,6 +672,13 @@ def generar_pdf(venta, descuento, dinero_recibido, total_con_descuento):
     path = "ticket.pdf"
     pdf.output(path)
     return path
+
+
+#!============================== Error 404 ==============================#
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 
 if __name__ == '__main__':

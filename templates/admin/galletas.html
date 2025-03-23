@@ -3,23 +3,26 @@
 {% import "admin/_macros.html" as macro %}
 
 <!--* Main -->
-<div class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 p-1 mt-3">
+
     <div class="row">
         <div class="card border-0 gb mb-3" style="height: 58px; background-color: #e1e1e1">
-            {% with message = get_flashed_messages() %}
-                {% if message %}
-                    {% for messages in message %}
-                        <div class="alert alert-success bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                            {{ messages }}
-                        </div>
-                    {% endfor %}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="container col-12">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
                 {% endif %}
             {% endwith %}
         </div>
         <div class="col-6">
             <div class="card border-0 shadow-sm rounded-3 bg-white">
                 <div class="card-header border-0 rounded-top-3 text-center bg-white">
-                    <b class="text-center font-Spartan">Galletas</b>
+                    <b class="text-center font-Spartan">Productos</b>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover text-center mb-0 table-borderless">
@@ -35,7 +38,7 @@
                         </thead>
                         <tbody id="productosTableBody">
                             {% for producto in productos %}
-                            <tr onclick="selectProduct('{{ producto.idProducto }}', '{{ producto.estatus }}')">
+                            <tr class="{% if producto.bajo_stock %}table-danger{% endif %}" onclick="selectProduct('{{ producto.idProducto }}', '{{ producto.estatus }}')">
                                 <td>{{ producto.idProducto }}</td>
                                 <td>{{ producto.nombreSabor }}</td>
                                 <td>{{ producto.tipoProducto }}</td>
@@ -53,7 +56,7 @@
         <div class="col-6">
             <form id="formLote" method="POST" action="{{ url_for('guardarLote') }}" novalidate>
                 {{ form.hidden_tag() }}
-                <div class="row">
+                <div class="row" style="display: none;">
                     <div class="col-md-6">
                         {{ macro.datos('txtIdGalleta', '', 'text', disabled=true) }}
                     </div>
@@ -98,7 +101,6 @@
             </div>
         </div>
     </div>
-</div>
 
 <!--* Modal Merma -->
 <div class="modal fade mt-5" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -131,41 +133,53 @@
                 <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" style="background-color: #eee">
-                <form id="formNuevoPaquete">
-                    {{form.csrf_token}}
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    <div class="col-md-12" style="display: none;">
-                        <div class="form-floating">
-                            <input type="text" class="form-control border-0" id="mdlIdGalletas" placeholder="" disabled="">
-                            <label for="mdlIdGalletas">ID</label>
+                <form id="formNuevoPaquete" method="POST" action="{{ url_for('guardar_paquete') }}">
+                    {{ paquete_form.hidden_tag() }}
+                    <div class="card border-0 rounded-3 shadow-sm">
+                        <input type="hidden" id="txtIdGalletaGranel" name="txtIdGalletaGranel" value="">
+                        <div class="card-header border-0 rounded-top-3 text-center bg-white">
+                            <b class="text-center font-Spartan">Galletas</b>
                         </div>
-                    </div>
-                    <div class="card pt-2 pb-2 pe-0 ps-0 border-0 rounded-3">
-                        <table class="table-borderless table table-hover table-sm rounded-3 text-center">
-                            <thead>
-                                <tr>
-                                    <th>Sabor</th>
-                                    <th>Tipo</th>
-                                    <th>Cantidad</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tBodyGalletas">
-                                <!-- Contenido de la tabla -->
-                            </tbody>
-                        </table>
+                        <div class="card-body table-scroll mb-0 pb-0">
+                            <table class="scroll table-borderless table table-hover table-sm rounded-3 text-center">
+                                <thead>
+                                    <tr>
+                                        <th>Sabor</th>
+                                        <th>Cantidad</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tBodyGalletas">
+                                    {% for producto in productos_granel %}
+                                    <tr onclick="selectProductForPaquete('{{ producto.idProducto }}')">
+                                        <td>{{ producto.nombreSabor }}</td>
+                                        <td>{{ producto.cantidadDisponible }}</td>
+                                        <td class=""><a class="fs-5 fa fa-info-circle text-decoration-none text-warning"></a></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     <div class="col-md-12 mt-2">
-                        <div class="form-floating">
-                            <input type="number" class="form-control border-0" id="mdlCantidadPkg" placeholder="">
-                            <label for="mdlCantidadPkg">Cantidad</label>
+                        <div class="row">
+                            <div class="col-6 form-floating">
+                                {{ paquete_form.tipo_producto(class="form-select border-0") }}
+                                <label for="paquete_form.tipo_producto">Tipo de Producto</label>
+                            </div>
+                            <div class="col-6 form-floating">
+                                {{ paquete_form.cantidad(class="form-control border-0") }}
+                                <label for="paquete_form.cantidad">Cantidad</label>
+                            </div>
                         </div>
                     </div>
+                    <div class="modal-footer border-0" style="background-color: #eee">
+                        {{ paquete_form.submit(class="btn btn-warning font-Spartan text-white") }}
+                    </div>
                 </form>
-            </div>
-            <div class="modal-footer border-0" style="background-color: #eee">
-                <button type="button" class="btn btn-warning font-Spartan text-white" onclick="savePaquete()">Guardar</button>
             </div>
         </div>
     </div>
 </div>
+
 {% endblock %}
