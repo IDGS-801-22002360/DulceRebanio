@@ -1,85 +1,110 @@
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Dulce Rebaño</title>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css"/>
-                <link rel="stylesheet" href="static/bootstrap/css/bootstrap-utilities.min.css"/>
-                <link rel="stylesheet" href="static/bootstrap/css/bootstrap-grid.min.css"/>
-                <link rel="stylesheet" href="static/sweetalert2/sweetalert2.min.css">
-                <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.css"/>
-                <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.min.css"/>
-            
-                <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700&display=swap" rel="stylesheet">
-                <meta name="csrf-token" content="{{ csrf_token() }}">
-                <style>
-                    .font-Spartan {
-                        font-family: 'Roboto', sans-serif;
-                    }
-                    .btn-color {
-                        background-color: #542E02;
-                    }
-                    .btn-hover:hover {
-                        background-color: #371E01;
-                    }
-                    .btn-del {
-                        background-color: #FF0000;
-                    }
-                    .btn-del-hover:hover {
-                        background-color: #D90000;
-                    }
-                    .bg-danger-light {
-                        background-color: rgba(255, 0, 0, 0.1); /* Rojo suave */
-                    }
-                    .buyButtons {
-                        background-color: #FFD700;
-                    }
-                </style>
-            </head>
-            <body class="" style="background-color: #e1e1e1">
-                <div class="container-fluid">
-                    <div class="row vh-100">
-                        <!--* Navbar Lateral -->
-                        <nav class="col-md-1 col-lg-1 d-md-block sidebar text-center" style="background-color: #532d02; opacity: 50%">
-                            <div class="position-sticky pt-3">
-                                <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px;">
-                                    <i class="fa fa-2x fa-cookie-bite"></i><br>
-                                    <b>Ventas</b>
-                                </button>
-                                <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
-                                    <i class="fa fa-2x fa-box-open"></i><br>
-                                    <b>Inventario</b>
-                                </button>
-                                <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
-                                    <i class="fa fa-2x fa-fire"></i><br>
-                                    <b>Produccion</b>
-                                </button>
-                                <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
-                                    <i class="fa fa-2x fa-file-alt"></i><br>
-                                    <b>Recetas</b>
-                                </button>
-                                <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
-                                    <i class="fa fa-2x fa-layer-group"></i><br>
-                                    <b>Insumos</b>
-                                </button>
-                                <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
-                                    <i class="fa fa-2x fa-bar-chart"></i><br>
-                                    <b>Dashboard</b>
-                                </button>
-                            </div>
-                        </nav>
-                        {% block container %}
-                        
-                        {% endblock %}
-                    </div>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dulce Rebaño</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="static/bootstrap/css/bootstrap-utilities.min.css"/>
+    <link rel="stylesheet" href="static/bootstrap/css/bootstrap-grid.min.css"/>
+    <link rel="stylesheet" href="static/sweetalert2/sweetalert2.min.css">
+    <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.css"/>
+    <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.min.css"/>
+
+    <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .font-Spartan {
+            font-family: 'Roboto', sans-serif;
+        }
+        .btn-color {
+            background-color: #542E02;
+        }
+        .btn-hover:hover {
+            background-color: #371E01;
+        }
+        .btn-del {
+            background-color: #FF0000;
+        }
+        .btn-del-hover:hover {
+            background-color: #D90000;
+        }
+        .bg-danger-light {
+            background-color: rgba(255, 0, 0, 0.1);
+        }
+        .buyButtons {
+            background-color: #FFD700;
+        }
+        .last-login {
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            color: #000; 
+            font-size: 14px; 
+            z-index: 1000; 
+        }
+    </style>
+</head>
+<body class="" style="background-color: #e1e1e1">
+    <div class="container-fluid">
+        <div class="row vh-100">
+            <!--* Navbar Lateral -->
+            <nav class="col-md-1 col-lg-1 d-md-block sidebar text-center" style="background-color: #532d02; opacity: 50%">
+                <div class="position-sticky pt-3">
+                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px;">
+                        <i class="fa fa-2x fa-cookie-bite"></i><br>
+                        <b>Ventas</b>
+                    </button>
+                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
+                        <i class="fa fa-2x fa-box-open"></i><br>
+                        <b>Inventario</b>
+                    </button>
+                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
+                        <i class="fa fa-2x fa-fire"></i><br>
+                        <b>Produccion</b>
+                    </button>
+                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
+                        <i class="fa fa-2x fa-file-alt"></i><br>
+                        <b>Recetas</b>
+                    </button>
+                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
+                        <i class="fa fa-2x fa-layer-group"></i><br>
+                        <b>Insumos</b>
+                    </button>
+                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
+                        <i class="fa fa-2x fa-bar-chart"></i><br>
+                        <b>Dashboard</b>
+                    </button>
+                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
+                        <i class="fa fa-2x fa-users"></i><br>
+                        <b>Usuarios</b>
+                    </button>
+                    <a href="{{ url_for('logout') }}" class="btn border-0 rounded-4 text-white btn-del btn-del-hover font-Spartan d-flex flex-column justify-content-center align-items-center" style="width: 100%; height: 115px">
+                        <i class="fa fa-2x fa-sign-out-alt mb-2"></i>
+                        <b>Cerrar sesión</b>
+                    </a>
                 </div>
-            </body>
-            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-            <script src="static/bootstrap/js/bootstrap.esm.min.js"></script>
-            <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
-            <script src="static/sweetalert2/sweetalert2.all.min.js"></script>
-            <script src="static/fontawesome-free-6.4.0-web/js/all.js"></script>
-            <script src="static/js/galletas.js"></script>
-            <script src="{{url_for('static', filename='js/galletas.js')}}""></script>
-            </html>
+            </nav>
+            
+            {% block container %}
+            
+            
+            {% endblock %}
+        </div>
+    </div>
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="static/bootstrap/js/bootstrap.esm.min.js"></script>
+<script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="static/sweetalert2/sweetalert2.all.min.js"></script>
+<script src="static/fontawesome-free-6.4.0-web/js/all.js"></script>
+<script src="{{url_for('static', filename='js/galletas.js')}}""></script>
+</html>

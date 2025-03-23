@@ -1,15 +1,31 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
+import hashlib
 import datetime
 
 db = SQLAlchemy()
 
-class Usuarios(db.Model):
+class Usuarios(db.Model, UserMixin): 
     __tablename__ = 'usuarios'
     idUsuario = db.Column(db.Integer, primary_key=True)
-    nombreUsuario = db.Column(db.String(100))
+    nombre = db.Column(db.String(100)) 
+    apaterno = db.Column(db.String(100))
+    amaterno = db.Column(db.String(100)) 
     correo = db.Column(db.String(100), unique=True)
-    contrasena = db.Column(db.String(255))
+    contrasena = db.Column(db.String(64))
     rol = db.Column(db.Enum('Admin', 'Ventas', 'Produccion', 'Cliente'))
+    activo = db.Column(db.Integer, default=1)
+    ultimo_login = db.Column(db.DateTime)
+    
+
+    def set_contrasena(self, contrasena):
+        self.contrasena = hashlib.sha256(contrasena.encode('utf-8')).hexdigest()
+
+    def check_contrasena(self, contrasena):
+        return self.contrasena == hashlib.sha256(contrasena.encode('utf-8')).hexdigest()
+
+    def get_id(self):
+        return str(self.idUsuario)
 
 class MateriasPrimas(db.Model):
     __tablename__ = 'materiasprimas'
@@ -46,13 +62,24 @@ class IngredientesReceta(db.Model):
     idMateriaPrima = db.Column(db.Integer, db.ForeignKey('materiasprimas.idMateriaPrima'))
     cantidadNecesaria = db.Column(db.Numeric(10, 2))
 
+class Sabores(db.Model):
+    __tablename__ = 'sabores'
+    idSabor = db.Column(db.Integer, primary_key=True)
+    nombreSabor = db.Column(db.String(100), unique=True, nullable=False)
+
+class DetallesProducto(db.Model):
+    __tablename__ = 'detallesproducto'
+    idDetalle = db.Column(db.Integer, primary_key=True)
+    tipoProducto = db.Column(db.String(30), unique=True, nullable=False)
+    precio = db.Column(db.Numeric(10, 2), nullable=False)
+
 class ProductosTerminados(db.Model):
     __tablename__ = 'productosterminados'
     idProducto = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(100))
+    idSabor = db.Column(db.Integer, db.ForeignKey('sabores.idSabor'), nullable=False)
     cantidadDisponible = db.Column(db.Integer)
     fechaCaducidad = db.Column(db.Date)
-    tipoProducto = db.Column(db.String(30))
+    idDetalle = db.Column(db.Integer, db.ForeignKey('detallesproducto.idDetalle'), nullable=False)
     estatus = db.Column(db.Integer, default=1)
 
 class Ventas(db.Model):
