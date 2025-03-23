@@ -122,8 +122,8 @@
                 <h5 class="subtitulo-productos">¿Que quieres comprar hoy?</h5>            
                 <div class="row mt-5">
                     {% for sabor in sabores %}
-                    <div class="col-md-3 mb-3">
-                        <div class="card shadow-sm">
+                    <div class="col-md-3 mb-4">
+                        <div class="card shadow-sm" style="border-radius: 22px;">
                             <div class="card-body text-center">
                                 <img src="../../static/img/{{ sabor.nombreSabor | lower }}.jpg" alt="{{ sabor.nombreSabor }}" class="w-100 img-fluid" style="height: 200px; object-fit: cover; border-radius: 10px;">
                                 <h5 class="card-title fw-bold">{{ sabor.nombreSabor }}</h5>

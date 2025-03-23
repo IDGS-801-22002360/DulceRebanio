@@ -33,3 +33,21 @@
         </label>
     </div>
 {% endmacro %}
+
+{% macro cantidad_input(input_id, label) %}
+    <div class="form-floating">
+        <input type="number" class="form-control border-0" id="{{ input_id }}" name="{{ input_id }}" placeholder="{{ label }}">
+        <label for="{{ input_id }}">{{ label }}</label>
+    </div>
+{% endmacro %}
+
+{% macro tipo_producto_select(select_id, label, options) %}
+    <div class="form-floating">
+        <select class="form-control form-select border-0" id="{{ select_id }}" name="{{ select_id }}">
+            {% for value, text in options %}
+            <option value="{{ value }}">{{ text }}</option>
+            {% endfor %}
+        </select>
+        <label for="{{ select_id }}">{{ label }}</label>
+    </div>
+{% endmacro %}
