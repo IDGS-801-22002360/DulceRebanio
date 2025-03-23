@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="static/sweetalert2/sweetalert2.min.css">
     <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.css"/>
     <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.min.css"/>
+    <link rel="stylesheet" href="static/css/ventas.css">
 
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700&display=swap" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -51,6 +52,16 @@
             font-size: 14px; 
             z-index: 1000; 
         }
+        .table-scroll {
+            max-height: 200px; /* Altura máxima de la tabla */
+            overflow-y: auto; /* Habilitar desplazamiento vertical */
+            border: 0px;
+        }
+        
+        .table-scroll table {
+            width: 100%; /* Asegurar que la tabla ocupe todo el ancho del contenedor */
+            height: 90%;
+        }
     </style>
 </head>
 <body class="" style="background-color: #e1e1e1">
@@ -68,10 +79,6 @@
                         <b>Inventario</b>
                     </button>
                     <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
-                        <i class="fa fa-2x fa-fire"></i><br>
-                        <b>Produccion</b>
-                    </button>
-                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
                         <i class="fa fa-2x fa-file-alt"></i><br>
                         <b>Recetas</b>
                     </button>
@@ -87,17 +94,32 @@
                         <i class="fa fa-2x fa-users"></i><br>
                         <b>Usuarios</b>
                     </button>
+                    <button>
+                        <i class="fa fa-2x fa-tools"></i><br>
+                        <b>Config Prod</b>
+                    </button>
                     <a href="{{ url_for('logout') }}" class="btn border-0 rounded-4 text-white btn-del btn-del-hover font-Spartan d-flex flex-column justify-content-center align-items-center" style="width: 100%; height: 115px">
                         <i class="fa fa-2x fa-sign-out-alt mb-2"></i>
                         <b>Cerrar sesión</b>
                     </a>
                 </div>
+            </body>
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script src="static/bootstrap/js/bootstrap.esm.min.js"></script>
+            <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
+            <script src="static/sweetalert2/sweetalert2.all.min.js"></script>
+            <script src="static/fontawesome-free-6.4.0-web/js/all.js"></script>
+            <script src="static/js/galletas.js"></script>
+            <script src="static/js/insumos.js"></script>
+            <script src="{{url_for('static', filename='js/galletas.js')}}"></script>
+            </html>
             </nav>
-            
+            <div class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 p-1 mt-5">
             {% block container %}
             
             
             {% endblock %}
+            </div>
         </div>
     </div>
 </body>
@@ -106,5 +128,5 @@
 <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="static/sweetalert2/sweetalert2.all.min.js"></script>
 <script src="static/fontawesome-free-6.4.0-web/js/all.js"></script>
-<script src="{{url_for('static', filename='js/galletas.js')}}""></script>
+<script src="{{url_for('static', filename='js/galletas.js')}}"></script>
 </html>

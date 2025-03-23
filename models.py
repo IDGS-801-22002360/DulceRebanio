@@ -27,6 +27,7 @@ class Usuarios(db.Model, UserMixin):
     def get_id(self):
         return str(self.idUsuario)
 
+
 class MateriasPrimas(db.Model):
     __tablename__ = 'materiasprimas'
     idMateriaPrima = db.Column(db.Integer, primary_key=True)
@@ -34,6 +35,7 @@ class MateriasPrimas(db.Model):
     cantidadDisponible = db.Column(db.Numeric(10, 2))
     unidadMedida = db.Column(db.String(100))
     fechaCaducidad = db.Column(db.Date)
+    estatus = db.Column(db.Integer, default=1) #AGREGUÉ ESTATUS A MATERIAS PRIMAS -Oscar
 
 class Proveedores(db.Model):
     __tablename__ = 'proveedores'
@@ -41,6 +43,7 @@ class Proveedores(db.Model):
     nombreProveedor = db.Column(db.String(100))
     correo = db.Column(db.String(100))
     telefono = db.Column(db.String(20))
+    estatus = db.Column(db.Integer, default=1) #AGREGUÉ ESTATUS A PROVEEDORES -Oscar
 
 class ComprasInsumos(db.Model):
     __tablename__ = 'comprasinsumos'
@@ -49,6 +52,8 @@ class ComprasInsumos(db.Model):
     idMateriaPrima = db.Column(db.Integer, db.ForeignKey('materiasprimas.idMateriaPrima'))
     cantidad = db.Column(db.Numeric(10, 2))
     fecha = db.Column(db.Date)
+    totalCompra = db.Column(db.Numeric(10,2)) #AGREGUÉ TOTAL COMPRA A COMPRAS DE INSUMOS -Oscar
+
 
 class Recetas(db.Model):
     __tablename__ = 'recetas'
@@ -61,6 +66,8 @@ class IngredientesReceta(db.Model):
     idReceta = db.Column(db.Integer, db.ForeignKey('recetas.idReceta'))
     idMateriaPrima = db.Column(db.Integer, db.ForeignKey('materiasprimas.idMateriaPrima'))
     cantidadNecesaria = db.Column(db.Numeric(10, 2))
+
+
 
 class Sabores(db.Model):
     __tablename__ = 'sabores'
@@ -81,6 +88,8 @@ class ProductosTerminados(db.Model):
     fechaCaducidad = db.Column(db.Date)
     idDetalle = db.Column(db.Integer, db.ForeignKey('detallesproducto.idDetalle'), nullable=False)
     estatus = db.Column(db.Integer, default=1)
+
+
 
 class Ventas(db.Model):
     __tablename__ = 'ventas'
@@ -111,5 +120,4 @@ class DetallesPedido(db.Model):
     idPedido = db.Column(db.Integer, db.ForeignKey('pedidos.idPedido'))
     idProducto = db.Column(db.Integer, db.ForeignKey('productosterminados.idProducto'))
     cantidad = db.Column(db.Integer)
-    
     
