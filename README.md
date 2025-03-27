@@ -7,7 +7,9 @@
 El sistema está desarrollado con **Python - Flask** y utiliza **MySQL** como base de datos. Se permite el uso de frameworks como **Bootstrap**, pero no se permite el uso de frameworks frontend como Vue.js. o Angular
 
 ---
+
 ## Características Principales
+
 - **Gestión de productos:** Venta de 10 variedades de galletas en diferentes presentaciones (por pieza, gramos y paquetes preempacados).
 - **Control de inventarios:** Registro y manejo de materias primas con control de mermas y fechas de caducidad.
 - **Gestión de producción:** Transformación de materia prima en galletas listas para la venta con reducción automática de insumos.
@@ -16,27 +18,31 @@ El sistema está desarrollado con **Python - Flask** y utiliza **MySQL** como ba
 - **Seguridad robusta:** Implementación de autenticación, autorización y protección contra vulnerabilidades comunes (OWASP Top 10).
 
 ---
+
 ## Módulos del Sistema
-1. **Dashboard:** 
+
+1. **Dashboard:**
    - Ventas diarias
    - Productos y presentaciones más vendidas
-2. **Manejo de usuarios:** 
+2. **Manejo de usuarios:**
    - Registro, modificación y eliminación de usuarios, clientes y proveedores.
-3. **Inventario:** 
+3. **Inventario:**
    - Control de materias primas y productos terminados.
-4. **Producción:** 
+4. **Producción:**
    - Transformación de insumos en productos finales.
    - Solicitud de producción según la demanda.
-5. **Ventas:** 
+5. **Ventas:**
    - Registro de ventas y generación de tickets.
    - Portal del cliente para realizar pedidos.
-6. **Seguridad:** 
+6. **Seguridad:**
    - Control de acceso basado en roles.
    - Validación de entradas y manejo de errores seguro.
    - Cifrado de contraseñas y autenticación con JWT.
-   
+
 ---
+
 ## Tecnologías Utilizadas
+
 - **Backend:** Python - Flask
 - **Base de Datos:** MySQL
 - **Frontend:** HTML, CSS, Bootstrap
@@ -44,13 +50,15 @@ El sistema está desarrollado con **Python - Flask** y utiliza **MySQL** como ba
 - **Control de Versiones:** GitHub
 
 ---
+
 ## Seguridad y Buenas Prácticas
+
 Este proyecto busca seguir los siguientes estándares de seguridad:
+
 - Uso de roles y permisos para restringir accesos.
-- Cifrado de contraseñas con **bcrypt**.
+- Cifrado de contraseñas con **hash**.
 - Evita inyecciones SQL mediante **consultas parametrizadas**.
 - Sanitización de entradas para prevenir **XSS e Inyección de Código**.
-
 
 ⢸⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⡷  
 ⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ⠀⠢⣀  
@@ -65,6 +73,4 @@ Este proyecto busca seguir los siguientes estándares de seguridad:
 ⢸⠀⠀⠀⣠⠃⢸⠀⠀⠈⠉⡽⠿⠯⡆  
 ⢸⠀⠀⣰⠁⠀⢸⠀⠀⠀⠀⠉⠉⠉⠀⠀⡇  
 ⢸⠀⠀⠣⠀⠀⢸⢄⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇  
-⢸⠀⠀⠀⠀⠀⢸⠀⢇⠀⠀⠀⠀⠀⠀⠀⠀⡇  
-
-
+⢸⠀⠀⠀⠀⠀⢸⠀⢇⠀⠀⠀⠀⠀⠀⠀⠀⡇
