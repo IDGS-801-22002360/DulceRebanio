@@ -831,7 +831,7 @@ def register():
 @role_required(['Admin'])
 def miembros():
     form = EmpleadoForm()
-    usuarios = Usuarios.query.filter_by(activo=1).all()
+    usuarios = Usuarios.query.filter_by(activo=1).filter(Usuarios.rol != 'Cliente').all()
     
     if form.validate_on_submit():
         nombre = form.nombre.data
