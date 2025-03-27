@@ -1,15 +1,32 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
+import hashlib
 import datetime
 
 db = SQLAlchemy()
 
-class Usuarios(db.Model):
+class Usuarios(db.Model, UserMixin): 
     __tablename__ = 'usuarios'
     idUsuario = db.Column(db.Integer, primary_key=True)
-    nombreUsuario = db.Column(db.String(100))
+    nombre = db.Column(db.String(100)) 
+    apaterno = db.Column(db.String(100))
+    amaterno = db.Column(db.String(100)) 
     correo = db.Column(db.String(100), unique=True)
-    contrasena = db.Column(db.String(255))
+    contrasena = db.Column(db.String(64))
     rol = db.Column(db.Enum('Admin', 'Ventas', 'Produccion', 'Cliente'))
+    activo = db.Column(db.Integer, default=1)
+    ultimo_login = db.Column(db.DateTime)
+    
+
+    def set_contrasena(self, contrasena):
+        self.contrasena = hashlib.sha256(contrasena.encode('utf-8')).hexdigest()
+
+    def check_contrasena(self, contrasena):
+        return self.contrasena == hashlib.sha256(contrasena.encode('utf-8')).hexdigest()
+
+    def get_id(self):
+        return str(self.idUsuario)
+
 
 class MateriasPrimas(db.Model):
     __tablename__ = 'materiasprimas'
@@ -36,6 +53,8 @@ class ComprasInsumos(db.Model):
     cantidad = db.Column(db.Numeric(10, 2))
     fecha = db.Column(db.Date)
     totalCompra = db.Column(db.Numeric(10,2)) #AGREGUÉ TOTAL COMPRA A COMPRAS DE INSUMOS -Oscar
+
+
 class Recetas(db.Model):
     __tablename__ = 'recetas'
     idReceta = db.Column(db.Integer, primary_key=True)
@@ -47,6 +66,8 @@ class IngredientesReceta(db.Model):
     idReceta = db.Column(db.Integer, db.ForeignKey('recetas.idReceta'))
     idMateriaPrima = db.Column(db.Integer, db.ForeignKey('materiasprimas.idMateriaPrima'))
     cantidadNecesaria = db.Column(db.Numeric(10, 2))
+
+
 
 class Sabores(db.Model):
     __tablename__ = 'sabores'
@@ -67,6 +88,8 @@ class ProductosTerminados(db.Model):
     fechaCaducidad = db.Column(db.Date)
     idDetalle = db.Column(db.Integer, db.ForeignKey('detallesproducto.idDetalle'), nullable=False)
     estatus = db.Column(db.Integer, default=1)
+
+
 
 class Ventas(db.Model):
     __tablename__ = 'ventas'

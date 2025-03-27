@@ -11,7 +11,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
-        /* Estilos Generales */
         body {
             background-color: #e1e1e1;
             font-family: 'Roboto', sans-serif;
@@ -81,6 +80,14 @@
             font-size: 20px;
             text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
         }
+        .last-login {
+            position: fixed; 
+            top: 5px; 
+            right: 20px; 
+            color: #000; 
+            font-size: 14px; 
+            z-index: 1000; 
+        }
     </style>
 </head>
 
@@ -107,13 +114,23 @@
                     <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
                         <i class="fa fa-2x fa-history"></i><br>
                         <b>Historial</b>
-                    </button>                                      
+                    </button>   
+                    <a href="{{ url_for('logout') }}" class="btn border-0 rounded-4 text-white btn-del btn-del-hover font-Spartan d-flex flex-column justify-content-center align-items-center" style="width: 100%; height: 115px">
+                        <i class="fa fa-2x fa-sign-out-alt mb-2"></i>
+                        <b>Cerrar sesión</b>
+                    </a>                                   
                 </div>
             </nav>
 
             <!-- Contenido Principal -->
-            <div class="col-md-11 col-lg-11 content">
-                <div class="d-flex justify-content-between align-items-center">
+            <div class="col-md-11 col-lg-11 content md-5">
+                <div class="last-login">
+                    <p class="mb-0">
+                      <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d
+                      %H:%M:%S') if ultimo_login else 'Nunca' }}
+                    </p>
+                  </div>
+                <div class="d-flex justify-content-between align-items-center md-5">
                     <h2 class="text-center titulo-productos">
                         Productos <span>dulce rebaño</span>
                     </h2>
@@ -122,8 +139,8 @@
                 <h5 class="subtitulo-productos">¿Que quieres comprar hoy?</h5>            
                 <div class="row mt-5">
                     {% for sabor in sabores %}
-                    <div class="col-md-3 mb-3">
-                        <div class="card shadow-sm">
+                    <div class="col-md-3 mb-4">
+                        <div class="card shadow-sm" style="border-radius: 22px;">
                             <div class="card-body text-center">
                                 <img src="../../static/img/{{ sabor.nombreSabor | lower }}.jpg" alt="{{ sabor.nombreSabor }}" class="w-100 img-fluid" style="height: 200px; object-fit: cover; border-radius: 10px;">
                                 <h5 class="card-title fw-bold">{{ sabor.nombreSabor }}</h5>

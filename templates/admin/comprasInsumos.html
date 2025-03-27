@@ -1,23 +1,30 @@
-{% extends "admin/index.html" %}
-{% block container %}
-<div class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 mt-5 p-1">
+{% extends "admin/index.html" %} {% block container %}
+<div
+  class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 mt-5 p-1"
+>
   <div class="row">
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        {% for message in messages %}
-          <div class="alert alert-success" role="alert">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-    
+    {% with messages = get_flashed_messages() %} {% if messages %} {% for
+    message in messages %}
+    <div class="alert alert-success" role="alert">{{ message }}</div>
+    {% endfor %} {% endif %} {% endwith %}
+
     <!-- Listado de Compras de Insumos -->
     <div class="col-6">
+      <div class="last-login">
+        <p class="mb-0">
+          <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d
+          %H:%M:%S') if ultimo_login else 'Nunca' }}
+        </p>
+      </div>
       <div class="card shadow-sm rounded-3">
         <div class="card-header text-center">
           <b>Compras de Insumos</b>
         </div>
         <div class="table-responsive">
-          <table class="table table-hover table-striped text-center" id="comprasTable">
+          <table
+            class="table table-hover table-striped text-center"
+            id="comprasTable"
+          >
             <thead>
               <tr>
                 <th>Proveedor</th>
@@ -28,20 +35,22 @@
               </tr>
             </thead>
             <tbody id="comprasTableBody">
-                {% for compra in compras %}
-                <tr data-id="{{ compra.idCompra }}" 
-                    data-proveedor="{{ compra.idProveedor }}" 
-                    data-insumo="{{ compra.idMateriaPrima }}"
-                    data-cantidad="{{ compra.cantidad }}" 
-                    data-fecha="{{ compra.fecha }}"
-                    data-total="{{ compra.totalCompra }}">
-                    <td>{{ compra.nombreProveedor }}</td>
-                    <td>{{ compra.materiaPrima }}</td>
-                    <td>{{ compra.cantidad }}</td>
-                    <td>{{ compra.fecha }}</td>
-                    <td>{{ compra.totalCompra }}</td>
-                </tr>
-                {% endfor %}
+              {% for compra in compras %}
+              <tr
+                data-id="{{ compra.idCompra }}"
+                data-proveedor="{{ compra.idProveedor }}"
+                data-insumo="{{ compra.idMateriaPrima }}"
+                data-cantidad="{{ compra.cantidad }}"
+                data-fecha="{{ compra.fecha }}"
+                data-total="{{ compra.totalCompra }}"
+              >
+                <td>{{ compra.nombreProveedor }}</td>
+                <td>{{ compra.materiaPrima }}</td>
+                <td>{{ compra.cantidad }}</td>
+                <td>{{ compra.fecha }}</td>
+                <td>{{ compra.totalCompra }}</td>
+              </tr>
+              {% endfor %}
             </tbody>
           </table>
         </div>

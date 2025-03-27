@@ -1,0 +1,173 @@
+{% extends "admin/index.html" %} {% block container %} {% import
+"admin/_macros.html" as macro %}
+
+<!--* Main -->
+<div class="row">
+  {% with message = get_flashed_messages() %} {% if message %} {% for messages
+  in message %}
+  <div
+    class="alert alert-success bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative"
+    role="alert"
+  >
+    {{ messages }}
+  </div>
+  {% endfor %} {% endif %} {% endwith %}
+
+  <div class="col-6">
+    <div class="last-login">
+      <p class="mb-0">
+        <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d
+        %H:%M:%S') if ultimo_login else 'Nunca' }}
+      </p>
+    </div>
+    <div class="card border-0 shadow-sm rounded-3 bg-white">
+      <div class="card-header border-0 rounded-top-3 text-center bg-white">
+        <b class="text-center font-Spartan">Registro de Empleados</b>
+      </div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('miembros') }}">
+          {{ form.hidden_tag() }}
+          <div class="row g-3">
+            <div class="col-md-6">
+              {{ macro.input_field(form.nombre, placeholder="") }}
+            </div>
+            <div class="col-md-6">
+              {{ macro.input_field(form.apaterno, placeholder="") }}
+            </div>
+            <div class="col-md-6">
+              {{ macro.input_field(form.amaterno, placeholder="") }}
+            </div>
+            <div class="col-md-6">
+              {{ macro.input_field(form.correo, placeholder="", type="email") }}
+            </div>
+            <div class="col-md-6">
+              {{ macro.input_field(form.contrasena, placeholder="",
+              type="password") }}
+            </div>
+            <div class="col-md-6">
+              {{ macro.input_field(form.rol, placeholder="Rol") }}
+            </div>
+            <div class="col-md-12 d-flex justify-content-center">
+              <button
+                type="submit"
+                class="btn btn-warning btn-sm"
+                style="width: auto"
+              >
+                Registrar
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6">
+    <div class="card border-0 shadow-sm rounded-3 bg-white">
+      <div class="card-header border-0 rounded-top-3 text-center bg-white">
+        <b class="text-center font-Spartan">Lista de Usuarios</b>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover text-center mb-0 table-borderless">
+          <thead class="text-dark">
+            <tr>
+              <th>Nombre</th>
+              <th>Apellido Paterno</th>
+              <th>Apellido Materno</th>
+              <th>Correo</th>
+              <th>Rol</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for usuario in usuarios %}
+            <tr>
+              <td>{{ usuario.nombre }}</td>
+              <td>{{ usuario.apaterno }}</td>
+              <td>{{ usuario.amaterno }}</td>
+              <td>{{ usuario.correo }}</td>
+              <td>{{ usuario.rol }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="btn btn-primary btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#editarUsuarioModal{{ usuario.idUsuario }}"
+                >
+                  Editar
+                </button>
+                <form
+                  method="POST"
+                  action="{{ url_for('eliminar_usuario', id_usuario=usuario.idUsuario) }}"
+                  style="display: inline"
+                >
+                  <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                  />
+                  <button type="submit" class="btn btn-danger btn-sm">
+                    Eliminar
+                  </button>
+                </form>
+              </td>
+            </tr>
+            <div class="modal fade" id="editarUsuarioModal{{ usuario.idUsuario }}" tabindex="-1" aria-labelledby="editarUsuarioModalLabel{{ usuario.idUsuario }}" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="editarUsuarioModalLabel{{ usuario.idUsuario }}">Editar Usuario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <form method="POST" action="{{ url_for('editar_usuario', id_usuario=usuario.idUsuario) }}">
+                      {{ form.hidden_tag() }}
+                      <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" value="{{ usuario.nombre }}" required>
+                      </div>
+                      <div class="mb-3">
+                        <label for="apaterno" class="form-label">Apellido Paterno</label>
+                        <input type="text" class="form-control" id="apaterno" name="apaterno" value="{{ usuario.apaterno }}" required>
+                      </div>
+                      <div class="mb-3">
+                        <label for="amaterno" class="form-label">Apellido Materno</label>
+                        <input type="text" class="form-control" id="amaterno" name="amaterno" value="{{ usuario.amaterno }}" required>
+                      </div>
+                      <div class="mb-3">
+                        <label for="correo" class="form-label">Correo</label>
+                        <input type="email" class="form-control" id="correo" name="correo" value="{{ usuario.correo }}" required>
+                      </div>
+                      <div class="mb-3">
+                        <label for="rol" class="form-label">Rol</label>
+                        <select class="form-select" id="rol" name="rol" required>
+                          <option value="Admin" {% if usuario.rol == 'Admin' %}selected{% endif %}>Admin</option>
+                          <option value="Ventas" {% if usuario.rol == 'Ventas' %}selected{% endif %}>Ventas</option>
+                          <option value="Produccion" {% if usuario.rol == 'Produccion' %}selected{% endif %}>Produccion</option>
+                        </select>
+                      </div>
+                      <div class="mb-3">
+                        <label for="activo" class="form-label">Estado</label>
+                        <select class="form-select" id="activo" name="activo" required>
+                          <option value="1" {% if usuario.activo == 1 %}selected{% endif %}>Activo</option>
+                          <option value="0" {% if usuario.activo == 0 %}selected{% endif %}>Inactivo</option>
+                        </select>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
