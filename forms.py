@@ -1,5 +1,5 @@
 from wtforms.validators import Optional
-from flask_wtf import FlaskForm
+from flask_wtf import FlaskForm, RecaptchaField
 from wtforms import BooleanField, DateField, DecimalField, EmailField, IntegerField, SelectField, StringField, SubmitField, Form, validators, HiddenField, SelectField, PasswordField, SubmitField, StringField, IntegerField, BooleanField
 from wtforms.validators import DataRequired, Optional, Email, Length, ValidationError
 import re
@@ -147,6 +147,7 @@ def validate_contrasena(form, field):
 class LoginForm(FlaskForm):
     correo = StringField('Correo Electrónico', validators=[DataRequired(), Email()])
     contrasena = PasswordField('Contraseña', validators=[DataRequired()])
+    recaptcha = RecaptchaField()
     submit = SubmitField('Ingresar')
 
 class RegisterForm(FlaskForm):

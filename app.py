@@ -1,9 +1,10 @@
+from functools import wraps
 from models import DetallesVenta, Usuarios, Ventas, ComprasInsumos, DetallesProducto, Proveedores, Sabores, db, ProductosTerminados, MateriasPrimas
-from forms import CompraInsumoForm, LoteForm, InsumoForm, MermaForm, ProveedorForm, PaqueteForm
+from forms import CompraInsumoForm, LoteForm, InsumoForm, MermaForm, ProveedorForm, PaqueteForm, RecuperarContrasenaForm
 from flask import Flask, render_template, request, jsonify, redirect, session, url_for, flash,session
 import forms
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from flask_wtf import CSRFProtect
+from flask_wtf import CSRFProtect, RecaptchaField
 from flask_wtf.csrf import CSRFProtect
 from sqlalchemy import text
 from fpdf import FPDF
@@ -20,6 +21,10 @@ app = Flask(__name__)
 app.config.from_object(DevelopmentConfig)
 csrf = CSRFProtect()
 
+app.config["RECAPTCHA_PUBLIC_KEY"] = "6Lcb1f0qAAAAAMLjkyE44X40_nQq_FZns9Sj8CVs"
+app.config["RECAPTCHA_PRIVATE_KEY"] = "6Lcb1f0qAAAAADFk-w_f5-Da5MyzdN2E8HdY-Vcs"
+# app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=200)
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -30,21 +35,51 @@ def load_user(user_id):
 
 failed_attempts = {}
 
+def role_required(roles):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if current_user.rol not in roles:
+                flash('No tienes permiso para acceder a esta página.', 'danger')
+                
+
+                if current_user.rol == 'Admin':
+                    return redirect(url_for('usuarios'))
+                elif current_user.rol == 'Ventas':
+                    return redirect(url_for('puntoVenta'))
+                elif current_user.rol == 'Produccion':
+                    return redirect(url_for('galletas'))
+                elif current_user.rol == 'Cliente':
+                    return redirect(url_for('clientes'))
+                else:
+                    return redirect(url_for('index')) 
+                
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+
 @app.route("/", methods=["GET", "POST"])
 @app.route("/index")
 def index():
     login_form = LoginForm()
     register_form = RegisterForm()
-    return render_template("client/mainClientes.html", login_form=login_form, register_form=register_form)
+    recuperar_contrasena_form = RecuperarContrasenaForm()
+    return render_template("client/mainClientes.html", 
+                         login_form=login_form, 
+                         register_form=register_form,
+                         recuperar_contrasena_form=recuperar_contrasena_form)
 
 @app.route("/clientes", methods=["GET", "POST"])
+@login_required
+@role_required(['Cliente','Admin'])
 def clientes():
     sabores = Sabores.query.all()
     detalles_productos = DetallesProducto.query.all()
 
     if "carrito" not in session:
         session["carrito"] = []
-    return render_template("client/clientes.html", sabores=sabores, detalles_productos=detalles_productos, carrito=session["carrito"])
+    return render_template("client/clientes.html", sabores=sabores, detalles_productos=detalles_productos, carrito=session["carrito"], ultimo_login=current_user.ultimo_login)
 
 
 @app.route("/agregar_carrito", methods=["POST"])
@@ -101,14 +136,16 @@ def eliminar_carrito(item_id):
 
 @app.route("/dashboard", methods=["GET", "POST"])
 @login_required
+@role_required(['Admin', 'Ventas'])
 def dashboard():
-    return render_template("admin/dashboard.html")
+    return render_template("admin/dashboard.html", ultimo_login=current_user.ultimo_login)
 
 
 #!============================== Modulo de Productos ==============================#  
 
 @app.route("/galletas", methods=["GET", "POST"])
 @login_required  
+@role_required(['Admin', 'Ventas', 'Produccion'])
 def galletas():
     form = LoteForm()
     paquete_form = PaqueteForm()
@@ -185,7 +222,7 @@ def galletas():
         productos=productos_marcados,
         productos_granel=productos_granel,
         form=form,
-        paquete_form=paquete_form
+        paquete_form=paquete_form, ultimo_login=current_user.ultimo_login
     )
 
 
@@ -314,6 +351,7 @@ def guardar_paquete():
 #INSERCIÓN INSUMOS
 @app.route("/insumos", methods=["GET", "POST"])
 @login_required
+@role_required(['Admin', 'Produccion'])
 def insumos():
     form = InsumoForm(request.form)
     if request.method == "POST" and form.validate():
@@ -335,7 +373,7 @@ def insumos():
             return redirect(url_for("insumos"))
     
     insumos_lista = MateriasPrimas.query.filter(MateriasPrimas.estatus != 0).all()
-    return render_template("admin/insumos.html", insumos=insumos_lista, form=form)
+    return render_template("admin/insumos.html", insumos=insumos_lista, form=form, ultimo_login=current_user.ultimo_login)
 
 # Endpoint para editar un insumo
 @app.route("/editar_insumo", methods=["POST"])
@@ -390,6 +428,8 @@ def mermar_insumo(id, merma):
 
 #COMPRAS INSUMOS
 @app.route("/comprasInsumos", methods=["GET", "POST"])
+@login_required
+@role_required(['Admin'])
 def comprasInsumos():
     form = CompraInsumoForm(request.form)
     proveedores = Proveedores.query.all()
@@ -430,7 +470,7 @@ def comprasInsumos():
         return redirect(url_for("comprasInsumos"))
     else:
         compras = db.session.execute(text("SELECT * FROM vista_comprasInsumos")).fetchall()
-        return render_template("admin/comprasInsumos.html", form=form, compras=compras, proveedores=proveedores, insumos=insumos)
+        return render_template("admin/comprasInsumos.html", form=form, compras=compras, proveedores=proveedores, insumos=insumos, ultimo_login=current_user.ultimo_login)
 
 @app.route("/editar_compraInsumo", methods=["POST"])
 def editar_compraInsumo():
@@ -470,6 +510,7 @@ def editar_compraInsumo():
 #Endpoint para proveedores
 @app.route("/proveedores", methods=["GET", "POST"])
 @login_required
+@role_required(['Admin'])
 def proveedores():
     form = ProveedorForm(request.form)
     if request.method == "POST" and form.validate():
@@ -492,7 +533,7 @@ def proveedores():
             return redirect(url_for("proveedores"))
     # Consulta de proveedores activos (estatus distinto de 0)
     proveedores_lista = Proveedores.query.filter(Proveedores.estatus != 0).all()
-    return render_template("admin/proveedores.html", proveedores=proveedores_lista, form=form)
+    return render_template("admin/proveedores.html", proveedores=proveedores_lista, form=form, ultimo_login=current_user.ultimo_login)
 
 @app.route("/editar_proveedor", methods=["POST"])
 def editar_proveedor():
@@ -529,6 +570,7 @@ venta_actual = []
 
 @app.route("/puntoVenta", methods=["GET", "POST"])
 @login_required
+@role_required(['Admin', 'Ventas'])
 def puntoVenta():
     sabores = Sabores.query.all()
     tiposVenta = DetallesProducto.query.all()
@@ -646,7 +688,7 @@ def puntoVenta():
                             tiposVenta=tiposVenta,
                             venta=venta_actual,
                             total=total,
-                            inventario=inventario)
+                            inventario=inventario, ultimo_login=current_user.ultimo_login)
 
 
 def generar_pdf(venta, descuento, dinero_recibido, total_con_descuento):
@@ -713,6 +755,11 @@ def login():
         usuario = Usuarios.query.filter_by(correo=correo).first()
 
         if usuario:
+            if usuario.activo != 1:
+                flash('Tu cuenta ha sido desactivada. Por favor, contacta al administrador.', 'danger')
+                return render_template("client/mainClientes.html", login_form=form, register_form=RegisterForm())
+
+        if usuario:
             if usuario.check_contrasena(contrasena): 
                 login_user(usuario) 
                 usuario.ultimo_login = datetime.now()
@@ -724,11 +771,11 @@ def login():
                 form.contrasena.data = ''
                 
                 if usuario.rol == 'Cliente':
-                    return redirect(url_for('galletas'))
+                    return redirect(url_for('clientes'))
                 elif usuario.rol == 'Ventas':
-                    return redirect(url_for('galletas'))
+                    return redirect(url_for('puntoVenta'))
                 elif usuario.rol == 'Admin':
-                    return redirect(url_for('galletas'))
+                    return redirect(url_for('miembros'))
                 elif usuario.rol == 'Produccion':
                     return redirect(url_for('galletas'))
             else:
@@ -743,7 +790,7 @@ def login():
                 failed_attempts[correo] = (datetime.now(), failed_attempts[correo][1] + 1)
             else:
                 failed_attempts[correo] = (datetime.now(), 1)
-    return render_template("client/mainClientes.html", login_form=form, register_form=RegisterForm())
+    return render_template("client/mainClientes.html", login_form=form, register_form=RegisterForm(), recuperar_contrasena_form=RecuperarContrasenaForm())
 
 @app.route("/logout")
 @login_required 
@@ -779,9 +826,10 @@ def register():
             return redirect(url_for('login'))
     return render_template("client/mainClientes.html", login_form=LoginForm(), register_form=form)
 
-@app.route("/usuarios", methods=["GET", "POST"])
+@app.route("/miembros", methods=["GET", "POST"])
 @login_required
-def usuarios():
+@role_required(['Admin'])
+def miembros():
     form = EmpleadoForm()
     usuarios = Usuarios.query.filter_by(activo=1).all()
     
@@ -806,7 +854,7 @@ def usuarios():
             db.session.add(nuevo_usuario)
             db.session.commit()
             flash('Usuario registrado exitosamente.', 'success')
-        return redirect(url_for('usuarios'))
+        return redirect(url_for('miembros'))
     
     return render_template("admin/usuarios.html", form=form, usuarios=usuarios, ultimo_login=current_user.ultimo_login)
 
@@ -820,8 +868,62 @@ def eliminar_usuario(id_usuario):
         flash('Usuario eliminado correctamente.', 'success')
     else:
         flash('Usuario no encontrado.', 'danger')
-    return redirect(url_for('usuarios'))
+    return redirect(url_for('miembros'))
 
+
+@app.route("/editar_usuario/<int:id_usuario>", methods=["POST"])
+@login_required
+@role_required(['Admin'])
+def editar_usuario(id_usuario):
+    usuario = Usuarios.query.get_or_404(id_usuario)
+
+    usuario.nombre = request.form.get('nombre')
+    usuario.apaterno = request.form.get('apaterno')
+    usuario.amaterno = request.form.get('amaterno')
+    usuario.correo = request.form.get('correo')
+    usuario.rol = request.form.get('rol')
+    usuario.activo = int(request.form.get('activo'))  # Convertir a entero
+    
+    db.session.commit()
+    flash('Usuario actualizado correctamente.', 'success')
+    return redirect(url_for('miembros'))
+
+
+@app.route("/recuperar_contrasena", methods=["POST"])
+def recuperar_contrasena():
+    form = RecuperarContrasenaForm()
+    if form.validate_on_submit():
+        correo = form.correo.data
+        nueva_contrasena = form.nueva_contrasena.data
+        confirmar_contrasena = form.confirmar_contrasena.data
+
+        # Verificar si el correo existe en la base de datos
+        usuario = Usuarios.query.filter_by(correo=correo).first()
+        if not usuario:
+            flash('El correo no está registrado.', 'danger')
+            return redirect(url_for('login'))
+
+        # Verificar que las contraseñas coincidan
+        if nueva_contrasena != confirmar_contrasena:
+            flash('Las contraseñas no coinciden.', 'danger')
+            return redirect(url_for('login'))
+
+        # Validar la contraseña
+        if is_password_insecure(nueva_contrasena):
+            flash('La contraseña es insegura. Por favor, elige una contraseña más segura.', 'danger')
+            return redirect(url_for('login'))
+
+        # Actualizar la contraseña en la base de datos
+        usuario.set_contrasena(nueva_contrasena)
+        db.session.commit()
+        flash('Contraseña actualizada correctamente.', 'success')
+        return redirect(url_for('login'))
+
+    # Si el formulario no es válido, mostrar errores
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(f'{error}', 'danger')
+    return redirect(url_for('login'))
 
 
 def is_password_insecure(contrasena):
@@ -829,6 +931,17 @@ def is_password_insecure(contrasena):
         insecure_passwords = [line.strip() for line in file]
     return contrasena in insecure_passwords
 
+
+@app.before_request
+def before_request():
+    if current_user.is_authenticated:
+        if current_user.rol == 'Cliente':
+            session.permanent = True
+            app.permanent_session_lifetime = timedelta(minutes=60)
+        else:
+            session.permanent = True
+            app.permanent_session_lifetime = timedelta(days=100)  
+        session.modified = True
 
 if __name__ == '__main__':
     csrf.init_app(app)
