@@ -2,5 +2,10 @@
 {% block container %}
 {% import "admin/_macros.html" as macro %}
 
+<div class="last-login">
+    <p class="mb-0">
+        <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d%H:%M:%S') if ultimo_login else 'Nunca' }}
+    </p>
+</div>
 
 {% endblock %}
