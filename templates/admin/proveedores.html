@@ -50,7 +50,7 @@
                   <a
                     href="#"
                     class="btn btn-danger btn-sm"
-                    action="{{ url_for('eliminar_proveedor', id=proveedor.idProveedor) }}"
+                    onclick="confirmDeletion('{{ url_for('eliminar_proveedor', id=proveedor.idProveedor) }}', '{{ proveedor.nombreProveedor }}'); return false;"
                     >Eliminar</a
                   >
                 </td>
@@ -93,6 +93,7 @@
           <button
             type="submit"
             class="btn btn-warning text-white font-Spartan me-2"
+            id="btnGuardar"
           >
             Guardar Proveedor
           </button>

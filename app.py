@@ -384,8 +384,23 @@ def editar_insumo():
         insumo = MateriasPrimas.query.get(id_insumo)
         if insumo:
             insumo.materiaPrima = form.materiaPrima.data
-            insumo.unidadMedida = form.unidadMedida.data
+            nueva_unidad = form.unidadMedida.data
             insumo.fechaCaducidad = form.fechaCaducidad.data
+            
+            # Conversión automática entre unidades
+            conversiones = {
+                ("Kilogramos", "Gramos"): 1000,
+                ("Gramos", "Kilogramos"): 0.001,
+                ("Litros", "Mililitros"): 1000,
+                ("Mililitros", "Litros"): 0.001
+            }
+            
+            if (insumo.unidadMedida, nueva_unidad) in conversiones:
+                from decimal import Decimal  # Asegúrate de importar Decimal
+                factor = Decimal(str(conversiones[(insumo.unidadMedida, nueva_unidad)]))
+                insumo.cantidadDisponible *= factor
+            
+            insumo.unidadMedida = nueva_unidad
             db.session.commit()
             flash("Insumo actualizado correctamente", "success")
         else:
@@ -393,6 +408,8 @@ def editar_insumo():
     else:
         flash("Error en la validación del formulario", "danger")
     return redirect(url_for("insumos"))
+
+
 
 # Endpoint para eliminar un insumo
 @app.route("/eliminar_insumo/<int:id>", methods=["GET"])
@@ -427,6 +444,7 @@ def mermar_insumo(id, merma):
 
 
 #COMPRAS INSUMOS
+#COMPRAS INSUMOS
 @app.route("/comprasInsumos", methods=["GET", "POST"])
 @login_required
 @role_required(['Admin'])
@@ -436,10 +454,13 @@ def comprasInsumos():
     insumos = MateriasPrimas.query.all()
     form.idProveedor.choices = [(prov.idProveedor, prov.nombreProveedor) for prov in proveedores]
     form.idMateriaPrima.choices = [(insumo.idMateriaPrima, insumo.materiaPrima) for insumo in insumos]
+    # Asignar choices y valor por defecto para el campo 'sabor'
+    form.sabor.choices = [('default', 'Default')]
+    if not form.sabor.data:
+        form.sabor.data = 'default'
 
     if request.method == "POST" and form.validate():
-        # Si el campo idCompra está vacío, se trata de una inserción y se usa el SP.
-        # Dentro de la ruta comprasInsumos, en el bloque POST:
+        # Inserción: si no hay idCompra se usa el SP
         if not request.form.get("idCompra"):
             sql = text("CALL guardarCompraInsumo(:idProveedor, :idMateriaPrima, :cantidad, :fecha, :totalCompra)")
             params = {
@@ -447,13 +468,13 @@ def comprasInsumos():
                 "idMateriaPrima": form.idMateriaPrima.data,
                 "cantidad": form.cantidad.data,
                 "fecha": form.fecha.data,
-                "totalCompra": form.totalCompra.data  # Añadir totalCompra
+                "totalCompra": form.totalCompra.data
             }
             db.session.execute(sql, params)
             db.session.commit()
             flash("Compra registrada correctamente", "success")
         else:
-            # Edición: se actualiza el registro existente, incluyendo totalCompra
+            # Edición: se actualiza el registro existente
             id_compra = request.form.get("idCompra")
             compra = ComprasInsumos.query.get(id_compra)
             if compra:
@@ -461,7 +482,6 @@ def comprasInsumos():
                 compra.idMateriaPrima = form.idMateriaPrima.data
                 compra.cantidad = Decimal(form.cantidad.data)
                 compra.fecha = form.fecha.data
-                # Se asume que totalCompra es un campo numérico; convertirlo a Decimal:
                 compra.totalCompra = Decimal(form.totalCompra.data)
                 db.session.commit()
                 flash("Compra actualizada correctamente", "success")
@@ -479,19 +499,21 @@ def editar_compraInsumo():
     insumos = MateriasPrimas.query.all()
     form.idProveedor.choices = [(prov.idProveedor, prov.nombreProveedor) for prov in proveedores]
     form.idMateriaPrima.choices = [(insumo.idMateriaPrima, insumo.materiaPrima) for insumo in insumos]
+    # Asigna choices para 'sabor'
+    form.sabor.choices = [('default', 'Default')]
+    if not form.sabor.data:
+        form.sabor.data = 'default'
 
     id_compra = request.form.get("idCompra")
     if id_compra:
         compra = ComprasInsumos.query.get(id_compra)
         if compra:
             try:
-                # Actualizar campos
                 compra.idProveedor = int(form.idProveedor.data)
                 compra.idMateriaPrima = int(form.idMateriaPrima.data)
                 compra.cantidad = Decimal(form.cantidad.data)
                 compra.fecha = form.fecha.data
                 compra.totalCompra = Decimal(form.totalCompra.data)
-                
                 db.session.commit()
                 flash("¡Compra actualizada!", "success")
             except Exception as e:
@@ -824,7 +846,7 @@ def register():
             db.session.commit()
             flash('Cuenta creada exitosamente. Ahora puedes iniciar sesión.', 'success')
             return redirect(url_for('login'))
-    return render_template("client/mainClientes.html", login_form=LoginForm(), register_form=form)
+    return render_template("client/mainClientes.html", login_form=LoginForm(), register_form=form,  recuperar_contrasena_form=RecuperarContrasenaForm())
 
 @app.route("/miembros", methods=["GET", "POST"])
 @login_required

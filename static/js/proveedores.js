@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", function() {
             document.getElementById("nombreProveedor").value = nombre;
             document.getElementById("correo").value = correo;
             document.getElementById("telefono").value = telefono;
+            btnGuardar.disabled = true;
         });
     });
 });
@@ -37,3 +38,40 @@ function confirmDeletion(url, itemName) {
         }
     });
 }
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Sanitizar nombre: solo permite letras, tildes, ñ y espacios
+    function sanitizarNombre(texto) {
+        return texto.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "").trim();
+    }
+
+    // Sanitizar correo: permite letras, números, @, ., - y _
+    function sanitizarCorreo(texto) {
+        return texto.replace(/[^a-zA-Z0-9@._-]/g, "").trim();
+    }
+
+    // Sanitizar teléfono: solo permite números
+    function sanitizarTelefono(texto) {
+        return texto.replace(/[^0-9]/g, "").trim();
+    }
+
+    // Obtener los campos de entrada
+    let nombreProveedor = document.getElementById("nombreProveedor");
+    let correo = document.getElementById("correo");
+    let telefono = document.getElementById("telefono");
+
+    // Sanitizar en tiempo real cuando el usuario ingresa datos
+    nombreProveedor.addEventListener("input", function() {
+        this.value = sanitizarNombre(this.value);
+    });
+
+    correo.addEventListener("input", function() {
+        this.value = sanitizarCorreo(this.value);
+    });
+
+    telefono.addEventListener("input", function() {
+        this.value = sanitizarTelefono(this.value);
+    });
+
+});

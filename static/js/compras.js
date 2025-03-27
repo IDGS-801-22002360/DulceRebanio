@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", function() {
             document.getElementById("cantidad").value = row.getAttribute("data-cantidad");
             document.getElementById("fecha").value = row.getAttribute("data-fecha");
             document.getElementById("totalCompra").value = row.getAttribute("data-total");
+            btnGuardar.disabled = true;
         });
     });
 });
@@ -17,3 +18,31 @@ function editarCompra() {
     form.action = comprasEditarUrl;
     form.submit();
 }
+
+document.addEventListener("DOMContentLoaded", function() {
+    function sanitizarNumerosYPuntos(texto) {
+        // Permite solo dígitos (0-9) y puntos, elimina el resto
+        return texto.replace(/[^0-9.]/g, "").trim();
+    }
+
+    // Supongamos que el campo se llama "totalCompra"
+    document.getElementById("totalCompra").addEventListener("input", function() {
+        this.value = sanitizarNumerosYPuntos(this.value);
+    });
+});
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    function sanitizarTexto(texto) {
+        return texto.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g, "").trim();
+    }
+
+    document.getElementById("cantidad").addEventListener("input", function() {
+        this.value = sanitizarTexto(this.value);
+    });
+    document.getElementById("totalCompra").addEventListener("input", function() {
+        this.value = sanitizarTexto(this.value);
+    });
+});
+
+
