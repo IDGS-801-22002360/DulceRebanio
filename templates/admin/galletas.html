@@ -29,6 +29,12 @@
     {% endif %} {% endwith %}
   </div>
   <div class="col-6">
+    <div class="last-login">
+      <p class="mb-0">
+        <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d
+        %H:%M:%S') if ultimo_login else 'Nunca' }}
+      </p>
+    </div>
     <div class="card border-0 shadow-sm rounded-3 bg-white">
       <div class="card-header border-0 rounded-top-3 text-center bg-white">
         <b class="text-center font-Spartan">Productos</b>

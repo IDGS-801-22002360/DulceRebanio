@@ -35,6 +35,14 @@
         .buyButtons {
             background-color: #FFD700;
         }
+        .last-login {
+            position: fixed; 
+            top: 5px; 
+            right: 20px; 
+            color: #000; 
+            font-size: 14px; 
+            z-index: 1000; 
+        }
     </style>
 </head>
 <body>
@@ -68,8 +76,19 @@
                             <i class="fa fa-2x fa-bar-chart"></i><br>
                             <b>Dashboard</b>
                         </button>
+                        <a href="{{ url_for('logout') }}" class="btn border-0 rounded-4 text-white btn-del btn-del-hover font-Spartan d-flex flex-column justify-content-center align-items-center" style="width: 100%; height: 115px">
+                            <i class="fa fa-2x fa-sign-out-alt mb-2"></i>
+                            <b>Cerrar sesión</b>
+                        </a>                                   
+                    </div>
                     </div>
                 </nav>
+                <div class="last-login">
+                    <p class="mb-0">
+                      <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d
+                      %H:%M:%S') if ultimo_login else 'Nunca' }}
+                    </p>
+                  </div>
                 {% block container %}
                 
                 {% endblock %}

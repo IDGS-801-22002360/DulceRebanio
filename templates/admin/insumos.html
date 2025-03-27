@@ -1,24 +1,29 @@
-{% extends "admin/index.html" %}
-{% block container %}
-<div class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 mt-5 p-1">
+{% extends "admin/index.html" %} {% block container %}
+<div
+  class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 mt-5 p-1"
+>
   <div class="row">
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        {% for message in messages %}
-          <div class="alert alert-success" role="alert">
-            {{ message }}
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+    {% with messages = get_flashed_messages() %} {% if messages %} {% for
+    message in messages %}
+    <div class="alert alert-success" role="alert">{{ message }}</div>
+    {% endfor %} {% endif %} {% endwith %}
     <!-- Listado de Insumos -->
     <div class="col-6">
+      <div class="last-login">
+        <p class="mb-0">
+          <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d
+          %H:%M:%S') if ultimo_login else 'Nunca' }}
+        </p>
+      </div>
       <div class="card shadow-sm rounded-3">
         <div class="card-header text-center">
           <b>Insumos - Materias Primas</b>
         </div>
         <div class="table-responsive">
-          <table class="table table-hover table-striped text-center" id="insumosTable">
+          <table
+            class="table table-hover table-striped text-center"
+            id="insumosTable"
+          >
             <thead>
               <tr>
                 <th>ID</th>
@@ -31,10 +36,12 @@
             </thead>
             <tbody id="productosTableBody">
               {% for insumo in insumos %}
-              <tr data-id="{{ insumo.idMateriaPrima }}" 
-                  data-materia="{{ insumo.materiaPrima }}" 
-                  data-unidad="{{ insumo.unidadMedida }}" 
-                  data-fecha="{{ insumo.fechaCaducidad.strftime('%Y-%m-%d') }}">
+              <tr
+                data-id="{{ insumo.idMateriaPrima }}"
+                data-materia="{{ insumo.materiaPrima }}"
+                data-unidad="{{ insumo.unidadMedida }}"
+                data-fecha="{{ insumo.fechaCaducidad.strftime('%Y-%m-%d') }}"
+              >
                 <td>{{ insumo.idMateriaPrima }}</td>
                 <td>{{ insumo.materiaPrima }}</td>
                 <td>{{ insumo.cantidadDisponible }}</td>
@@ -42,9 +49,19 @@
                 <td>{{ insumo.fechaCaducidad.strftime('%d-%m-%Y') }}</td>
                 <td>
                   <!-- Botón Eliminar con SweetAlert2 (ya existente) -->
-                  <a href="#" class="btn btn-danger btn-sm" onclick="confirmDeletion(&quot;{{ url_for('eliminar_insumo', id=insumo.idMateriaPrima) }}&quot;, &quot;este insumo&quot;); return false;">Eliminar</a>
+                  <a
+                    href="#"
+                    class="btn btn-danger btn-sm"
+                    action="{{ url_for('eliminar_insumo', id=insumo.idMateriaPrima) }}"
+                    >Eliminar</a
+                  >
                   <!-- Nuevo botón Mermar -->
-                  <a href="#" class="btn btn-warning btn-sm" onclick="mermarInsumo('{{ insumo.idMateriaPrima }}'); return false;">Mermar</a>
+                  <a
+                    href="#"
+                    class="btn btn-warning btn-sm"
+                    onclick="mermarInsumo('{{ insumo.idMateriaPrima }}'); return false;"
+                    >Mermar</a
+                  >
                 </td>
               </tr>
               {% endfor %}
@@ -57,25 +74,46 @@
     <div class="col-6">
       <form id="formInsumos" method="POST" action="{{ url_for('insumos') }}">
         {{ form.csrf_token }}
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <!-- Campo oculto para el id del insumo -->
-        <input type="hidden" id="idMateriaPrima" name="idMateriaPrima" value="">
+        <input
+          type="hidden"
+          id="idMateriaPrima"
+          name="idMateriaPrima"
+          value=""
+        />
         <div class="mb-3">
           <label for="materiaPrima" class="form-label">Materia Prima</label>
-          {{ form.materiaPrima(class="form-control", id="materiaPrima", placeholder="Nombre del insumo") }}
+          {{ form.materiaPrima(class="form-control", id="materiaPrima",
+          placeholder="Nombre del insumo") }}
         </div>
         <div class="mb-3">
           <label for="unidadMedida" class="form-label">Unidad de Medida</label>
-          {{ form.unidadMedida(class="form-control", id="unidadMedida", placeholder="Unidad de medida") }}
+          {{ form.unidadMedida(class="form-control", id="unidadMedida",
+          placeholder="Unidad de medida") }}
         </div>
         <div class="mb-3">
-          <label for="fechaCaducidad" class="form-label">Fecha de Caducidad</label>
+          <label for="fechaCaducidad" class="form-label"
+            >Fecha de Caducidad</label
+          >
           {{ form.fechaCaducidad(class="form-control", id="fechaCaducidad") }}
         </div>
         <div class="d-flex">
-          <button type="submit" class="btn btn-warning text-white font-Spartan me-2">Guardar Insumo</button>
+          <button
+            type="submit"
+            class="btn btn-warning text-white font-Spartan me-2"
+          >
+            Guardar Insumo
+          </button>
           <!-- Botón de editar -->
-          <button type="button" class="btn btn-primary text-white font-Spartan" id="btnEditar" onclick="editarInsumo()">Editar Insumo</button>
+          <button
+            type="button"
+            class="btn btn-primary text-white font-Spartan"
+            id="btnEditar"
+            onclick="editarInsumo()"
+          >
+            Editar Insumo
+          </button>
         </div>
       </form>
     </div>

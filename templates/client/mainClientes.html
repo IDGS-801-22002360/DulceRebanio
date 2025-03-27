@@ -49,8 +49,18 @@ input_field, submit_button %} {% block container %}
           {{ login_form.hidden_tag() }} {{ input_field(login_form.correo,
           placeholder="Correo Electrónico", type="email") }} {{
           input_field(login_form.contrasena, placeholder="Contraseña",
-          type="password") }} {{ submit_button('Ingresar') }}
+          type="password") }}
+          <div class="form-group mb-3">{{ login_form.recaptcha }}</div>
+          {{ submit_button('Ingresar') }}
         </form>
+        <p class="text-center mt-3">
+          <a
+            href="#"
+            data-bs-toggle="modal"
+            data-bs-target="#recuperarContrasenaModal"
+            >¿Olvidaste tu contraseña?</a
+          >
+        </p>
       </div>
 
       <div class="tab-pane fade" id="register">
@@ -68,6 +78,59 @@ input_field, submit_button %} {% block container %}
           type="email") }} {{ input_field(register_form.contrasena,
           placeholder="Contraseña", type="password") }} {{
           submit_button('Registrarse') }}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="modal fade"
+  id="recuperarContrasenaModal"
+  tabindex="-1"
+  aria-labelledby="recuperarContrasenaModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="recuperarContrasenaModalLabel">
+          Recuperar Contraseña
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="{{ url_for('recuperar_contrasena') }}">
+          {{ recuperar_contrasena_form.hidden_tag() }}
+          <div class="mb-3">
+            {{ input_field(recuperar_contrasena_form.correo, placeholder="Correo
+            Electrónico", type="email") }}
+          </div>
+          <div class="mb-3">
+            {{ input_field(recuperar_contrasena_form.nueva_contrasena,
+            placeholder="Nueva Contraseña", type="password") }}
+          </div>
+          <div class="mb-3">
+            {{ input_field(recuperar_contrasena_form.confirmar_contrasena,
+            placeholder="Confirmar Contraseña", type="password") }}
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cerrar
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Cambiar Contraseña
+            </button>
+          </div>
         </form>
       </div>
     </div>
