@@ -10,7 +10,7 @@ El sistema está desarrollado con **Python - Flask** y utiliza **MySQL** como ba
 
 ## Características Principales
 
-- **Gestión de productos:** Venta de 10 variedades de galletas en diferentes presentaciones (por pieza, gramos y paquetes preempacados).
+- **Gestión de productos:** Venta de 10 variedades de galletas en diferentes presentaciones (por pieza, Kilo y Med. Kilo).
 - **Control de inventarios:** Registro y manejo de materias primas con control de mermas y fechas de caducidad.
 - **Gestión de producción:** Transformación de materia prima en galletas listas para la venta con reducción automática de insumos.
 - **Panel de ventas:** Registra ventas, genera tickets y permite cortes diarios.
@@ -26,11 +26,11 @@ El sistema está desarrollado con **Python - Flask** y utiliza **MySQL** como ba
    - Productos y presentaciones más vendidas
 2. **Manejo de usuarios:**
    - Registro, modificación y eliminación de usuarios, clientes y proveedores.
-3. **Inventario:**
+3. **Inventario de Insumos:**
    - Control de materias primas y productos terminados.
-4. **Producción:**
+4. **Inventario de Producción:**
    - Transformación de insumos en productos finales.
-   - Solicitud de producción según la demanda.
+   - creacion de paquetes de Kilo y Med. kilo.
 5. **Ventas:**
    - Registro de ventas y generación de tickets.
    - Portal del cliente para realizar pedidos.
@@ -55,10 +55,12 @@ El sistema está desarrollado con **Python - Flask** y utiliza **MySQL** como ba
 
 Este proyecto busca seguir los siguientes estándares de seguridad:
 
-- Uso de roles y permisos para restringir accesos.
+- Uso de roles como Cliente, Ventas, Produccion y Administrador y permisos para restringir accesos.
 - Cifrado de contraseñas con **hash**.
 - Evita inyecciones SQL mediante **consultas parametrizadas**.
 - Sanitización de entradas para prevenir **XSS e Inyección de Código**.
+
+---
 
 ⢸⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⡷  
 ⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ⠀⠢⣀  
