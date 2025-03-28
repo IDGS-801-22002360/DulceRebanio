@@ -1,290 +1,205 @@
-{% extends "admin/index.html" %} {% block container %} {% import
-"admin/_macros.html" as macro %}
+{% extends "admin/index.html" %}
+{% block container %}
+{% import "admin/_macros.html" as macro %}
 
 <!--* Main -->
 
 <div class="row">
-  <div
-    class="card border-0 gb mb-3"
-    style="height: 58px; background-color: #e1e1e1"
-  >
-    {% with messages = get_flashed_messages(with_categories=true) %} {% if
-    messages %}
-    <div class="container col-12">
-      {% for category, message in messages %}
-      <div
-        class="alert alert-{{ category }} alert-dismissible fade show"
-        role="alert"
-      >
-        {{ message }}
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="alert"
-          aria-label="Close"
-        ></button>
-      </div>
-      {% endfor %}
-    </div>
-    {% endif %} {% endwith %}
-  </div>
-  <div class="col-6">
-    <div class="last-login">
-      <p class="mb-0">
-        <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d
-        %H:%M:%S') if ultimo_login else 'Nunca' }}
-      </p>
-    </div>
-    <div class="card border-0 shadow-sm rounded-3 bg-white">
-      <div class="card-header border-0 rounded-top-3 text-center bg-white">
-        <b class="text-center font-Spartan">Productos</b>
-      </div>
-      <div class="table-responsive">
-        <table class="table table-hover text-center mb-0 table-borderless">
-          <thead class="text-dark">
-            <tr>
-              <th>N°Lote</th>
-              <th>Sabor</th>
-              <th>Tipo</th>
-              <th>Fecha</th>
-              <th>Cantidad</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="productosTableBody">
-            {% for producto in productos %}
-            <tr
-              class="{% if producto.bajo_stock %}table-danger{% endif %}"
-              onclick="selectProduct('{{ producto.idProducto }}', '{{ producto.estatus }}')"
-            >
-              <td>{{ producto.idProducto }}</td>
-              <td>{{ producto.nombreSabor }}</td>
-              <td>{{ producto.tipoProducto }}</td>
-              <td>{{ producto.fechaCaducidad.strftime('%d-%m-%Y') }}</td>
-              <td>{{ producto.cantidadDisponible }}</td>
-              <td class="">
-                <a
-                  class="fs-5 fa fa-info-circle text-decoration-none text-warning"
-                ></a>
-              </td>
-            </tr>
+    <div class="card border-0 gb mb-3" style="height: 58px; background-color: #e1e1e1">
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %}
+        <div class="container col-12">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
             {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      <div class="card-footer border-0 rounded-bottom-3 bg-white pt-0"></div>
+        </div>
+        {% endif %} {% endwith %}
     </div>
-  </div>
-  <div class="col-6">
-    <form
-      id="formLote"
-      method="POST"
-      action="{{ url_for('guardarLote') }}"
-      novalidate
-    >
-      {{ form.hidden_tag() }}
-      <div class="row" style="display: none">
-        <div class="col-md-6">
-          {{ macro.datos('txtIdGalleta', '', 'text', disabled=true) }}
+    <div class="col-6">
+        <div class="card border-0 shadow-sm rounded-3 bg-white">
+            <div class="card-header border-0 rounded-top-3 text-center bg-white">
+                <b class="text-center font-Spartan">Productos</b>
+            </div>
+            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                <table class="table table-hover text-center mb-0 table-borderless">
+                    <thead class="text-dark">
+                        <tr>
+                            <th>N°Lote</th>
+                            <th>Sabor</th>
+                            <th>Tipo</th>
+                            <th>Fecha</th>
+                            <th>Cantidad</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="productosTableBody">
+                        {% for producto in productos %}
+                        <tr class="{% if producto.bajo_stock %}table-danger{% endif %}"
+                            onclick="selectProduct('{{ producto.idProducto }}', '{{ producto.estatus }}')">
+                            <td>{{ producto.idProducto }}</td>
+                            <td>{{ producto.nombreSabor }}</td>
+                            <td>{{ producto.tipoProducto }}</td>
+                            <td>{{ producto.fechaCaducidad.strftime('%d-%m-%Y') }}</td>
+                            <td>{{ producto.cantidadDisponible }}</td>
+                            <td class="">
+                                <a class="fs-5 fa fa-info-circle text-decoration-none text-warning"></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer border-0 rounded-bottom-3 bg-white pt-0"></div>
         </div>
-        <div class="col-md-6">
-          {{ macro.datos('txtEstatus', '', 'text', disabled=true) }}
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-12">
-          <div class="form-floating">
-            {{ form.sabor(class="form-select border-0", id="txtSabor") }}
-            <label for="txtSabor">Sabor</label>
-          </div>
-        </div>
-      </div>
+    </div>
+    <div class="col-6">
+        <form id="formLote" method="POST" action="{{ url_for('guardarLote') }}" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="row" style="display: none">
+                <div class="col-md-6">
+                    {{ macro.datos('txtIdGalleta', '', 'text', disabled=true) }}
+                </div>
+                <div class="col-md-6">
+                    {{ macro.datos('txtEstatus', '', 'text', disabled=true) }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-floating">
+                        {{ form.sabor(class="form-select border-0", id="txtSabor") }}
+                        <label for="txtSabor">Sabor</label>
+                    </div>
+                </div>
+            </div>
 
-      <!--* Botones -->
-      <div class="row mt-2">
-        <div class="col-4">
-          <div class="form-floating text-end">
-            <button
-              class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan"
-              type="button"
-              data-bs-toggle="modal"
-              data-bs-target="#modalNuevoPaquete"
-            >
-              <b>Nuevo Paquete</b><i class="fa fa-plus ms-1"></i>
-            </button>
-          </div>
+            <!--* Botones -->
+            <div class="row mt-2">
+                <div class="col-4">
+                    <div class="form-floating text-end">
+                        <button class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan"
+                            type="button" data-bs-toggle="modal" data-bs-target="#modalNuevoPaquete">
+                            <b>Nuevo Paquete</b><i class="fa fa-plus ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-floating text-end">
+                        <button class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan" type="button">
+                            <b>Nuevo Lote</b><i class="fa fa-plus ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-floating text-end">
+                        <button class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan" type="button" onclick="guardarLote()">
+                            <b>Guardar</b>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="row mt-2">
+            <div class="col-12">
+                <div class="form-floating text-end">
+                    <button class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">
+                        <b>Mermar</b><i class="fa fa-trash-alt ms-2"></i>
+                    </button>
+                </div>
+            </div>
         </div>
-        <div class="col-4">
-          <div class="form-floating text-end">
-            <button
-              class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan"
-              type="button"
-            >
-              <b>Nuevo Lote</b><i class="fa fa-plus ms-1"></i>
-            </button>
-          </div>
-        </div>
-        <div class="col-4">
-          <div class="form-floating text-end">
-            <button
-              class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan"
-              type="button"
-              onclick="guardarLote()"
-            >
-              <b>Guardar</b>
-            </button>
-          </div>
-        </div>
-      </div>
-    </form>
-    <div class="row mt-2">
-      <div class="col-12">
-        <div class="form-floating text-end">
-          <button
-            class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan"
-            type="button"
-            data-bs-toggle="modal"
-            data-bs-target="#exampleModal"
-            data-bs-whatever="@getbootstrap"
-          >
-            <b>Mermar</b><i class="fa fa-trash-alt ms-2"></i>
-          </button>
-        </div>
-      </div>
     </div>
-  </div>
 </div>
 
 <!--* Modal Merma -->
-<div
-  class="modal fade mt-5"
-  id="exampleModal"
-  tabindex="-1"
-  aria-labelledby="exampleModalLabel"
-  aria-hidden="true"
->
-  <div class="modal-dialog">
-    <div class="modal-content border-0">
-      <div class="modal-header border-0" style="background-color: #eee">
-        <h1 class="modal-title fs-5 font-Spartan" id="exampleModalLabel">
-          <b>Merma de Productos</b>
-        </h1>
-        <button
-          type="button"
-          class="btn-close bg-white"
-          data-bs-dismiss="modal"
-          aria-label="Close"
-        ></button>
-      </div>
-      <div class="modal-body" style="background-color: #eee">
-        <form id="formMerma" method="POST" action="{{ url_for('mermar') }}">
-          {{ form.hidden_tag() }} {{ macro.merma('mdlCantidad', 'Cantidad a
-          mermar:', 'flexCheckIndeterminate', 'Mermar Todo') }}
-          <input type="hidden" id="mdlIdProducto" name="idProducto" />
-        </form>
-      </div>
-      <div class="modal-footer border-0" style="background-color: #eee">
-        <button
-          type="submit"
-          class="btn btn-warning font-Spartan text-white"
-          form="formMerma"
-        >
-          Mermar
-        </button>
-      </div>
+<div class="modal fade mt-5" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-0">
+            <div class="modal-header border-0" style="background-color: #eee">
+                <h1 class="modal-title fs-5 font-Spartan" id="exampleModalLabel">
+                    <b>Merma de Productos</b>
+                </h1>
+                <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="background-color: #eee">
+                <form id="formMerma" method="POST" action="{{ url_for('mermar') }}">
+                    {{ form.hidden_tag() }} {{ macro.merma('mdlCantidad', 'Cantidad a
+                    mermar:', 'flexCheckIndeterminate', 'Mermar Todo') }}
+                    <input type="hidden" id="mdlIdProducto" name="idProducto" />
+                </form>
+            </div>
+            <div class="modal-footer border-0" style="background-color: #eee">
+                <button type="submit" class="btn btn-warning font-Spartan text-white" form="formMerma">
+                    Mermar
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <!--* Modal Nuevo Paquete -->
-<div
-  class="modal fade mt-5"
-  id="modalNuevoPaquete"
-  tabindex="-1"
-  aria-labelledby="modalNuevoPaqueteLabel"
-  aria-hidden="true"
->
-  <div class="modal-dialog">
-    <div class="modal-content border-0">
-      <div class="modal-header border-0" style="background-color: #eee">
-        <h1 class="modal-title fs-5 font-Spartan" id="modalNuevoPaqueteLabel">
-          <b>Nuevo Paquete</b>
-        </h1>
-        <button
-          type="button"
-          class="btn-close bg-white"
-          data-bs-dismiss="modal"
-          aria-label="Close"
-        ></button>
-      </div>
-      <div class="modal-body" style="background-color: #eee">
-        <form
-          id="formNuevoPaquete"
-          method="POST"
-          action="{{ url_for('guardar_paquete') }}"
-        >
-          {{ paquete_form.hidden_tag() }}
-          <div class="card border-0 rounded-3 shadow-sm">
-            <input
-              type="hidden"
-              id="txtIdGalletaGranel"
-              name="txtIdGalletaGranel"
-              value=""
-            />
-            <div
-              class="card-header border-0 rounded-top-3 text-center bg-white"
-            >
-              <b class="text-center font-Spartan">Galletas</b>
+<div class="modal fade mt-5" id="modalNuevoPaquete" tabindex="-1" aria-labelledby="modalNuevoPaqueteLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-0">
+            <div class="modal-header border-0" style="background-color: #eee">
+                <h1 class="modal-title fs-5 font-Spartan" id="modalNuevoPaqueteLabel">
+                    <b>Nuevo Paquete</b>
+                </h1>
+                <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="card-body table-scroll mb-0 pb-0">
-              <table
-                class="scroll table-borderless table table-hover table-sm rounded-3 text-center"
-              >
-                <thead>
-                  <tr>
-                    <th>Sabor</th>
-                    <th>Cantidad</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody id="tBodyGalletas">
-                  {% for producto in productos_granel %}
-                  <tr
-                    onclick="selectProductForPaquete('{{ producto.idProducto }}')"
-                  >
-                    <td>{{ producto.nombreSabor }}</td>
-                    <td>{{ producto.cantidadDisponible }}</td>
-                    <td class="">
-                      <a
-                        class="fs-5 fa fa-info-circle text-decoration-none text-warning"
-                      ></a>
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
+            <div class="modal-body" style="background-color: #eee">
+                <form id="formNuevoPaquete" method="POST" action="{{ url_for('guardar_paquete') }}">
+                    {{ paquete_form.hidden_tag() }}
+                    <div class="card border-0 rounded-3 shadow-sm">
+                        <input type="hidden" id="txtIdGalletaGranel" name="txtIdGalletaGranel" value="" />
+                        <div class="card-header border-0 rounded-top-3 text-center bg-white">
+                            <b class="text-center font-Spartan">Galletas</b>
+                        </div>
+                        <div class="card-body table-scroll mb-0 pb-0">
+                            <table class="scroll table-borderless table table-hover table-sm rounded-3 text-center">
+                                <thead>
+                                    <tr>
+                                        <th>Sabor</th>
+                                        <th>Cantidad</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tBodyGalletas">
+                                    {% for producto in productos_granel %}
+                                    <tr onclick="selectProductForPaquete('{{ producto.idProducto }}')">
+                                        <td>{{ producto.nombreSabor }}</td>
+                                        <td>{{ producto.cantidadDisponible }}</td>
+                                        <td class="">
+                                            <a class="fs-5 fa fa-info-circle text-decoration-none text-warning"></a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-12 mt-2">
+                        <div class="row">
+                            <div class="col-6 form-floating">
+                                {{ paquete_form.tipo_producto(class="form-select border-0") }}
+                                <label for="paquete_form.tipo_producto">Tipo de Producto</label>
+                            </div>
+                            <div class="col-6 form-floating">
+                                {{ paquete_form.cantidad(class="form-control border-0") }}
+                                <label for="paquete_form.cantidad">Cantidad</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0" style="background-color: #eee">
+                        {{ paquete_form.submit(class="btn btn-warning font-Spartan
+                        text-white") }}
+                    </div>
+                </form>
             </div>
-          </div>
-          <div class="col-md-12 mt-2">
-            <div class="row">
-              <div class="col-6 form-floating">
-                {{ paquete_form.tipo_producto(class="form-select border-0") }}
-                <label for="paquete_form.tipo_producto">Tipo de Producto</label>
-              </div>
-              <div class="col-6 form-floating">
-                {{ paquete_form.cantidad(class="form-control border-0") }}
-                <label for="paquete_form.cantidad">Cantidad</label>
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer border-0" style="background-color: #eee">
-            {{ paquete_form.submit(class="btn btn-warning font-Spartan
-            text-white") }}
-          </div>
-        </form>
-      </div>
+        </div>
     </div>
-  </div>
 </div>
 
 {% endblock %}

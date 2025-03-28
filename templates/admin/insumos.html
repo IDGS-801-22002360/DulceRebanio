@@ -1,7 +1,5 @@
 {% extends "admin/index.html" %} {% block container %}
-<div
-  class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 mt-5 p-1"
->
+<div class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 mt-5 p-1">
   <div class="row">
     {% with messages = get_flashed_messages() %} {% if messages %} {% for
     message in messages %}
@@ -20,10 +18,7 @@
           <b>Insumos - Materias Primas</b>
         </div>
         <div class="table-responsive">
-          <table
-            class="table table-hover table-striped text-center"
-            id="insumosTable"
-          >
+          <table class="table table-hover table-striped text-center" id="insumosTable">
             <thead>
               <tr>
                 <th>ID</th>
@@ -36,12 +31,8 @@
             </thead>
             <tbody id="productosTableBody">
               {% for insumo in insumos %}
-              <tr
-                data-id="{{ insumo.idMateriaPrima }}"
-                data-materia="{{ insumo.materiaPrima }}"
-                data-unidad="{{ insumo.unidadMedida }}"
-                data-fecha="{{ insumo.fechaCaducidad.strftime('%Y-%m-%d') }}"
-              >
+              <tr data-id="{{ insumo.idMateriaPrima }}" data-materia="{{ insumo.materiaPrima }}"
+                data-unidad="{{ insumo.unidadMedida }}" data-fecha="{{ insumo.fechaCaducidad.strftime('%Y-%m-%d') }}">
                 <td>{{ insumo.idMateriaPrima }}</td>
                 <td>{{ insumo.materiaPrima }}</td>
                 <td>{{ insumo.cantidadDisponible }}</td>
@@ -56,12 +47,8 @@
                     >Eliminar</a
                   >
                   <!-- Nuevo botón Mermar -->
-                  <a
-                    href="#"
-                    class="btn btn-warning btn-sm"
-                    onclick="mermarInsumo('{{ insumo.idMateriaPrima }}'); return false;"
-                    >Mermar</a
-                  >
+                  <a href="#" class="btn btn-warning btn-sm"
+                    onclick="mermarInsumo('{{ insumo.idMateriaPrima }}'); return false;">Mermar</a>
                 </td>
               </tr>
               {% endfor %}
