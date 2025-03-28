@@ -40,8 +40,12 @@
                 <td>{{ insumo.fechaCaducidad.strftime('%d-%m-%Y') }}</td>
                 <td>
                   <!-- Botón Eliminar con SweetAlert2 (ya existente) -->
-                  <a href="#" class="btn btn-danger btn-sm"
-                    action="{{ url_for('eliminar_insumo', id=insumo.idMateriaPrima) }}">Eliminar</a>
+                  <a
+                    href="#"
+                    class="btn btn-danger btn-sm"
+                     onclick="confirmDeletion('{{ url_for('eliminar_insumo', id=insumo.idMateriaPrima) }}', '{{ insumo.materiaPrima }}'); return false;"
+                    >Eliminar</a
+                  >
                   <!-- Nuevo botón Mermar -->
                   <a href="#" class="btn btn-warning btn-sm"
                     onclick="mermarInsumo('{{ insumo.idMateriaPrima }}'); return false;">Mermar</a>
@@ -53,39 +57,48 @@
         </div>
       </div>
     </div>
-    <!-- Formulario de creación/edición de Insumo -->
-    <div class="col-6">
-      <form id="formInsumos" method="POST" action="{{ url_for('insumos') }}">
-        {{ form.csrf_token }}
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-        <!-- Campo oculto para el id del insumo -->
-        <input type="hidden" id="idMateriaPrima" name="idMateriaPrima" value="" />
-        <div class="mb-3">
-          <label for="materiaPrima" class="form-label">Materia Prima</label>
-          {{ form.materiaPrima(class="form-control", id="materiaPrima",
-          placeholder="Nombre del insumo") }}
-        </div>
-        <div class="mb-3">
-          <label for="unidadMedida" class="form-label">Unidad de Medida</label>
-          {{ form.unidadMedida(class="form-control", id="unidadMedida",
-          placeholder="Unidad de medida") }}
-        </div>
-        <div class="mb-3">
-          <label for="fechaCaducidad" class="form-label">Fecha de Caducidad</label>
-          {{ form.fechaCaducidad(class="form-control", id="fechaCaducidad") }}
-        </div>
-        <div class="d-flex">
-          <button type="submit" class="btn btn-warning text-white font-Spartan me-2">
-            Guardar Insumo
-          </button>
-          <!-- Botón de editar -->
-          <button type="button" class="btn btn-primary text-white font-Spartan" id="btnEditar" onclick="editarInsumo()">
-            Editar Insumo
-          </button>
-        </div>
-      </form>
-    </div>
+    <!-- Formulario -->
+    <div class="col-xl-4">
+      <div class="card shadow-sm h-100">
+          <div class="card-header bg-light py-3">
+              <h5 class="mb-0 text-center">Crear/Editar Insumo</h5>
+          </div>
+          <div class="card-body">
+              <form id="formInsumos" method="POST" action="{{ url_for('insumos') }}">
+                  {{ form.csrf_token }}
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                  <input type="hidden" id="idMateriaPrima" name="idMateriaPrima" value="">
+                  
+                  <div class="mb-3">
+                      <label class="form-label fw-bold">Materia Prima</label>
+                      {{ form.materiaPrima(class="form-control form-control-sm", id="materiaPrima", placeholder="Nombre del insumo") }}
+                  </div>
+                  <div class="mb-3">
+                      <label class="form-label fw-bold">Unidad de Medida</label>
+                      <select class="form-select form-select-sm" id="unidadMedida" name="unidadMedida">
+                          <option value="" selected disabled>Seleccione una unidad</option>
+                          <option value="Kilogramos">Kilogramos</option>
+                          <option value="Gramos">Gramos</option>
+                          <option value="Litros">Litros</option>
+                          <option value="Mililitros">Mililitros</option>
+                          <option value="Piezas">Piezas</option>
+                      </select>
+                  </div>
+                  <div class="mb-4">
+                      <label class="form-label fw-bold">Fecha de Caducidad</label>
+                      {{ form.fechaCaducidad(class="form-control form-control-sm", id="fechaCaducidad") }}
+                  </div>
+                  <div class="d-grid gap-2">
+                      <button type="submit" class="btn btn-warning text-white">Guardar Insumo</button>
+                      <button type="button" class="btn btn-primary" id="btnEditar" onclick="editarInsumo()">
+                          Editar Insumo
+                      </button>
+                  </div>
+              </form>
+          </div>
+      </div>
   </div>
+</div>
 </div>
 
 <!-- Definir URL de edición en una variable JavaScript -->

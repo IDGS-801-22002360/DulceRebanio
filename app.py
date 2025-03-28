@@ -226,9 +226,6 @@ def galletas():
         paquete_form=paquete_form, ultimo_login=current_user.ultimo_login
     )
 
-
-from decimal import Decimal
-
 @app.route("/guardarLote", methods=["POST"])
 def guardarLote():
     form = LoteForm()
@@ -424,8 +421,23 @@ def editar_insumo():
         insumo = MateriasPrimas.query.get(id_insumo)
         if insumo:
             insumo.materiaPrima = form.materiaPrima.data
-            insumo.unidadMedida = form.unidadMedida.data
+            nueva_unidad = form.unidadMedida.data
             insumo.fechaCaducidad = form.fechaCaducidad.data
+            
+            # Conversión automática entre unidades
+            conversiones = {
+                ("Kilogramos", "Gramos"): 1000,
+                ("Gramos", "Kilogramos"): 0.001,
+                ("Litros", "Mililitros"): 1000,
+                ("Mililitros", "Litros"): 0.001
+            }
+            
+            if (insumo.unidadMedida, nueva_unidad) in conversiones:
+                from decimal import Decimal  # Asegúrate de importar Decimal
+                factor = Decimal(str(conversiones[(insumo.unidadMedida, nueva_unidad)]))
+                insumo.cantidadDisponible *= factor
+            
+            insumo.unidadMedida = nueva_unidad
             db.session.commit()
             flash("Insumo actualizado correctamente", "success")
         else:
@@ -433,6 +445,8 @@ def editar_insumo():
     else:
         flash("Error en la validación del formulario", "danger")
     return redirect(url_for("insumos"))
+
+
 
 # Endpoint para eliminar un insumo
 @app.route("/eliminar_insumo/<int:id>", methods=["GET"])
@@ -467,6 +481,7 @@ def mermar_insumo(id, merma):
 
 
 #COMPRAS INSUMOS
+#COMPRAS INSUMOS
 @app.route("/comprasInsumos", methods=["GET", "POST"])
 @login_required
 @role_required(['Admin'])
@@ -476,10 +491,13 @@ def comprasInsumos():
     insumos = MateriasPrimas.query.all()
     form.idProveedor.choices = [(prov.idProveedor, prov.nombreProveedor) for prov in proveedores]
     form.idMateriaPrima.choices = [(insumo.idMateriaPrima, insumo.materiaPrima) for insumo in insumos]
+    # Asignar choices y valor por defecto para el campo 'sabor'
+    form.sabor.choices = [('default', 'Default')]
+    if not form.sabor.data:
+        form.sabor.data = 'default'
 
     if request.method == "POST" and form.validate():
-        # Si el campo idCompra está vacío, se trata de una inserción y se usa el SP.
-        # Dentro de la ruta comprasInsumos, en el bloque POST:
+        # Inserción: si no hay idCompra se usa el SP
         if not request.form.get("idCompra"):
             sql = text("CALL guardarCompraInsumo(:idProveedor, :idMateriaPrima, :cantidad, :fecha, :totalCompra)")
             params = {
@@ -487,13 +505,13 @@ def comprasInsumos():
                 "idMateriaPrima": form.idMateriaPrima.data,
                 "cantidad": form.cantidad.data,
                 "fecha": form.fecha.data,
-                "totalCompra": form.totalCompra.data  # Añadir totalCompra
+                "totalCompra": form.totalCompra.data
             }
             db.session.execute(sql, params)
             db.session.commit()
             flash("Compra registrada correctamente", "success")
         else:
-            # Edición: se actualiza el registro existente, incluyendo totalCompra
+            # Edición: se actualiza el registro existente
             id_compra = request.form.get("idCompra")
             compra = ComprasInsumos.query.get(id_compra)
             if compra:
@@ -501,7 +519,6 @@ def comprasInsumos():
                 compra.idMateriaPrima = form.idMateriaPrima.data
                 compra.cantidad = Decimal(form.cantidad.data)
                 compra.fecha = form.fecha.data
-                # Se asume que totalCompra es un campo numérico; convertirlo a Decimal:
                 compra.totalCompra = Decimal(form.totalCompra.data)
                 db.session.commit()
                 flash("Compra actualizada correctamente", "success")
@@ -519,19 +536,21 @@ def editar_compraInsumo():
     insumos = MateriasPrimas.query.all()
     form.idProveedor.choices = [(prov.idProveedor, prov.nombreProveedor) for prov in proveedores]
     form.idMateriaPrima.choices = [(insumo.idMateriaPrima, insumo.materiaPrima) for insumo in insumos]
+    # Asigna choices para 'sabor'
+    form.sabor.choices = [('default', 'Default')]
+    if not form.sabor.data:
+        form.sabor.data = 'default'
 
     id_compra = request.form.get("idCompra")
     if id_compra:
         compra = ComprasInsumos.query.get(id_compra)
         if compra:
             try:
-                # Actualizar campos
                 compra.idProveedor = int(form.idProveedor.data)
                 compra.idMateriaPrima = int(form.idMateriaPrima.data)
                 compra.cantidad = Decimal(form.cantidad.data)
                 compra.fecha = form.fecha.data
                 compra.totalCompra = Decimal(form.totalCompra.data)
-                
                 db.session.commit()
                 flash("¡Compra actualizada!", "success")
             except Exception as e:
@@ -612,123 +631,98 @@ venta_actual = []
 @login_required
 @role_required(['Admin', 'Ventas'])
 def puntoVenta():
-    sabores = Sabores.query.all()
-    tiposVenta = DetallesProducto.query.all()
-    
-    print("Sabores cargados:", sabores)
-    print("Tipos de venta cargados:", tiposVenta)
-    
+    # Consulta optimizada para obtener solo productos disponibles
+    productos_disponibles = db.session.query(
+        ProductosTerminados.idProducto,
+        Sabores.nombreSabor,
+        DetallesProducto.tipoProducto,
+        ProductosTerminados.cantidadDisponible,
+        DetallesProducto.precio
+    ).join(Sabores, ProductosTerminados.idSabor == Sabores.idSabor)\
+    .join(DetallesProducto, ProductosTerminados.idDetalle == DetallesProducto.idDetalle)\
+    .filter(ProductosTerminados.estatus == 1, ProductosTerminados.cantidadDisponible > 0)\
+    .order_by(ProductosTerminados.idDetalle.asc()).all()
+
     if request.method == "POST":
         accion = request.form.get("accion")
 
         if accion == "agregar":
             try:
-                idSabor = int(request.form.get("idSabor"))
-                idTipoVenta = int(request.form.get("idTipoVenta"))
-                cantidad = int(request.form.get("cantidad"))
+                idProducto = int(request.form.get("idProducto"))
+                cantidad = int(request.form.get(f"cantidad_{idProducto}"))
             except (ValueError, TypeError):
-                flash("Datos inválidos para agregar producto.")
                 return redirect(url_for("puntoVenta"))
 
-            sabor = Sabores.query.get(idSabor)
-            tipo_venta = DetallesProducto.query.get(idTipoVenta)
-
-            if not sabor or not tipo_venta or cantidad <= 0:
-                flash("Producto o cantidad inválida.")
+            # Buscar el producto en la lista de productos disponibles
+            producto = next((p for p in productos_disponibles if p.idProducto == idProducto), None)
+            if not producto or cantidad <= 0:
                 return redirect(url_for("puntoVenta"))
 
+            # Verificar si el producto ya está en la venta
             for prod in venta_actual:
-                if prod["idSabor"] == idSabor and prod["idTipoVenta"] == idTipoVenta:
-                    flash("El producto ya está en la venta.")
+                if prod["idProducto"] == idProducto:
                     return redirect(url_for("puntoVenta"))
 
-            # Guarda los datos del producto para su venta
-            precio_total = float(tipo_venta.precio) * cantidad
-            producto = {
-                "idSabor": sabor.idSabor,
-                "sabor": sabor.nombreSabor,
-                "idTipoVenta": tipo_venta.idDetalle,
-                "tipo": tipo_venta.tipoProducto,
+            # Agregar el producto a la venta actual
+            precio_total = float(producto.precio) * cantidad
+            venta_actual.append({
+                "idProducto": producto.idProducto,
+                "sabor": producto.nombreSabor,
+                "tipo": producto.tipoProducto,
                 "cantidad": cantidad,
-                "precio_unitario": float(tipo_venta.precio),
+                "precio_unitario": float(producto.precio),
                 "precio_total": precio_total
-            }
-            venta_actual.append(producto)
-            flash("Producto agregado correctamente.")
+            })
             return redirect(url_for("puntoVenta"))
 
-        # Confirmar compra
         elif accion == "confirmar":
             try:
                 descuento = float(request.form.get("descuento", 0))
                 dinero_recibido = float(request.form.get("dinero_recibido"))
             except (ValueError, TypeError):
-                flash("Datos de confirmación inválidos.")
                 return redirect(url_for("puntoVenta"))
 
             total = sum(prod["precio_total"] for prod in venta_actual)
             total_con_descuento = total - (total * (descuento / 100))
 
             if dinero_recibido < total_con_descuento:
-                flash("El dinero recibido no es suficiente.")
                 return redirect(url_for("puntoVenta"))
 
-            # Actualizar inventario en la BD usando la cantidadDisponible en ProductosTerminados
+            # Actualizar inventario y registrar la venta
             for prod in venta_actual:
-                # Buscamos el producto terminado que corresponda al idSabor y al idDetalle (tipo de venta)
-                productoTerminado = ProductosTerminados.query.filter_by(
-                    idSabor=prod["idSabor"],
-                    idDetalle=prod["idTipoVenta"]
-                ).first()
-                if productoTerminado is None:
-                    flash(f"Producto terminado no encontrado para {prod['sabor']}.")
-                    return redirect(url_for("puntoVenta"))
+                productoTerminado = ProductosTerminados.query.get(prod["idProducto"])
                 if productoTerminado.cantidadDisponible < prod["cantidad"]:
                     flash(f"Inventario insuficiente para {prod['sabor']}.")
                     return redirect(url_for("puntoVenta"))
                 productoTerminado.cantidadDisponible -= prod["cantidad"]
-            
+
             db.session.commit()
 
             nueva_venta = Ventas(total=total_con_descuento)
             db.session.add(nueva_venta)
-            db.session.flush() 
+            db.session.flush()
 
             for prod in venta_actual:
-                productoTerminado = ProductosTerminados.query.filter_by(
-                    idSabor=prod["idSabor"],
-                    idDetalle=prod["idTipoVenta"]
-                ).first()
                 detalle = DetallesVenta(
                     idVenta=nueva_venta.idVenta,
-                    idProducto=productoTerminado.idProducto,
+                    idProducto=prod["idProducto"],
                     cantidad=prod["cantidad"],
                     subtotal=prod["precio_total"]
                 )
                 db.session.add(detalle)
-            db.session.commit() 
+            db.session.commit()
 
-            # Generar el ticket en PDF
-            pdf_path = generar_pdf(venta_actual, descuento, dinero_recibido, total_con_descuento)
-            flash("Venta confirmada. Ticket generado en: " + pdf_path)
-            venta_actual.clear()  
+            venta_actual.clear()
             return redirect(url_for("puntoVenta"))
 
-    sabores = Sabores.query.all()
-    tiposVenta = DetallesProducto.query.all()
     total = sum(prod["precio_total"] for prod in venta_actual)
-    
-    inventario = {}
-    productos = ProductosTerminados.query.all()
-    for producto in productos:
-        inventario[(producto.idSabor, producto.idDetalle)] = producto.cantidadDisponible
 
     return render_template("admin/ventas.html",
-                            sabores=sabores,
-                            tiposVenta=tiposVenta,
+                            productos_disponibles=productos_disponibles,
                             venta=venta_actual,
                             total=total,
-                            inventario=inventario, ultimo_login=current_user.ultimo_login)
+                            ultimo_login=current_user.ultimo_login)
+
 
 
 def generar_pdf(venta, descuento, dinero_recibido, total_con_descuento):
@@ -866,7 +860,7 @@ def register():
             db.session.commit()
             flash('Cuenta creada exitosamente. Ahora puedes iniciar sesión.', 'success')
             return redirect(url_for('login'))
-    return render_template("client/mainClientes.html", login_form=LoginForm(), register_form=form)
+    return render_template("client/mainClientes.html", login_form=LoginForm(), register_form=form,  recuperar_contrasena_form=RecuperarContrasenaForm())
 
 @app.route("/miembros", methods=["GET", "POST"])
 @login_required
