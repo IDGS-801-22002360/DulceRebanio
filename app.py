@@ -8,13 +8,13 @@ from flask_wtf.csrf import CSRFProtect
 from sqlalchemy import text
 from fpdf import FPDF
 import os
-import datetime
+import datetime 
 
 from config import DevelopmentConfig
 from flask_wtf import FlaskForm
 from forms import EmpleadoForm, HiddenField, SubmitField, LoginForm, RecuperarContrasenaForm, RegisterForm
 from decimal import Decimal
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 app = Flask(__name__)
 app.config.from_object(DevelopmentConfig)
@@ -125,7 +125,7 @@ def galletas():
     .filter(ProductosTerminados.idDetalle == 1, ProductosTerminados.estatus == 1).all()
     
     #* Verificar si estamos en temporada navideña
-    today = datetime.date.today()
+    today = date.today()
     is_christmas_season = today.month == 12
     
     #* Ajuste de mínimo stock según la temporada
@@ -575,6 +575,35 @@ def puntoVenta():
             flash("Producto agregado correctamente.")
             return redirect(url_for("puntoVenta"))
 
+        # Actualizar cantidad de producto (subir o bajar)
+        elif accion == "actualizar":
+            try:
+                idSabor = int(request.form.get("idSabor"))
+                idTipoVenta = int(request.form.get("idTipoVenta"))
+            except (ValueError, TypeError):
+                flash("Datos inválidos para actualizar producto.")
+                return redirect(url_for("puntoVenta"))
+
+            operacion = request.form.get("operacion")  # 'subir' o 'bajar'
+            for prod in venta_actual:
+                if prod["idSabor"] == idSabor and prod["idTipoVenta"] == idTipoVenta:
+                    if operacion == "subir":
+                        prod["cantidad"] += 1
+                    elif operacion == "bajar":
+                        prod["cantidad"] -= 1
+                        if prod["cantidad"] <= 0:
+                            venta_actual.remove(prod)
+                            flash("Producto eliminado.")
+                            break
+                    # Actualiza el precio total si el producto no fue eliminado
+                    if prod in venta_actual:
+                        prod["precio_total"] = prod["cantidad"] * prod["precio_unitario"]
+                    flash("Producto actualizado.")
+                    break
+            else:
+                flash("Producto no encontrado.")
+            return redirect(url_for("puntoVenta"))
+
         # Confirmar compra
         elif accion == "confirmar":
             try:
@@ -647,6 +676,7 @@ def puntoVenta():
                             venta=venta_actual,
                             total=total,
                             inventario=inventario)
+
 
 
 def generar_pdf(venta, descuento, dinero_recibido, total_con_descuento):

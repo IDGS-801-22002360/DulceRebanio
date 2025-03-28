@@ -4,24 +4,25 @@
 <style>
   #productosTable {
     width: 90%; /* Ajusta el ancho */
-    height: 80%;
     background-color: white; /* Fondo blanco */
     border-collapse: collapse;
     margin: auto;
   }
-
   #productosTable th, #productosTable td {
     padding: 5px;
     text-align: left;
     border: 1px solid #ddd;
   }
-
   .left-side {
     width: 40%; /* Ajusta el tamaño del contenedor de la tabla */
   }
-
   .right-side {
     width: 60%;
+  }
+  .btn-action {
+    padding: 2px 5px;
+    margin: 0 2px;
+    font-size: 14px;
   }
 </style>
 
@@ -36,6 +37,7 @@
           <th>Tipo</th>
           <th>Cantidad</th>
           <th>Precio</th>
+          <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -45,6 +47,26 @@
           <td>{{ prod.tipo }}</td>
           <td>{{ prod.cantidad }}</td>
           <td>${{ prod.precio_total }}</td>
+          <td>
+            <!-- Botón para subir cantidad -->
+            <form method="POST" action="{{ url_for('puntoVenta') }}" style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="accion" value="actualizar">
+              <input type="hidden" name="idSabor" value="{{ prod.idSabor }}">
+              <input type="hidden" name="idTipoVenta" value="{{ prod.idTipoVenta }}">
+              <input type="hidden" name="operacion" value="subir">
+              <button type="submit" class="btn-action">+</button>
+            </form>
+            <!-- Botón para bajar cantidad -->
+            <form method="POST" action="{{ url_for('puntoVenta') }}" style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="accion" value="actualizar">
+              <input type="hidden" name="idSabor" value="{{ prod.idSabor }}">
+              <input type="hidden" name="idTipoVenta" value="{{ prod.idTipoVenta }}">
+              <input type="hidden" name="operacion" value="bajar">
+              <button type="submit" class="btn-action">-</button>
+            </form>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
