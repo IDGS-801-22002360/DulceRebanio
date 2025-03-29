@@ -1,51 +1,22 @@
-{% extends "admin/index.html" %} 
-{% block container %}
+{% extends "admin/index.html" %} {% block container %}
 
 <style>
-/* Reset básico y tipografía */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+    #productosTable {
+        width: 90%;
+        /* Ajusta el ancho */
+        height: 80%;
+        background-color: white;
+        /* Fondo blanco */
+        border-collapse: collapse;
+        margin: auto;
+    }
 
-body {
-  font-family: 'League Spartan', 'League Gothic', sans-serif;
-  background-color: #d9d9d9;
-  color: #333;
-  margin: 0;
-  padding: 0;
-}
-
-/* Header */
-.header {
-  background-color: #5B331E;
-  padding: 10px 20px;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: left;
-}
-
-.header h1 {
-  color: #fff;
-  font-size: 50px;
-  margin-left: 10px;
-}
-
-.header img {
-  height: 100px;
-  margin-right: 10px;
-}
-
-/* Layout principal */
-.content {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  min-height: 100vh;
-  gap: 20px;
-}
+    #productosTable th,
+    #productosTable td {
+        padding: 5px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
 
 .left-side {
   flex: 1;
@@ -267,63 +238,58 @@ input[type="number"] {
     </table>
   </div>
 
-  <div class="right-side" style="min-width: 320px;">
-    <!-- Contenedor scrollable para la tabla de inventario -->
-    <div class="scroll-container" style="margin-top: 10px; overflow: auto; max-height: 300px;">
-      <h3 style="font-size: 16px; margin-bottom: 5px;">Inventario</h3>
-      <table id="inventarioTable" style="font-size: 14px; width: 100%;">
-        <thead>
-          <tr>
-            <th>Sabor</th>
-            <th>Tipo</th>
-            <th>Cant.</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for sabor in sabores %}
-            {% for tipo in tiposVenta %}
-              <tr>
-                <td>{{ sabor.nombreSabor }}</td>
-                <td>{{ tipo.tipoProducto }}</td>
-                <td>{{ inventario.get((sabor.idSabor, tipo.idDetalle), 'No disp.') }}</td>
-              </tr>
-            {% endfor %}
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    <div class="right-side" style="min-width: 320px">
+        <!-- Contenedor scrollable para la tabla de inventario -->
+        <div class="scroll-container" style="margin-top: 10px; overflow: auto; max-height: 300px">
+            <h3 style="font-size: 16px; margin-bottom: 5px">Inventario</h3>
+            <table id="inventarioTable" style="font-size: 14px; width: 100%">
+                <thead>
+                    <tr>
+                        <th>Sabor</th>
+                        <th>Tipo</th>
+                        <th>Cant.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sabor in sabores %} {% for tipo in tiposVenta %}
+                    <tr>
+                        <td>{{ sabor.nombreSabor }}</td>
+                        <td>{{ tipo.tipoProducto }}</td>
+                        <td>
+                            {{ inventario.get((sabor.idSabor, tipo.idDetalle), 'No disp.') }}
+                        </td>
+                    </tr>
+                    {% endfor %} {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-    <div class="options" style="margin-top: 15px;">
-      <!-- Formulario para agregar un producto a la venta -->
-      <form method="POST" action="{{ url_for('puntoVenta') }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" name="accion" value="agregar">
-        <select id="flavor" name="idSabor" required>
-          <option value="">Selecciona un sabor</option>
-          {% for sabor in sabores %}
-          <option value="{{ sabor.idSabor }}">{{ sabor.nombreSabor }}</option>
-          {% endfor %}
-        </select>
-        <select id="type" name="idTipoVenta" required>
-          <option value="">Selecciona tipo de venta</option>
-          {% for tipo in tiposVenta %}
-          <option value="{{ tipo.idDetalle }}">{{ tipo.tipoProducto }} - ${{ tipo.precio }}</option>
-          {% endfor %}
-        </select>
-        <input
-          type="number"
-          id="quantity"
-          name="cantidad"
-          placeholder="Cantidad"
-          min="1"
-          required
-        />
-        <button type="submit" id="add-button">Agregar</button>
-      </form>
-      <!-- Botón para mostrar el modal de confirmación -->
-      <button id="buy-button" onclick="mostrarModal()">Comprar</button>
+        <div class="options" style="margin-top: 15px">
+            <!-- Formulario para agregar un producto a la venta -->
+            <form method="POST" action="{{ url_for('puntoVenta') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <input type="hidden" name="accion" value="agregar" />
+                <select id="flavor" name="idSabor" required>
+                    <option value="">Selecciona un sabor</option>
+                    {% for sabor in sabores %}
+                    <option value="{{ sabor.idSabor }}">{{ sabor.nombreSabor }}</option>
+                    {% endfor %}
+                </select>
+                <select id="type" name="idTipoVenta" required>
+                    <option value="">Selecciona tipo de venta</option>
+                    {% for tipo in tiposVenta %}
+                    <option value="{{ tipo.idDetalle }}">
+                        {{ tipo.tipoProducto }} - ${{ tipo.precio }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <input type="number" id="quantity" name="cantidad" placeholder="Cantidad" min="1" required />
+                <button type="submit" id="add-button">Agregar</button>
+            </form>
+            <!-- Botón para mostrar el modal de confirmación -->
+            <button id="buy-button" onclick="mostrarModal()">Comprar</button>
+        </div>
     </div>
-  </div>
 </div>
 
 <!-- Modal de confirmación de compra -->

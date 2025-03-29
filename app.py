@@ -1,9 +1,10 @@
+from functools import wraps
 from models import DetallesVenta, Usuarios, Ventas, ComprasInsumos, DetallesProducto, Proveedores, Sabores, db, ProductosTerminados, MateriasPrimas
-from forms import CompraInsumoForm, LoteForm, InsumoForm, MermaForm, ProveedorForm, PaqueteForm
+from forms import CompraInsumoForm, LoteForm, InsumoForm, MermaForm, ProveedorForm, PaqueteForm, RecuperarContrasenaForm
 from flask import Flask, render_template, request, jsonify, redirect, session, url_for, flash,session
 import forms
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from flask_wtf import CSRFProtect
+from flask_wtf import CSRFProtect, RecaptchaField
 from flask_wtf.csrf import CSRFProtect
 from sqlalchemy import text
 from fpdf import FPDF
@@ -20,6 +21,10 @@ app = Flask(__name__)
 app.config.from_object(DevelopmentConfig)
 csrf = CSRFProtect()
 
+app.config["RECAPTCHA_PUBLIC_KEY"] = "6Lcb1f0qAAAAAMLjkyE44X40_nQq_FZns9Sj8CVs"
+app.config["RECAPTCHA_PRIVATE_KEY"] = "6Lcb1f0qAAAAADFk-w_f5-Da5MyzdN2E8HdY-Vcs"
+# app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=200)
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -30,21 +35,51 @@ def load_user(user_id):
 
 failed_attempts = {}
 
+def role_required(roles):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if current_user.rol not in roles:
+                flash('No tienes permiso para acceder a esta página.', 'danger')
+                
+
+                if current_user.rol == 'Admin':
+                    return redirect(url_for('usuarios'))
+                elif current_user.rol == 'Ventas':
+                    return redirect(url_for('puntoVenta'))
+                elif current_user.rol == 'Produccion':
+                    return redirect(url_for('galletas'))
+                elif current_user.rol == 'Cliente':
+                    return redirect(url_for('clientes'))
+                else:
+                    return redirect(url_for('index')) 
+                
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+
 @app.route("/", methods=["GET", "POST"])
 @app.route("/index")
 def index():
     login_form = LoginForm()
     register_form = RegisterForm()
-    return render_template("client/mainClientes.html", login_form=login_form, register_form=register_form)
+    recuperar_contrasena_form = RecuperarContrasenaForm()
+    return render_template("client/mainClientes.html", 
+                         login_form=login_form, 
+                         register_form=register_form,
+                         recuperar_contrasena_form=recuperar_contrasena_form)
 
 @app.route("/clientes", methods=["GET", "POST"])
+@login_required
+@role_required(['Cliente','Admin'])
 def clientes():
     sabores = Sabores.query.all()
     detalles_productos = DetallesProducto.query.all()
 
     if "carrito" not in session:
         session["carrito"] = []
-    return render_template("client/clientes.html", sabores=sabores, detalles_productos=detalles_productos, carrito=session["carrito"])
+    return render_template("client/clientes.html", sabores=sabores, detalles_productos=detalles_productos, carrito=session["carrito"], ultimo_login=current_user.ultimo_login)
 
 
 @app.route("/agregar_carrito", methods=["POST"])
@@ -101,14 +136,16 @@ def eliminar_carrito(item_id):
 
 @app.route("/dashboard", methods=["GET", "POST"])
 @login_required
+@role_required(['Admin', 'Ventas'])
 def dashboard():
-    return render_template("admin/dashboard.html")
+    return render_template("admin/dashboard.html", ultimo_login=current_user.ultimo_login)
 
 
 #!============================== Modulo de Productos ==============================#  
 
 @app.route("/galletas", methods=["GET", "POST"])
 @login_required  
+@role_required(['Admin', 'Ventas', 'Produccion'])
 def galletas():
     form = LoteForm()
     paquete_form = PaqueteForm()
@@ -185,9 +222,8 @@ def galletas():
         productos=productos_marcados,
         productos_granel=productos_granel,
         form=form,
-        paquete_form=paquete_form
+        paquete_form=paquete_form, ultimo_login=current_user.ultimo_login
     )
-
 
 @app.route("/guardarLote", methods=["POST"])
 def guardarLote():
@@ -196,26 +232,59 @@ def guardarLote():
     
     if form.validate_on_submit():
         try:
+            print("Formulario validado correctamente")
             sabor_id = form.sabor.data
             id_detalle = 1
+            print(f"Sabor seleccionado: {sabor_id}")
 
             nuevo_producto = ProductosTerminados(
                 idSabor=sabor_id,
                 cantidadDisponible=150,
-                fechaCaducidad=datetime.date.today() + datetime.timedelta(days=7),
+                fechaCaducidad=date.today() + timedelta(days=7),
                 idDetalle=id_detalle,
                 estatus=1
             )
             db.session.add(nuevo_producto)
+            print("Producto terminado agregado a la sesión")
+            
+            # Descontar materias primas
+            insumos = {
+                2: Decimal("0.9"),  # Harina (kg)
+                3: Decimal("3"),    # Huevos (pzs)
+                4: Decimal("0.3"),  # Azúcar (kg)
+                7: Decimal("0.45"), # Mantequilla (kg)
+                5: Decimal("0.015") # Sal (kg)
+            }
+            
+            for id_materia, cantidad_usada in insumos.items():
+                materia_prima = MateriasPrimas.query.get(id_materia)
+                print(f"Procesando materia prima ID {id_materia}, Cantidad disponible: {materia_prima.cantidadDisponible}")
+                if materia_prima and materia_prima.cantidadDisponible >= cantidad_usada:
+                    materia_prima.cantidadDisponible -= cantidad_usada
+                    print(f"Nueva cantidad disponible para ID {id_materia}: {materia_prima.cantidadDisponible}")
+                else:
+                    print(f"Error: No hay suficiente {materia_prima.materiaPrima} en inventario o ID no encontrado")
+                    flash(f'No hay suficiente {materia_prima.materiaPrima} en inventario.', 'danger')
+                    return redirect(url_for('galletas'))
+            
             db.session.commit()
+            print("Transacción confirmada y datos guardados correctamente")
 
-            flash('Lote guardado correctamente', 'success')
+            # Log de la acción
+            action_logger.info(f"Usuario: {current_user.correo} - Acción: Guardar lote - Sabor: {nuevo_producto.idSabor} - Cantidad: {nuevo_producto.cantidadDisponible} - Fecha: {datetime.now()}")
+            
+            flash('Lote guardado y materias primas descontadas correctamente', 'success')
         except Exception as e:
+            db.session.rollback()
+            print(f"Error en guardarLote: {str(e)}")
             flash(f'Error al guardar el lote: {str(e)}', 'danger')
         return redirect(url_for('galletas'))
 
+    print("Error: El formulario no pasó la validación")
     flash('Error al guardar el lote. Verifica los datos ingresados.', 'danger')
     return redirect(url_for('galletas'))
+
+
 
 
 @app.route("/mermar", methods=["POST"])
@@ -225,9 +294,6 @@ def mermar():
         id_producto = form.idProducto.data
         cantidad = form.cantidad.data
         mermar_todo = form.mermar_todo.data
-        
-        print(f"Cantidad recibida: {cantidad} (Tipo: {type(cantidad)})")
-        print(f"Mermar todo: {mermar_todo}")
         
         if mermar_todo:
             cantidad = None
@@ -247,12 +313,18 @@ def mermar():
             return redirect(url_for('galletas'))
         
         if cantidad is None or cantidad >= producto.cantidadDisponible:
+            cantidad_mermada = producto.cantidadDisponible
             producto.cantidadDisponible = 0
             producto.estatus = 0
         else:
+            cantidad_mermada = cantidad
             producto.cantidadDisponible -= cantidad
 
         db.session.commit()
+
+        #! Log de la acción para mermar cualquier producto
+        action_logger.info(f"Usuario: {current_user.correo} - Acción: Mermar producto - Producto ID: {producto.idProducto} - Cantidad mermada: {cantidad_mermada} - Fecha: {datetime.now()}")
+
         flash('Producto mermado correctamente', 'success')
         return redirect(url_for('galletas'))
 
@@ -263,11 +335,9 @@ def mermar():
 def guardar_paquete():
     paquete_form = PaqueteForm()
     if paquete_form.validate_on_submit():
-        
-        #* Obtener datos del formulario
         tipo_producto = paquete_form.tipo_producto.data  # 2 = Kilo, 3 = Medio Kilo
         cantidad_paquetes = paquete_form.cantidad.data
-        id_producto = request.form.get("txtIdGalletaGranel")  #* ID del lote seleccionado
+        id_producto = request.form.get("txtIdGalletaGranel")  # ID del lote seleccionado
 
         producto = ProductosTerminados.query.get(id_producto)
         if not producto:
@@ -285,7 +355,6 @@ def guardar_paquete():
         if producto.cantidadDisponible == 0:
             producto.estatus = 0
 
-        #* Crear el nuevo paquete
         nuevo_paquete = ProductosTerminados(
             idSabor=producto.idSabor,
             cantidadDisponible=cantidad_paquetes,
@@ -294,8 +363,10 @@ def guardar_paquete():
             estatus=1
         )
         db.session.add(nuevo_paquete)
-
         db.session.commit()
+
+        #! Log de la acción para crear paquetes 
+        action_logger.info(f"Usuario: {current_user.correo} - Acción: Guardar paquete - Sabor: {nuevo_paquete.idSabor} - Tipo: {tipo_producto} - Cantidad: {cantidad_paquetes} - Fecha: {datetime.now()}")
 
         flash(f"Paquete creado correctamente: {cantidad_paquetes} paquetes de tipo {tipo_producto}.", "success")
         return redirect(url_for("galletas"))
@@ -307,13 +378,16 @@ def guardar_paquete():
 
 #!============================== Modulo de Recetas ==============================#  
 
-
-
+@app.route("/recetas", methods=["GET", "POST"])
+@login_required
+def recetas():
+    return render_template("admin/recetas.html")
 
 #!============================== Modulo de Insumos ==============================#
 #INSERCIÓN INSUMOS
 @app.route("/insumos", methods=["GET", "POST"])
 @login_required
+@role_required(['Admin', 'Produccion'])
 def insumos():
     form = InsumoForm(request.form)
     if request.method == "POST" and form.validate():
@@ -335,7 +409,7 @@ def insumos():
             return redirect(url_for("insumos"))
     
     insumos_lista = MateriasPrimas.query.filter(MateriasPrimas.estatus != 0).all()
-    return render_template("admin/insumos.html", insumos=insumos_lista, form=form)
+    return render_template("admin/insumos.html", insumos=insumos_lista, form=form, ultimo_login=current_user.ultimo_login)
 
 # Endpoint para editar un insumo
 @app.route("/editar_insumo", methods=["POST"])
@@ -346,8 +420,23 @@ def editar_insumo():
         insumo = MateriasPrimas.query.get(id_insumo)
         if insumo:
             insumo.materiaPrima = form.materiaPrima.data
-            insumo.unidadMedida = form.unidadMedida.data
+            nueva_unidad = form.unidadMedida.data
             insumo.fechaCaducidad = form.fechaCaducidad.data
+            
+            # Conversión automática entre unidades
+            conversiones = {
+                ("Kilogramos", "Gramos"): 1000,
+                ("Gramos", "Kilogramos"): 0.001,
+                ("Litros", "Mililitros"): 1000,
+                ("Mililitros", "Litros"): 0.001
+            }
+            
+            if (insumo.unidadMedida, nueva_unidad) in conversiones:
+                from decimal import Decimal  # Asegúrate de importar Decimal
+                factor = Decimal(str(conversiones[(insumo.unidadMedida, nueva_unidad)]))
+                insumo.cantidadDisponible *= factor
+            
+            insumo.unidadMedida = nueva_unidad
             db.session.commit()
             flash("Insumo actualizado correctamente", "success")
         else:
@@ -355,6 +444,8 @@ def editar_insumo():
     else:
         flash("Error en la validación del formulario", "danger")
     return redirect(url_for("insumos"))
+
+
 
 # Endpoint para eliminar un insumo
 @app.route("/eliminar_insumo/<int:id>", methods=["GET"])
@@ -389,17 +480,23 @@ def mermar_insumo(id, merma):
 
 
 #COMPRAS INSUMOS
+#COMPRAS INSUMOS
 @app.route("/comprasInsumos", methods=["GET", "POST"])
+@login_required
+@role_required(['Admin'])
 def comprasInsumos():
     form = CompraInsumoForm(request.form)
     proveedores = Proveedores.query.all()
     insumos = MateriasPrimas.query.all()
     form.idProveedor.choices = [(prov.idProveedor, prov.nombreProveedor) for prov in proveedores]
     form.idMateriaPrima.choices = [(insumo.idMateriaPrima, insumo.materiaPrima) for insumo in insumos]
+    # Asignar choices y valor por defecto para el campo 'sabor'
+    form.sabor.choices = [('default', 'Default')]
+    if not form.sabor.data:
+        form.sabor.data = 'default'
 
     if request.method == "POST" and form.validate():
-        # Si el campo idCompra está vacío, se trata de una inserción y se usa el SP.
-        # Dentro de la ruta comprasInsumos, en el bloque POST:
+        # Inserción: si no hay idCompra se usa el SP
         if not request.form.get("idCompra"):
             sql = text("CALL guardarCompraInsumo(:idProveedor, :idMateriaPrima, :cantidad, :fecha, :totalCompra)")
             params = {
@@ -407,13 +504,13 @@ def comprasInsumos():
                 "idMateriaPrima": form.idMateriaPrima.data,
                 "cantidad": form.cantidad.data,
                 "fecha": form.fecha.data,
-                "totalCompra": form.totalCompra.data  # Añadir totalCompra
+                "totalCompra": form.totalCompra.data
             }
             db.session.execute(sql, params)
             db.session.commit()
             flash("Compra registrada correctamente", "success")
         else:
-            # Edición: se actualiza el registro existente, incluyendo totalCompra
+            # Edición: se actualiza el registro existente
             id_compra = request.form.get("idCompra")
             compra = ComprasInsumos.query.get(id_compra)
             if compra:
@@ -421,7 +518,6 @@ def comprasInsumos():
                 compra.idMateriaPrima = form.idMateriaPrima.data
                 compra.cantidad = Decimal(form.cantidad.data)
                 compra.fecha = form.fecha.data
-                # Se asume que totalCompra es un campo numérico; convertirlo a Decimal:
                 compra.totalCompra = Decimal(form.totalCompra.data)
                 db.session.commit()
                 flash("Compra actualizada correctamente", "success")
@@ -430,7 +526,7 @@ def comprasInsumos():
         return redirect(url_for("comprasInsumos"))
     else:
         compras = db.session.execute(text("SELECT * FROM vista_comprasInsumos")).fetchall()
-        return render_template("admin/comprasInsumos.html", form=form, compras=compras, proveedores=proveedores, insumos=insumos)
+        return render_template("admin/comprasInsumos.html", form=form, compras=compras, proveedores=proveedores, insumos=insumos, ultimo_login=current_user.ultimo_login)
 
 @app.route("/editar_compraInsumo", methods=["POST"])
 def editar_compraInsumo():
@@ -439,19 +535,21 @@ def editar_compraInsumo():
     insumos = MateriasPrimas.query.all()
     form.idProveedor.choices = [(prov.idProveedor, prov.nombreProveedor) for prov in proveedores]
     form.idMateriaPrima.choices = [(insumo.idMateriaPrima, insumo.materiaPrima) for insumo in insumos]
+    # Asigna choices para 'sabor'
+    form.sabor.choices = [('default', 'Default')]
+    if not form.sabor.data:
+        form.sabor.data = 'default'
 
     id_compra = request.form.get("idCompra")
     if id_compra:
         compra = ComprasInsumos.query.get(id_compra)
         if compra:
             try:
-                # Actualizar campos
                 compra.idProveedor = int(form.idProveedor.data)
                 compra.idMateriaPrima = int(form.idMateriaPrima.data)
                 compra.cantidad = Decimal(form.cantidad.data)
                 compra.fecha = form.fecha.data
                 compra.totalCompra = Decimal(form.totalCompra.data)
-                
                 db.session.commit()
                 flash("¡Compra actualizada!", "success")
             except Exception as e:
@@ -470,6 +568,7 @@ def editar_compraInsumo():
 #Endpoint para proveedores
 @app.route("/proveedores", methods=["GET", "POST"])
 @login_required
+@role_required(['Admin'])
 def proveedores():
     form = ProveedorForm(request.form)
     if request.method == "POST" and form.validate():
@@ -492,7 +591,7 @@ def proveedores():
             return redirect(url_for("proveedores"))
     # Consulta de proveedores activos (estatus distinto de 0)
     proveedores_lista = Proveedores.query.filter(Proveedores.estatus != 0).all()
-    return render_template("admin/proveedores.html", proveedores=proveedores_lista, form=form)
+    return render_template("admin/proveedores.html", proveedores=proveedores_lista, form=form, ultimo_login=current_user.ultimo_login)
 
 @app.route("/editar_proveedor", methods=["POST"])
 def editar_proveedor():
@@ -529,50 +628,50 @@ venta_actual = []
 
 @app.route("/puntoVenta", methods=["GET", "POST"])
 @login_required
+@role_required(['Admin', 'Ventas'])
 def puntoVenta():
-    sabores = Sabores.query.all()
-    tiposVenta = DetallesProducto.query.all()
-    
-    print("Sabores cargados:", sabores)
-    print("Tipos de venta cargados:", tiposVenta)
-    
+    # Consulta optimizada para obtener solo productos disponibles
+    productos_disponibles = db.session.query(
+        ProductosTerminados.idProducto,
+        Sabores.nombreSabor,
+        DetallesProducto.tipoProducto,
+        ProductosTerminados.cantidadDisponible,
+        DetallesProducto.precio
+    ).join(Sabores, ProductosTerminados.idSabor == Sabores.idSabor)\
+    .join(DetallesProducto, ProductosTerminados.idDetalle == DetallesProducto.idDetalle)\
+    .filter(ProductosTerminados.estatus == 1, ProductosTerminados.cantidadDisponible > 0)\
+    .order_by(ProductosTerminados.idDetalle.asc()).all()
+
     if request.method == "POST":
         accion = request.form.get("accion")
 
         if accion == "agregar":
             try:
-                idSabor = int(request.form.get("idSabor"))
-                idTipoVenta = int(request.form.get("idTipoVenta"))
-                cantidad = int(request.form.get("cantidad"))
+                idProducto = int(request.form.get("idProducto"))
+                cantidad = int(request.form.get(f"cantidad_{idProducto}"))
             except (ValueError, TypeError):
-                flash("Datos inválidos para agregar producto.")
                 return redirect(url_for("puntoVenta"))
 
-            sabor = Sabores.query.get(idSabor)
-            tipo_venta = DetallesProducto.query.get(idTipoVenta)
-
-            if not sabor or not tipo_venta or cantidad <= 0:
-                flash("Producto o cantidad inválida.")
+            # Buscar el producto en la lista de productos disponibles
+            producto = next((p for p in productos_disponibles if p.idProducto == idProducto), None)
+            if not producto or cantidad <= 0:
                 return redirect(url_for("puntoVenta"))
 
+            # Verificar si el producto ya está en la venta
             for prod in venta_actual:
-                if prod["idSabor"] == idSabor and prod["idTipoVenta"] == idTipoVenta:
-                    flash("El producto ya está en la venta.")
+                if prod["idProducto"] == idProducto:
                     return redirect(url_for("puntoVenta"))
 
-            # Guarda los datos del producto para su venta
-            precio_total = float(tipo_venta.precio) * cantidad
-            producto = {
-                "idSabor": sabor.idSabor,
-                "sabor": sabor.nombreSabor,
-                "idTipoVenta": tipo_venta.idDetalle,
-                "tipo": tipo_venta.tipoProducto,
+            # Agregar el producto a la venta actual
+            precio_total = float(producto.precio) * cantidad
+            venta_actual.append({
+                "idProducto": producto.idProducto,
+                "sabor": producto.nombreSabor,
+                "tipo": producto.tipoProducto,
                 "cantidad": cantidad,
-                "precio_unitario": float(tipo_venta.precio),
+                "precio_unitario": float(producto.precio),
                 "precio_total": precio_total
-            }
-            venta_actual.append(producto)
-            flash("Producto agregado correctamente.")
+            })
             return redirect(url_for("puntoVenta"))
 
         # Actualizar cantidad de producto (subir o bajar)
@@ -610,72 +709,50 @@ def puntoVenta():
                 descuento = float(request.form.get("descuento", 0))
                 dinero_recibido = float(request.form.get("dinero_recibido"))
             except (ValueError, TypeError):
-                flash("Datos de confirmación inválidos.")
                 return redirect(url_for("puntoVenta"))
 
             total = sum(prod["precio_total"] for prod in venta_actual)
             total_con_descuento = total - (total * (descuento / 100))
 
             if dinero_recibido < total_con_descuento:
-                flash("El dinero recibido no es suficiente.")
                 return redirect(url_for("puntoVenta"))
 
-            # Actualizar inventario en la BD usando la cantidadDisponible en ProductosTerminados
+            # Actualizar inventario y registrar la venta
             for prod in venta_actual:
-                # Buscamos el producto terminado que corresponda al idSabor y al idDetalle (tipo de venta)
-                productoTerminado = ProductosTerminados.query.filter_by(
-                    idSabor=prod["idSabor"],
-                    idDetalle=prod["idTipoVenta"]
-                ).first()
-                if productoTerminado is None:
-                    flash(f"Producto terminado no encontrado para {prod['sabor']}.")
-                    return redirect(url_for("puntoVenta"))
+                productoTerminado = ProductosTerminados.query.get(prod["idProducto"])
                 if productoTerminado.cantidadDisponible < prod["cantidad"]:
                     flash(f"Inventario insuficiente para {prod['sabor']}.")
                     return redirect(url_for("puntoVenta"))
                 productoTerminado.cantidadDisponible -= prod["cantidad"]
-            
+
             db.session.commit()
 
             nueva_venta = Ventas(total=total_con_descuento)
             db.session.add(nueva_venta)
-            db.session.flush() 
+            db.session.flush()
 
             for prod in venta_actual:
-                productoTerminado = ProductosTerminados.query.filter_by(
-                    idSabor=prod["idSabor"],
-                    idDetalle=prod["idTipoVenta"]
-                ).first()
                 detalle = DetallesVenta(
                     idVenta=nueva_venta.idVenta,
-                    idProducto=productoTerminado.idProducto,
+                    idProducto=prod["idProducto"],
                     cantidad=prod["cantidad"],
                     subtotal=prod["precio_total"]
                 )
                 db.session.add(detalle)
-            db.session.commit() 
+            db.session.commit()
 
-            # Generar el ticket en PDF
-            pdf_path = generar_pdf(venta_actual, descuento, dinero_recibido, total_con_descuento)
-            flash("Venta confirmada. Ticket generado en: " + pdf_path)
-            venta_actual.clear()  
+            venta_actual.clear()
             return redirect(url_for("puntoVenta"))
 
-    sabores = Sabores.query.all()
-    tiposVenta = DetallesProducto.query.all()
     total = sum(prod["precio_total"] for prod in venta_actual)
-    
-    inventario = {}
-    productos = ProductosTerminados.query.all()
-    for producto in productos:
-        inventario[(producto.idSabor, producto.idDetalle)] = producto.cantidadDisponible
 
     return render_template("admin/ventas.html",
-                            sabores=sabores,
-                            tiposVenta=tiposVenta,
+                            productos_disponibles=productos_disponibles,
                             venta=venta_actual,
                             total=total,
-                            inventario=inventario)
+                            ultimo_login=current_user.ultimo_login)
+
+
 
 
 
@@ -727,6 +804,8 @@ def generar_pdf(venta, descuento, dinero_recibido, total_con_descuento):
 def page_not_found(e):
     return render_template('404.html'), 404
 
+#!============================== Login ==============================#
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
@@ -738,9 +817,14 @@ def login():
             last_attempt_time, attempts = failed_attempts[correo]
             if attempts >= 3 and datetime.now() - last_attempt_time < timedelta(minutes=1):
                 flash('Demasiados intentos fallidos. Por favor, espera un minuto antes de intentar nuevamente.', 'danger')
-                return render_template("client/mainClientes.html", login_form=form, register_form=RegisterForm())
+                return render_template("client/mainClientes.html", login_form=form, register_form=RegisterForm(), recuperar_contrasena_form=RecuperarContrasenaForm())
 
         usuario = Usuarios.query.filter_by(correo=correo).first()
+
+        if usuario:
+            if usuario.activo != 1:
+                flash('Tu cuenta ha sido desactivada. Por favor, contacta al administrador.', 'danger')
+                return render_template("client/mainClientes.html", login_form=form, register_form=RegisterForm())
 
         if usuario:
             if usuario.check_contrasena(contrasena): 
@@ -754,11 +838,11 @@ def login():
                 form.contrasena.data = ''
                 
                 if usuario.rol == 'Cliente':
-                    return redirect(url_for('galletas'))
+                    return redirect(url_for('clientes'))
                 elif usuario.rol == 'Ventas':
-                    return redirect(url_for('galletas'))
+                    return redirect(url_for('puntoVenta'))
                 elif usuario.rol == 'Admin':
-                    return redirect(url_for('galletas'))
+                    return redirect(url_for('miembros'))
                 elif usuario.rol == 'Produccion':
                     return redirect(url_for('galletas'))
             else:
@@ -773,7 +857,7 @@ def login():
                 failed_attempts[correo] = (datetime.now(), failed_attempts[correo][1] + 1)
             else:
                 failed_attempts[correo] = (datetime.now(), 1)
-    return render_template("client/mainClientes.html", login_form=form, register_form=RegisterForm())
+    return render_template("client/mainClientes.html", login_form=form, register_form=RegisterForm(), recuperar_contrasena_form=RecuperarContrasenaForm())
 
 @app.route("/logout")
 @login_required 
@@ -807,13 +891,14 @@ def register():
             db.session.commit()
             flash('Cuenta creada exitosamente. Ahora puedes iniciar sesión.', 'success')
             return redirect(url_for('login'))
-    return render_template("client/mainClientes.html", login_form=LoginForm(), register_form=form)
+    return render_template("client/mainClientes.html", login_form=LoginForm(), register_form=form,  recuperar_contrasena_form=RecuperarContrasenaForm())
 
-@app.route("/usuarios", methods=["GET", "POST"])
+@app.route("/miembros", methods=["GET", "POST"])
 @login_required
-def usuarios():
+@role_required(['Admin'])
+def miembros():
     form = EmpleadoForm()
-    usuarios = Usuarios.query.filter_by(activo=1).all()
+    usuarios = Usuarios.query.filter_by(activo=1).filter(Usuarios.rol != 'Cliente').all()
     
     if form.validate_on_submit():
         nombre = form.nombre.data
@@ -836,7 +921,7 @@ def usuarios():
             db.session.add(nuevo_usuario)
             db.session.commit()
             flash('Usuario registrado exitosamente.', 'success')
-        return redirect(url_for('usuarios'))
+        return redirect(url_for('miembros'))
     
     return render_template("admin/usuarios.html", form=form, usuarios=usuarios, ultimo_login=current_user.ultimo_login)
 
@@ -850,8 +935,62 @@ def eliminar_usuario(id_usuario):
         flash('Usuario eliminado correctamente.', 'success')
     else:
         flash('Usuario no encontrado.', 'danger')
-    return redirect(url_for('usuarios'))
+    return redirect(url_for('miembros'))
 
+
+@app.route("/editar_usuario/<int:id_usuario>", methods=["POST"])
+@login_required
+@role_required(['Admin'])
+def editar_usuario(id_usuario):
+    usuario = Usuarios.query.get_or_404(id_usuario)
+
+    usuario.nombre = request.form.get('nombre')
+    usuario.apaterno = request.form.get('apaterno')
+    usuario.amaterno = request.form.get('amaterno')
+    usuario.correo = request.form.get('correo')
+    usuario.rol = request.form.get('rol')
+    usuario.activo = int(request.form.get('activo'))  # Convertir a entero
+    
+    db.session.commit()
+    flash('Usuario actualizado correctamente.', 'success')
+    return redirect(url_for('miembros'))
+
+
+@app.route("/recuperar_contrasena", methods=["POST"])
+def recuperar_contrasena():
+    form = RecuperarContrasenaForm()
+    if form.validate_on_submit():
+        correo = form.correo.data
+        nueva_contrasena = form.nueva_contrasena.data
+        confirmar_contrasena = form.confirmar_contrasena.data
+
+        # Verificar si el correo existe en la base de datos
+        usuario = Usuarios.query.filter_by(correo=correo).first()
+        if not usuario:
+            flash('El correo no está registrado.', 'danger')
+            return redirect(url_for('login'))
+
+        # Verificar que las contraseñas coincidan
+        if nueva_contrasena != confirmar_contrasena:
+            flash('Las contraseñas no coinciden.', 'danger')
+            return redirect(url_for('login'))
+
+        # Validar la contraseña
+        if is_password_insecure(nueva_contrasena):
+            flash('La contraseña es insegura. Por favor, elige una contraseña más segura.', 'danger')
+            return redirect(url_for('login'))
+
+        # Actualizar la contraseña en la base de datos
+        usuario.set_contrasena(nueva_contrasena)
+        db.session.commit()
+        flash('Contraseña actualizada correctamente.', 'success')
+        return redirect(url_for('login'))
+
+    # Si el formulario no es válido, mostrar errores
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(f'{error}', 'danger')
+    return redirect(url_for('login'))
 
 
 def is_password_insecure(contrasena):
@@ -859,6 +998,17 @@ def is_password_insecure(contrasena):
         insecure_passwords = [line.strip() for line in file]
     return contrasena in insecure_passwords
 
+
+@app.before_request
+def before_request():
+    if current_user.is_authenticated:
+        if current_user.rol == 'Cliente':
+            session.permanent = True
+            app.permanent_session_lifetime = timedelta(minutes=60)
+        else:
+            session.permanent = True
+            app.permanent_session_lifetime = timedelta(days=100)  
+        session.modified = True
 
 if __name__ == '__main__':
     csrf.init_app(app)

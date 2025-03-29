@@ -58,42 +58,57 @@
             width: 100%;
             height: 90%;
         }
+        a.btn {
+            display: flex; /* Usar flexbox para centrar contenido */
+            flex-direction: column; /* Alinear ícono y texto en columna */
+            justify-content: center; /* Centrar verticalmente */
+            align-items: center; /* Centrar horizontalmente */
+            text-decoration: none; /* Eliminar subrayado */
+            color: inherit; /* Mantener el color del texto */
+        }
     </style>
 </head>
 <body style="background-color: #e1e1e1">
     <div class="container-fluid">
         <div class="row vh-100">
             <!--* Navbar Lateral -->
-            <nav class="col-md-1 col-lg-1 d-md-block sidebar text-center" style="background-color: rgba(83, 45, 2, 0.5);">
-                <div class="position-sticky pt-3">
-                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px;">
-                        <i class="fa fa-2x fa-cookie-bite"></i><br><b>Ventas</b>
-                    </button>
-                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px;">
-                        <i class="fa fa-2x fa-box-open"></i><br><b>Inventario</b>
-                    </button>
-                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px;">
-                        <i class="fa fa-2x fa-file-alt"></i><br><b>Recetas</b>
-                    </button>
-                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px;">
-                        <i class="fa fa-2x fa-layer-group"></i><br><b>Insumos</b>
-                    </button>
-                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px;">
-                        <i class="fa fa-2x fa-bar-chart"></i><br><b>Dashboard</b>
-                    </button>
-                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px;">
-                        <i class="fa fa-2x fa-users"></i><br><b>Usuarios</b>
-                    </button>
-                    <a href="{{ url_for('logout') }}" class="btn border-0 rounded-4 text-white btn-del btn-del-hover font-Spartan d-flex flex-column justify-content-center align-items-center" style="width: 100%; height: 115px;">
+            <nav class="col-md-1 col-lg-1 d-md-block sidebar text-center" style="background-color: #532d02; opacity: 50%">
+                <div class="position-sticky pt-3 d-flex flex-column" style="height: 100vh;">
+                    <a href="{{ url_for('puntoVenta') }}" class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px;">
+                        <i class="fa fa-2x fa-cookie-bite"></i><br>
+                        <b>Ventas</b>
+                    </a>
+                    <a href="{{ url_for('galletas') }}" class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px;">
+                        <i class="fa fa-2x fa-box-open"></i><br>
+                        <b>Inventario</b>
+                    </a>
+                    <a href="{{ url_for('recetas') }}" class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px;">
+                        <i class="fa fa-2x fa-file-alt"></i><br>
+                        <b>Recetas</b>
+                    </a>
+                    <a href="{{ url_for('insumos') }}" class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px;">
+                        <i class="fa fa-2x fa-layer-group"></i><br>
+                        <b>Insumos</b>
+                    </a>
+                    <a href="{{ url_for('miembros') }}" class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px;">
+                        <i class="fa fa-2x fa-users"></i><br>
+                        <b>Usuarios</b>
+                    </a>
+                    <a href="{{ url_for('dashboard') }}" class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px;">
+                        <i class="fa fa-2x fa-bar-chart"></i><br>
+                        <b>Dashboard</b>
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="mb-2 btn border-0 rounded-4 text-white btn-del btn-del-hover font-Spartan d-flex flex-column justify-content-center align-items-center mt-auto" style="width: 100%; height: 115px;">
                         <i class="fa fa-2x fa-sign-out-alt mb-2"></i>
                         <b>Cerrar sesión</b>
                     </a>
                 </div>
             </nav>
-
-            <div class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 p-1 mt-5">
-                {% block container %}
-                {% endblock %}
+            <div class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 p-1 mt-3">
+            {% block container %}
+            
+            
+            {% endblock %}
             </div>
         </div>
     </div>
