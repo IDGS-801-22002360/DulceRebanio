@@ -2,28 +2,220 @@
 {% block container %}
 
 <style>
-  #productosTable {
-    width: 90%; /* Ajusta el ancho */
-    background-color: white; /* Fondo blanco */
-    border-collapse: collapse;
-    margin: auto;
-  }
-  #productosTable th, #productosTable td {
-    padding: 5px;
-    text-align: left;
-    border: 1px solid #ddd;
-  }
-  .left-side {
-    width: 40%; /* Ajusta el tamaño del contenedor de la tabla */
-  }
-  .right-side {
-    width: 60%;
-  }
-  .btn-action {
-    padding: 2px 5px;
-    margin: 0 2px;
-    font-size: 14px;
-  }
+/* Reset básico y tipografía */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'League Spartan', 'League Gothic', sans-serif;
+  background-color: #d9d9d9;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+/* Header */
+.header {
+  background-color: #5B331E;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: left;
+}
+
+.header h1 {
+  color: #fff;
+  font-size: 50px;
+  margin-left: 10px;
+}
+
+.header img {
+  height: 100px;
+  margin-right: 10px;
+}
+
+/* Layout principal */
+.content {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  min-height: 100vh;
+  gap: 20px;
+}
+
+.left-side {
+  flex: 1;
+  width: 50%;
+}
+
+.right-side {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 100px;
+  width: 320px;
+}
+
+/* Tablas */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #FFF;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  height: 60%;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 12px 20px;
+  text-align: center;
+}
+
+th {
+  background-color: #F0E68C;
+  color: #5B331E;
+  font-size: 1.1rem;
+}
+
+td {
+  background-color: #fff;
+}
+
+/* Scrollable para inventario */
+.scroll-container {
+  overflow: auto;
+  max-height: 300px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  padding: 5px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Inventario: tabla interna */
+#inventarioTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#inventarioTable th, #inventarioTable td {
+  border: 1px solid #ddd;
+  padding: 6px;
+  font-size: 14px;
+  text-align: center;
+}
+
+#inventarioTable th {
+  background-color: #f0f0f0;
+}
+
+/* Opciones: formulario para agregar productos */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.options form, .options button {
+  width: 90%;
+  padding: 10px;
+  border: none;
+  border-radius: 30px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 1.2rem;
+  font-family: 'League Spartan', sans-serif;
+  transition: background-color 0.3s, transform 0.3s ease;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+}
+
+.options form:hover, .options button:hover {
+  transform: scale(1.03);
+}
+
+.options form select, .options form input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #ccc;
+  border-radius: 14px;
+  font-size: 1.1rem;
+  margin: 5px 0;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+  transition: border-color 0.3s ease;
+}
+
+.options form select:focus, .options form input:focus {
+  border-color: #FFD700;
+  outline: none;
+}
+
+/* Quitar spin a number */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  width: 50px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 5px;
+  font-size: 1rem;
+  font-family: 'League Spartan', sans-serif;
+}
+
+/* Botón de compra */
+#buy-button {
+  margin-top: 30px;
+  background-color: #FFD700;
+  color: #fff;
+}
+
+.row-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+}
+
+.row-container p {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
+
+.row-container span, .row-container input {
+  display: block;
+  margin-top: 5px;
+  font-size: 1.2rem;
+  width: 150px;
+}
+
+#dineroRecibido {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 150px;
+}
+
+#totalVenta, #cambio {
+  background-color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+#add-button{
+  margin-top: 30px;
+  background-color: #FFD700;
+  color: #fff;
+}
 </style>
 
 <!-- Content -->
@@ -48,24 +240,26 @@
           <td>{{ prod.cantidad }}</td>
           <td>${{ prod.precio_total }}</td>
           <td>
-            <!-- Botón para subir cantidad -->
-            <form method="POST" action="{{ url_for('puntoVenta') }}" style="display:inline;">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <input type="hidden" name="accion" value="actualizar">
-              <input type="hidden" name="idSabor" value="{{ prod.idSabor }}">
-              <input type="hidden" name="idTipoVenta" value="{{ prod.idTipoVenta }}">
-              <input type="hidden" name="operacion" value="subir">
-              <button type="submit" class="btn-action">+</button>
-            </form>
-            <!-- Botón para bajar cantidad -->
-            <form method="POST" action="{{ url_for('puntoVenta') }}" style="display:inline;">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <input type="hidden" name="accion" value="actualizar">
-              <input type="hidden" name="idSabor" value="{{ prod.idSabor }}">
-              <input type="hidden" name="idTipoVenta" value="{{ prod.idTipoVenta }}">
-              <input type="hidden" name="operacion" value="bajar">
-              <button type="submit" class="btn-action">-</button>
-            </form>
+            <div class="d-flex justify-content-center">
+              <!-- Botón para subir cantidad -->
+              <form method="POST" action="{{ url_for('puntoVenta') }}" class="me-1" style="display: inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="accion" value="actualizar">
+                <input type="hidden" name="idSabor" value="{{ prod.idSabor }}">
+                <input type="hidden" name="idTipoVenta" value="{{ prod.idTipoVenta }}">
+                <input type="hidden" name="operacion" value="subir">
+                <button type="submit" class="btn btn-success btn-sm" style="border-radius: 30px; font-size: 1.2rem;">+</button>
+              </form>
+              <!-- Botón para bajar cantidad -->
+              <form method="POST" action="{{ url_for('puntoVenta') }}" style="display: inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="accion" value="actualizar">
+                <input type="hidden" name="idSabor" value="{{ prod.idSabor }}">
+                <input type="hidden" name="idTipoVenta" value="{{ prod.idTipoVenta }}">
+                <input type="hidden" name="operacion" value="bajar">
+                <button type="submit" class="btn btn-danger btn-sm" style="border-radius: 30px; font-size: 1.2rem;">-</button>
+              </form>
+            </div>
           </td>
         </tr>
         {% endfor %}
@@ -133,57 +327,62 @@
 </div>
 
 <!-- Modal de confirmación de compra -->
-<div id="modal" class="modal" style="display: none;">
-  <div class="modal-content">
-    <div class="modal-header">
-      <span class="close" onclick="cerrarModal()">&times;</span>
-    </div>
-    <form method="POST" action="{{ url_for('puntoVenta') }}">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <input type="hidden" name="accion" value="confirmar">
-      <div class="center">
-        <div class="row-container">
-          <p style="font-weight: bold">
-            Cobro: <span id="totalVenta">${{ total if total else "0.00" }}</span>
-          </p>
-          <p style="font-weight: bold">
-            Recibido:
-            <input
-              type="number"
-              name="dinero_recibido"
-              id="dineroRecibido"
-              placeholder="Ingresa el dinero recibido"
-              step="0.01"
-              required
-            />
-          </p>
-          <p style="font-weight: bold">
-            Cambio: <span id="cambio">$0.00</span>
-          </p>
-        </div>
-        <br /><br /><br /><br />
-        <label>
-          <input type="checkbox" id="imprimirTicket" name="imprimirTicket" value="1" /> Imprimir ticket
-        </label>
-        <select id="descuento" name="descuento">
-          <option value="0">Sin descuento</option>
-          <option value="5">5%</option>
-          <option value="10">10%</option>
-          <option value="15">15%</option>
-          <option value="20">20%</option>
-        </select>
+<div id="modal" class="modal fade" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 320px;">
+    <div class="modal-content" style="background-color: #e1e1e1; box-shadow: 0 0 10px rgba(0,0,0,0.2); border-radius: 10px;">
+      <div class="modal-header" style="background-color: #a78e6f; color: #000; font-size: 30px; border-radius: 10px 10px 0 0; padding: 15px; position: relative;">
+        <h5 class="modal-title">Confirmar Compra</h5>
+        <button type="button" class="btn-close" aria-label="Close" onclick="cerrarModal()" style="font-size: 50px; color: #391f01;"></button>
       </div>
-      <button type="submit" id="confirmarCompra">Confirmar Compra</button>
-    </form>
+      <form method="POST" action="{{ url_for('puntoVenta') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="accion" value="confirmar">
+        <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 20px;">
+          <div class="text-center">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <p class="fw-bold mb-0">Cobro: <span id="totalVenta">${{ total if total else '0.00' }}</span></p>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <p class="fw-bold mb-0">Recibido:</p>
+              <input type="number" name="dinero_recibido" id="dineroRecibido" placeholder="Ingresa el dinero recibido" step="0.01" required style="padding: 10px; font-size: 20px; border-radius: 5px; border: 1px solid #ccc; width: 150px;">
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <p class="fw-bold mb-0">Cambio: <span id="cambio">$0.00</span></p>
+            </div>
+          </div>
+          <div class="text-center">
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="imprimirTicket" name="imprimirTicket" value="1">
+              <label class="form-check-label" for="imprimirTicket">Imprimir ticket</label>
+            </div>
+            <select id="descuento" name="descuento" class="form-select" style="background-color: #b77918; color: black;">
+              <option value="0">Sin descuento</option>
+              <option value="5">5%</option>
+              <option value="10">10%</option>
+              <option value="15">15%</option>
+              <option value="20">20%</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer" style="padding: 10px 0; display: flex; justify-content: space-between; align-items: center;">
+          <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+          <button type="submit" id="confirmarCompra" class="btn text-white" style="background-color: #b36f04; border-radius: 30px; font-size: 1.2rem; padding: 10px;">Confirmar Compra</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 
+<!-- Scripts para el Modal -->
 <script>
   function mostrarModal() {
-    document.getElementById('modal').style.display = 'block';
+    var modal = new bootstrap.Modal(document.getElementById('modal'));
+    modal.show();
   }
   function cerrarModal() {
-    document.getElementById('modal').style.display = 'none';
+    var modalEl = document.getElementById('modal');
+    var modal = bootstrap.Modal.getInstance(modalEl);
+    modal.hide();
   }
 </script>
 
