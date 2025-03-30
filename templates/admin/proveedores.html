@@ -1,6 +1,8 @@
 {% extends "admin/index.html" %} {% block container %}
+
+<h1>Proveedores</h1>
 <div
-  class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 mt-5 p-1"
+  class="col-md-12 ms-sm-auto col-lg-12 px-md-4 container rounded-3 mt-5 p-1"
 >
   <div class="row">
     {% with messages = get_flashed_messages() %} {% if messages %} {% for
@@ -19,11 +21,8 @@
         <div class="card-header text-center">
           <b>Proveedores</b>
         </div>
-        <div class="table-responsive">
-          <table
-            class="table table-hover table-striped text-center"
-            id="proveedoresTable"
-          >
+        <div class="table-responsive" style="max-height: 400px; overflow-y: auto; max-width: 650px; overflow-x: hidden;">
+          <table class="table table-hover table-striped text-center" id="proveedoresTable">
             <thead>
               <tr>
                 <th>ID</th>
@@ -35,30 +34,21 @@
             </thead>
             <tbody id="proveedoresTableBody">
               {% for proveedor in proveedores %}
-              <tr
-                data-id="{{ proveedor.idProveedor }}"
-                data-nombre="{{ proveedor.nombreProveedor }}"
-                data-correo="{{ proveedor.correo }}"
-                data-telefono="{{ proveedor.telefono }}"
-              >
+              <tr data-id="{{ proveedor.idProveedor }}" data-nombre="{{ proveedor.nombreProveedor }}" data-correo="{{ proveedor.correo }}" data-telefono="{{ proveedor.telefono }}">
                 <td>{{ proveedor.idProveedor }}</td>
                 <td>{{ proveedor.nombreProveedor }}</td>
                 <td>{{ proveedor.correo }}</td>
                 <td>{{ proveedor.telefono }}</td>
                 <td>
                   <!-- Botón de eliminación con SweetAlert2 -->
-                  <a
-                    href="#"
-                    class="btn btn-danger btn-sm"
-                    onclick="confirmDeletion('{{ url_for('eliminar_proveedor', id=proveedor.idProveedor) }}', '{{ proveedor.nombreProveedor }}'); return false;"
-                    >Eliminar</a
-                  >
+                  <a href="#" class="btn btn-danger btn-sm" onclick="confirmDeletion('{{ url_for('eliminar_proveedor', id=proveedor.idProveedor) }}', '{{ proveedor.nombreProveedor }}'); return false;">Eliminar</a>
                 </td>
               </tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
+        
       </div>
     </div>
     <!-- Formulario de creación/edición de Proveedor -->
@@ -81,8 +71,7 @@
         </div>
         <div class="mb-3">
           <label for="correo" class="form-label">Correo</label>
-          {{ form.correo(class="form-control", id="correo", placeholder="Correo
-          electrónico") }}
+          {{ form.correo(class="form-control", id="correo", placeholder="Correo electrónico") }}
         </div>
         <div class="mb-3">
           <label for="telefono" class="form-label">Teléfono</label>
