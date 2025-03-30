@@ -16,6 +16,9 @@ class Usuarios(db.Model, UserMixin):
     rol = db.Column(db.Enum('Admin', 'Ventas', 'Produccion', 'Cliente'))
     activo = db.Column(db.Integer, default=1)
     ultimo_login = db.Column(db.DateTime)
+    otp_secret = db.Column(db.String(16)) 
+    otp_verified = db.Column(db.Boolean, default=False) 
+    registration_data = db.Column(db.JSON)  
     
 
     def set_contrasena(self, contrasena):
@@ -120,6 +123,7 @@ class DetallesPedido(db.Model):
     idPedido = db.Column(db.Integer, db.ForeignKey('pedidos.idPedido'))
     idProducto = db.Column(db.Integer, db.ForeignKey('productosterminados.idProducto'))
     cantidad = db.Column(db.Integer)
+
     
 
 class VentasCliente(db.Model):

@@ -1,4 +1,6 @@
 from functools import wraps
+from models import DetallesVenta, Usuarios, Ventas, ComprasInsumos, DetallesProducto, Proveedores, Sabores, db, ProductosTerminados, MateriasPrimas
+from forms import CompraInsumoForm, LoteForm, InsumoForm, MermaForm, OTPVerificationForm, ProveedorForm, PaqueteForm, RecuperarContrasenaForm
 from models import VentasCliente, DetallesVenta, Usuarios, Ventas, ComprasInsumos, DetallesProducto, Proveedores, Sabores, db, ProductosTerminados, MateriasPrimas
 from forms import CompraInsumoForm, LoteForm, InsumoForm, MermaForm, ProveedorForm, PaqueteForm, RecuperarContrasenaForm
 from flask import Flask, render_template, request, jsonify, redirect, session, url_for, flash,session
@@ -22,6 +24,13 @@ from flask_wtf import FlaskForm
 from forms import EmpleadoForm, HiddenField, SubmitField, LoginForm, RecuperarContrasenaForm, RegisterForm
 from decimal import Decimal
 from datetime import datetime, timedelta, date
+import secrets
+import string
+from flask_mail import Mail, Message
+import pyotp
+import json
+import time
+import ntplib
 
 app = Flask(__name__)
 app.secret_key = "dongalleto" 
@@ -30,7 +39,25 @@ csrf = CSRFProtect()
 
 app.config["RECAPTCHA_PUBLIC_KEY"] = "6Lcb1f0qAAAAAMLjkyE44X40_nQq_FZns9Sj8CVs"
 app.config["RECAPTCHA_PRIVATE_KEY"] = "6Lcb1f0qAAAAADFk-w_f5-Da5MyzdN2E8HdY-Vcs"
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'fabian.anrey@gmail.com'
+app.config['MAIL_PASSWORD'] = 'pksh vgjq rbur axnc'
+app.config['MAIL_DEFAULT_SENDER'] = 'fabian.anrey@gmail.com'
+
+mail = Mail(app)
 # app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=200)
+
+def sync_time():
+    try:
+        c = ntplib.NTPClient()
+        response = c.request('pool.ntp.org')
+        time.time = lambda: response.tx_time
+    except:
+        pass
+
+sync_time()
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -71,10 +98,12 @@ def index():
     login_form = LoginForm()
     register_form = RegisterForm()
     recuperar_contrasena_form = RecuperarContrasenaForm()
+    show_recuperar_modal = request.args.get('show_recuperar_modal', False)
     return render_template("client/mainClientes.html", 
-                        login_form=login_form, 
-                        register_form=register_form,
-                        recuperar_contrasena_form=recuperar_contrasena_form)
+                         login_form=login_form, 
+                         register_form=register_form,
+                         recuperar_contrasena_form=recuperar_contrasena_form,
+                         show_recuperar_modal=show_recuperar_modal)
 
 @app.route("/clientes", methods=["GET", "POST"])
 @login_required
@@ -965,12 +994,26 @@ def login():
     if form.validate_on_submit():
         correo = form.correo.data
         contrasena = form.contrasena.data
+        now = datetime.now()
 
+        # Verificar intentos fallidos previos
         if correo in failed_attempts:
             last_attempt_time, attempts = failed_attempts[correo]
-            if attempts >= 3 and datetime.now() - last_attempt_time < timedelta(minutes=1):
+            
+            # Si han pasado más de 1 minuto desde el último intento, reiniciar el contador
+            if now - last_attempt_time > timedelta(minutes=1):
+                failed_attempts[correo] = (now, 1)
+            # Si hay 3 o más intentos en menos de 1 minuto
+            elif attempts >= 3:
                 flash('Demasiados intentos fallidos. Por favor, espera un minuto antes de intentar nuevamente.', 'danger')
-                return render_template("client/mainClientes.html", login_form=form, register_form=RegisterForm(), recuperar_contrasena_form=RecuperarContrasenaForm())
+                return render_template("client/mainClientes.html", 
+                                    login_form=form, 
+                                    register_form=RegisterForm(),
+                                    recuperar_contrasena_form=RecuperarContrasenaForm(),
+                                    show_modal=True)
+        else:
+            # Primer intento fallido para este correo
+            failed_attempts[correo] = (now, 0)
 
         usuario = Usuarios.query.filter_by(correo=correo).first()
 
@@ -979,38 +1022,49 @@ def login():
                 flash('Tu cuenta ha sido desactivada. Por favor, contacta al administrador.', 'danger')
                 return render_template("client/mainClientes.html", login_form=form, register_form=RegisterForm())
 
-        if usuario:
-            if usuario.check_contrasena(contrasena): 
-                login_user(usuario) 
-                usuario.ultimo_login = datetime.now()
-                db.session.commit()
-                flash('Inicio de sesión exitoso.', 'success')
-                if correo in failed_attempts:
-                    del failed_attempts[correo]
-                form.correo.data = ''
-                form.contrasena.data = ''
-                
-                if usuario.rol == 'Cliente':
-                    return redirect(url_for('clientes'))
-                elif usuario.rol == 'Ventas':
-                    return redirect(url_for('puntoVenta'))
-                elif usuario.rol == 'Admin':
-                    return redirect(url_for('miembros'))
-                elif usuario.rol == 'Produccion':
-                    return redirect(url_for('galletas'))
-            else:
-                flash('Correo o contraseña incorrectos. Por favor, intenta de nuevo.', 'danger')
-                if correo in failed_attempts:
-                    failed_attempts[correo] = (datetime.now(), failed_attempts[correo][1] + 1)
-                else:
-                    failed_attempts[correo] = (datetime.now(), 1)
-        else:
-            flash('Correo o contraseña incorrectos. Por favor, intenta de nuevo.', 'danger')
+        if usuario and usuario.check_contrasena(contrasena):
+            # Login exitoso - resetear intentos fallidos
             if correo in failed_attempts:
-                failed_attempts[correo] = (datetime.now(), failed_attempts[correo][1] + 1)
+                del failed_attempts[correo]
+            
+            login_user(usuario) 
+            usuario.ultimo_login = now
+            db.session.commit()
+                
+            if usuario.rol == 'Cliente':
+                return redirect(url_for('clientes'))
+            elif usuario.rol == 'Ventas':
+                return redirect(url_for('puntoVenta', _anchor='login-success'))
+            elif usuario.rol == 'Admin':
+                return redirect(url_for('miembros', _anchor='login-success'))
+            elif usuario.rol == 'Produccion':
+                return redirect(url_for('galletas', _anchor='login-success'))
+        else:
+            # Login fallido - incrementar contador
+            if correo in failed_attempts:
+                last_time, attempts = failed_attempts[correo]
+                failed_attempts[correo] = (now, attempts + 1)
             else:
-                failed_attempts[correo] = (datetime.now(), 1)
-    return render_template("client/mainClientes.html", login_form=form, register_form=RegisterForm(), recuperar_contrasena_form=RecuperarContrasenaForm())
+                failed_attempts[correo] = (now, 1)
+            
+            flash('Correo o contraseña incorrectos. Por favor, intenta de nuevo.', 'danger')
+            return render_template("client/mainClientes.html", 
+                                login_form=form, 
+                                register_form=RegisterForm(),
+                                recuperar_contrasena_form=RecuperarContrasenaForm(),
+                                show_modal=True)
+    
+    if form.errors:
+        return render_template("client/mainClientes.html", 
+                             login_form=form, 
+                             register_form=RegisterForm(),
+                             recuperar_contrasena_form=RecuperarContrasenaForm(),
+                             show_modal=True)
+    
+    return render_template("client/mainClientes.html", 
+                         login_form=form, 
+                         register_form=RegisterForm(),
+                         recuperar_contrasena_form=RecuperarContrasenaForm())
 
 @app.route("/logout")
 @login_required 
@@ -1023,6 +1077,9 @@ def logout():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     form = RegisterForm()
+    login_form = LoginForm()
+    recuperar_contrasena_form = RecuperarContrasenaForm()
+    
     if form.validate_on_submit():
         nombre = form.nombre.data
         apaterno = form.apaterno.data
@@ -1032,19 +1089,126 @@ def register():
 
         if is_password_insecure(contrasena):
             flash('La contraseña es insegura. Por favor, elige una contraseña más segura.', 'danger')
-            return render_template("client/mainClientes.html", login_form=LoginForm(), register_form=form)
+            return render_template("client/mainClientes.html", 
+                                login_form=login_form, 
+                                register_form=form,
+                                recuperar_contrasena_form=recuperar_contrasena_form,
+                                show_modal=True,
+                                active_tab='register')
 
         usuario_existente = Usuarios.query.filter_by(correo=correo).first()
         if usuario_existente:
             flash('El correo ya está registrado. Por favor, utiliza otro correo.', 'danger')
-        else:
-            nuevo_usuario = Usuarios(nombre=nombre, apaterno=apaterno, amaterno=amaterno, correo=correo, rol='Cliente')
-            nuevo_usuario.set_contrasena(contrasena)
-            db.session.add(nuevo_usuario)
+            return render_template("client/mainClientes.html", 
+                                login_form=login_form, 
+                                register_form=form,
+                                recuperar_contrasena_form=recuperar_contrasena_form,
+                                show_modal=True,
+                                active_tab='register')
+        
+        # Generar secreto OTP
+        otp_secret = pyotp.random_base32()
+        
+        # Crear usuario temporal con datos de registro
+        temp_user = Usuarios(
+            nombre=form.nombre.data,
+            apaterno=form.apaterno.data,
+            amaterno=form.amaterno.data,
+            correo=form.correo.data,
+            otp_secret=otp_secret,
+            registration_data=json.dumps({
+                'contrasena': form.contrasena.data,
+                'rol': 'Cliente',
+                'activo': 1
+            }),
+            activo=0  # Inactivo hasta verificación OTP
+        )
+        
+        try:
+            db.session.add(temp_user)
             db.session.commit()
-            flash('Cuenta creada exitosamente. Ahora puedes iniciar sesión.', 'success')
-            return redirect(url_for('login'))
-    return render_template("client/mainClientes.html", login_form=LoginForm(), register_form=form,  recuperar_contrasena_form=RecuperarContrasenaForm())
+            
+            # Generar y enviar código OTP
+            totp = pyotp.TOTP(temp_user.otp_secret, interval=600)
+            otp_code = totp.now()
+            
+            # Enviar correo con el código OTP
+            msg = Message(
+                subject="Código de verificación para tu registro en Dulce Rebaño",
+                recipients=[temp_user.correo],
+                html=f"""
+                <h2>Verificación de correo electrónico</h2>
+                <p>Gracias por registrarte en Dulce Rebaño. Tu código de verificación es:</p>
+                <h3 style="background: #f0f0f0; padding: 10px; display: inline-block; border-radius: 5px;">
+                    {otp_code}
+                </h3>
+                <p>Este código expirará en 10 minutos.</p>
+                """
+            )
+            mail.send(msg)
+            
+            flash('Se ha enviado un código de verificación a tu correo electrónico.', 'success')
+            return redirect(url_for('verify_otp', user_id=temp_user.idUsuario))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al registrar: {str(e)}', 'danger')
+            return render_template("client/mainClientes.html", 
+                                login_form=login_form, 
+                                register_form=form,
+                                recuperar_contrasena_form=recuperar_contrasena_form,
+                                show_modal=True,
+                                active_tab='register')
+    
+    if form.errors:
+        return render_template("client/mainClientes.html", 
+                            login_form=login_form, 
+                            register_form=form,
+                            recuperar_contrasena_form=recuperar_contrasena_form,
+                            show_modal=True,
+                            active_tab='register')
+    
+    return render_template("client/mainClientes.html", 
+                         login_form=login_form, 
+                         register_form=form,
+                         recuperar_contrasena_form=recuperar_contrasena_form,
+                         show_modal=True,
+                         active_tab='register')
+
+@app.route("/verify-otp/<int:user_id>", methods=["GET", "POST"])
+def verify_otp(user_id):
+    form = OTPVerificationForm()
+    user = Usuarios.query.get_or_404(user_id)
+    
+    if form.validate_on_submit():
+        # Usar el mismo intervalo (600 segundos) que en el registro
+        totp = pyotp.TOTP(user.otp_secret, interval=600)
+        
+        # Verificar con un margen de 1 código (10 minutos en total)
+        if totp.verify(form.otp_code.data, valid_window=1):
+            # OTP válido, activar la cuenta
+            try:
+                reg_data = json.loads(user.registration_data)
+                user.set_contrasena(reg_data['contrasena'])
+                user.rol = reg_data['rol']
+                user.activo = 1
+                user.otp_verified = True
+                user.registration_data = None  # Limpiar datos temporales
+                
+                db.session.commit()
+                
+                flash('¡Registro completado con éxito! Ahora puedes iniciar sesión.', 'success')
+                return redirect(url_for('index'))
+                
+            except Exception as e:
+                db.session.rollback()
+                flash('Error al completar el registro. Por favor intenta nuevamente.', 'danger')
+                return redirect(url_for('verify_otp', user_id=user_id))
+        else:
+            flash('Código OTP inválido o expirado. Por favor, intenta de nuevo.', 'danger')
+    
+    return render_template("client/verify_otp.html", form=form, user_id=user_id)
+
 
 @app.route("/miembros", methods=["GET", "POST"])
 @login_required
@@ -1112,38 +1276,38 @@ def editar_usuario(id_usuario):
 @app.route("/recuperar_contrasena", methods=["POST"])
 def recuperar_contrasena():
     form = RecuperarContrasenaForm()
+    login_form = LoginForm()
+    register_form = RegisterForm()
+    
     if form.validate_on_submit():
         correo = form.correo.data
         nueva_contrasena = form.nueva_contrasena.data
         confirmar_contrasena = form.confirmar_contrasena.data
 
-        # Verificar si el correo existe en la base de datos
         usuario = Usuarios.query.filter_by(correo=correo).first()
         if not usuario:
-            flash('El correo no está registrado.', 'danger')
-            return redirect(url_for('login'))
+            flash('El correo no está registrado.', 'recuperar_error')
+            return redirect(url_for('index', show_recuperar_modal=True))
 
-        # Verificar que las contraseñas coincidan
         if nueva_contrasena != confirmar_contrasena:
-            flash('Las contraseñas no coinciden.', 'danger')
-            return redirect(url_for('login'))
+            flash('Las contraseñas no coinciden.', 'recuperar_error')
+            return redirect(url_for('index', show_recuperar_modal=True))
 
-        # Validar la contraseña
         if is_password_insecure(nueva_contrasena):
-            flash('La contraseña es insegura. Por favor, elige una contraseña más segura.', 'danger')
-            return redirect(url_for('login'))
+            flash('La contraseña es insegura. Por favor, elige una contraseña más segura.', 'recuperar_error')
+            return redirect(url_for('index', show_recuperar_modal=True))
 
-        # Actualizar la contraseña en la base de datos
         usuario.set_contrasena(nueva_contrasena)
         db.session.commit()
-        flash('Contraseña actualizada correctamente.', 'success')
-        return redirect(url_for('login'))
+        flash('Contraseña actualizada correctamente. Ahora puedes iniciar sesión.', 'success')
+        return redirect(url_for('index'))
 
-    # Si el formulario no es válido, mostrar errores
+    # Si hay errores de validación del formulario
     for field, errors in form.errors.items():
         for error in errors:
-            flash(f'{error}', 'danger')
-    return redirect(url_for('login'))
+            flash(f'{error}', 'recuperar_error')
+    
+    return redirect(url_for('index', show_recuperar_modal=True))
 
 
 def is_password_insecure(contrasena):
