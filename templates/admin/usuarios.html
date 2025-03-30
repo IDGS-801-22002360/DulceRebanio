@@ -23,7 +23,7 @@
     </div>
     {% endif %} {% endwith %}  
   <div class="col-6">
-    <div class="last-login">
+  <div class="last-login">
       <p class="mb-0">
         <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d
         %H:%M:%S') if ultimo_login else 'Nunca' }}
@@ -57,11 +57,7 @@
               {{ macro.input_field(form.rol, placeholder="Rol") }}
             </div>
             <div class="col-md-12 d-flex justify-content-center">
-              <button
-                type="submit"
-                class="btn btn-warning btn-sm"
-                style="width: auto"
-              >
+              <button type="submit" class="btn btn-warning btn-sm" style="width: auto">
                 Registrar
               </button>
             </div>
@@ -116,7 +112,7 @@
                     value="{{ csrf_token() }}"
                   />
                   <button type="submit" class="btn btn-danger btn-sm">
-                    Eliminar
+                    <i class="fa fa-trash text-white"></i>
                   </button>
                 </form>
               </td>
@@ -174,6 +170,8 @@
             {% endfor %}
           </tbody>
         </table>
+      </div>
+      <div class="card-footer border-0 rounded-bottom-3 bg-white pt-0">
       </div>
     </div>
   </div>

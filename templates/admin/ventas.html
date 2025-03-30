@@ -2,185 +2,394 @@
 
 <style>
   #productosTable {
-    width: 90%; /* Ajusta el ancho */
-    height: 80%;
-    background-color: white; /* Fondo blanco */
-    border-collapse: collapse;
-    margin: auto;
+      width: 90%;
+      /* Ajusta el ancho */
+      height: 80%;
+      background-color: white;
+      /* Fondo blanco */
+      border-collapse: collapse;
+      margin: auto;
   }
 
   #productosTable th,
   #productosTable td {
-    padding: 5px;
+      padding: 5px;
+      text-align: left;
+      border: 1px solid #ddd;
+  }
+
+.left-side {
+flex: 1;
+width: 50%;
+}
+
+.right-side {
+display: flex;
+flex-direction: column;
+gap: 20px;
+min-width: 100px;
+width: 320px;
+}
+
+/* Tablas */
+table {
+width: 100%;
+border-collapse: collapse;
+background-color: #FFF;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+margin-bottom: 20px;
+height: 60%;
+}
+
+th, td {
+border: 1px solid #ccc;
+padding: 12px 20px;
+text-align: center;
+}
+
+th {
+background-color: #F0E68C;
+color: #5B331E;
+font-size: 1.1rem;
+}
+
+td {
+background-color: #fff;
+}
+
+/* Scrollable para inventario */
+.scroll-container {
+overflow: auto;
+max-height: 300px;
+border: 1px solid #ddd;
+border-radius: 8px;
+background-color: #fff;
+padding: 5px;
+box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Inventario: tabla interna */
+#inventarioTable {
+width: 100%;
+border-collapse: collapse;
+}
+
+#inventarioTable th, #inventarioTable td {
+border: 1px solid #ddd;
+padding: 6px;
+font-size: 14px;
+text-align: center;
+}
+
+#inventarioTable th {
+background-color: #f0f0f0;
+}
+
+/* Opciones: formulario para agregar productos */
+.options {
+display: flex;
+flex-direction: column;
+gap: 15px;
+}
+
+.options form, .options button {
+width: 90%;
+padding: 10px;
+border: none;
+border-radius: 30px;
+color: #fff;
+cursor: pointer;
+font-size: 1.2rem;
+font-family: 'League Spartan', sans-serif;
+transition: background-color 0.3s, transform 0.3s ease;
+box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+}
+
+.options form:hover, .options button:hover {
+transform: scale(1.03);
+}
+
+.options form select, .options form input {
+width: 100%;
+padding: 15px;
+border: 2px solid #ccc;
+border-radius: 14px;
+font-size: 1.1rem;
+margin: 5px 0;
+box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+transition: border-color 0.3s ease;
+}
+
+.options form select:focus, .options form input:focus {
+border-color: #FFD700;
+outline: none;
+}
+
+/* Quitar spin a number */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+-webkit-appearance: none;
+margin: 0;
+}
+
+input[type="number"] {
+-moz-appearance: textfield;
+width: 50px;
+text-align: center;
+border: 1px solid #ccc;
+border-radius: 5px;
+padding: 5px;
+font-size: 1rem;
+font-family: 'League Spartan', sans-serif;
+}
+
+/* Botón de compra */
+#buy-button {
+margin-top: 30px;
+background-color: #FFD700;
+color: #fff;
+}
+
+.row-container {
+display: flex;
+justify-content: space-between;
+gap: 20px;
+align-items: center;
+}
+
+.row-container p {
+margin-bottom: 10px;
+font-size: 1.2rem;
+}
+
+.row-container span, .row-container input {
+display: block;
+margin-top: 5px;
+font-size: 1.2rem;
+width: 150px;
+}
+
+#dineroRecibido {
+padding: 10px;
+border: 1px solid #ccc;
+border-radius: 5px;
+width: 150px;
+}
+
+#totalVenta, #cambio {
+background-color: #fff;
+padding: 5px 10px;
+border-radius: 5px;
+}
+
+#add-button{
+margin-top: 30px;
+background-color: #FFD700;
+color: #fff;
+}
+
+#productosTableSmall {
+    width: 90%;
+    background-color: white;
+    border-collapse: collapse;
+    margin: auto;
+    max-height: 150px; 
+    overflow-y: auto;  
+}
+
+#productosTableSmall th,
+#productosTableSmall td {
+    padding: 8px;
     text-align: left;
     border: 1px solid #ddd;
-  }
+}
 
-  .left-side {
-    width: 40%; /* Ajusta el tamaño del contenedor de la tabla */
-  }
+#productosTableSmall thead {
+    background-color: #F0E68C;
+    color: #5B331E;
+    font-size: 1.1rem;
+}
 
-  .right-side {
-    width: 60%;
-  }
+#productosTableSmall thead tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+#productosTableSmall tbody {
+    display: block;
+    max-height: 200px; /* Ajusta la altura si es necesario */
+    overflow-y: auto;
+    width: 100%;
+}
+
+#productosTableSmall tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+
 </style>
 
 <!-- Content -->
 <div class="content" style="flex: 1; display: flex">
-  <div class="last-login">
-    <p class="mb-0">
-      <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d
-      %H:%M:%S') if ultimo_login else 'Nunca' }}
-    </p>
-  </div>
-  <div class="left-side">
-    <!-- Tabla de productos de la venta actual -->
-    <table id="productosTable">
-      <thead>
-        <tr>
-          <th>Producto</th>
-          <th>Tipo</th>
-          <th>Cantidad</th>
-          <th>Precio</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for prod in venta %}
-        <tr>
-          <td>{{ prod.sabor }}</td>
-          <td>{{ prod.tipo }}</td>
-          <td>{{ prod.cantidad }}</td>
-          <td>${{ prod.precio_total }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-  <div class="right-side" style="min-width: 320px">
-    <!-- Contenedor scrollable para la tabla de inventario -->
-    <div
-      class="scroll-container"
-      style="margin-top: 10px; overflow: auto; max-height: 300px"
-    >
-      <h3 style="font-size: 16px; margin-bottom: 5px">Inventario</h3>
-      <table id="inventarioTable" style="font-size: 14px; width: 100%">
-        <thead>
-          <tr>
-            <th>Sabor</th>
-            <th>Tipo</th>
-            <th>Cant.</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for sabor in sabores %} {% for tipo in tiposVenta %}
-          <tr>
-            <td>{{ sabor.nombreSabor }}</td>
-            <td>{{ tipo.tipoProducto }}</td>
-            <td>
-              {{ inventario.get((sabor.idSabor, tipo.idDetalle), 'No disp.') }}
-            </td>
-          </tr>
-          {% endfor %} {% endfor %}
-        </tbody>
-      </table>
+    <div class="last-login">
+        <p class="mb-0">
+            <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d
+            %H:%M:%S') if ultimo_login else 'Nunca' }}
+        </p>
     </div>
+    <div class="left-side">
+        <table id="productosTable">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Tipo</th>
+                    <th>Cantidad</th>
+                    <th>Precio</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prod in venta %}
+                <tr>
+                    <td>{{ prod.sabor }}</td>
+                    <td>{{ prod.tipo }}</td>
+                    <td>{{ prod.cantidad }}</td>
+                    <td>${{ prod.precio_total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <table id="productosTableSmall" style="margin-top: 20px;">
+            <thead>
+                <tr>
+                    <th>Nombre Cliente</th>
+                    <th>Producto (Granel, Kilo, Med. Kilo)</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cliente, compras in ventas_estatus_1 | groupby('nombreCliente') %}
+                <tr>
+                    <td>{{ cliente }}</td>
+                    <td>
+                        {% for compra in compras %}
+                            {{ compra.nombreSabor }} ({{ compra.cantidad }}){% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        ${{ compras | map(attribute='total') | sum }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>        
 
-    <div class="options" style="margin-top: 15px">
-      <!-- Formulario para agregar un producto a la venta -->
-      <form method="POST" action="{{ url_for('puntoVenta') }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-        <input type="hidden" name="accion" value="agregar" />
-        <select id="flavor" name="idSabor" required>
-          <option value="">Selecciona un sabor</option>
-          {% for sabor in sabores %}
-          <option value="{{ sabor.idSabor }}">{{ sabor.nombreSabor }}</option>
-          {% endfor %}
-        </select>
-        <select id="type" name="idTipoVenta" required>
-          <option value="">Selecciona tipo de venta</option>
-          {% for tipo in tiposVenta %}
-          <option value="{{ tipo.idDetalle }}">
-            {{ tipo.tipoProducto }} - ${{ tipo.precio }}
-          </option>
-          {% endfor %}
-        </select>
-        <input
-          type="number"
-          id="quantity"
-          name="cantidad"
-          placeholder="Cantidad"
-          min="1"
-          required
-        />
-        <button type="submit" id="add-button">Agregar</button>
-      </form>
-      <!-- Botón para mostrar el modal de confirmación -->
-      <button id="buy-button" onclick="mostrarModal()">Comprar</button>
+    <div class="right-side" style="min-width: 320px">
+        <!-- Contenedor scrollable para la tabla de inventario -->
+        <div class="scroll-container" style="margin-top: 10px; overflow: auto; max-height: 300px">
+            <h3 style="font-size: 16px; margin-bottom: 5px">Inventario</h3>
+            <table id="inventarioTable" style="font-size: 14px; width: 100%">
+                <thead>
+                    <tr>
+                        <th>Sabor</th>
+                        <th>Tipo</th>
+                        <th>Cant.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sabor in sabores %} {% for tipo in tiposVenta %}
+                    <tr>
+                        <td>{{ sabor.nombreSabor }}</td>
+                        <td>{{ tipo.tipoProducto }}</td>
+                        <td>
+                            {{ inventario.get((sabor.idSabor, tipo.idDetalle), 'No disp.') }}
+                        </td>
+                    </tr>
+                    {% endfor %} {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="options" style="margin-top: 15px">
+            <!-- Formulario para agregar un producto a la venta -->
+            <form method="POST" action="{{ url_for('puntoVenta') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <input type="hidden" name="accion" value="agregar" />
+                <select id="flavor" name="idSabor" required>
+                    <option value="">Selecciona un sabor</option>
+                    {% for sabor in sabores %}
+                    <option value="{{ sabor.idSabor }}">{{ sabor.nombreSabor }}</option>
+                    {% endfor %}
+                </select>
+                <select id="type" name="idTipoVenta" required>
+                    <option value="">Selecciona tipo de venta</option>
+                    {% for tipo in tiposVenta %}
+                    <option value="{{ tipo.idDetalle }}">
+                        {{ tipo.tipoProducto }} - ${{ tipo.precio }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <input type="number" id="quantity" name="cantidad" placeholder="Cantidad" min="1" required />
+                <button type="submit" id="add-button">Agregar</button>
+            </form>
+            <!-- Botón para mostrar el modal de confirmación -->
+            <button id="buy-button" onclick="mostrarModal()">Comprar</button>
+        </div>
     </div>
-  </div>
 </div>
 
 <!-- Modal de confirmación de compra -->
 <div id="modal" class="modal" style="display: none">
-  <div class="modal-content">
-    <div class="modal-header">
-      <span class="close" onclick="cerrarModal()">&times;</span>
-    </div>
-    <form method="POST" action="{{ url_for('puntoVenta') }}">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-      <input type="hidden" name="accion" value="confirmar" />
-      <div class="center">
-        <div class="row-container">
-          <p style="font-weight: bold">
-            Cobro:
-            <span id="totalVenta">${{ total if total else "0.00" }}</span>
-          </p>
-          <p style="font-weight: bold">
-            Recibido:
-            <input
-              type="number"
-              name="dinero_recibido"
-              id="dineroRecibido"
-              placeholder="Ingresa el dinero recibido"
-              step="0.01"
-              required
-            />
-          </p>
-          <p style="font-weight: bold">
-            Cambio: <span id="cambio">$0.00</span>
-          </p>
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="close" onclick="cerrarModal()">&times;</span>
         </div>
-        <br /><br /><br /><br />
-        <label>
-          <input
-            type="checkbox"
-            id="imprimirTicket"
-            name="imprimirTicket"
-            value="1"
-          />
-          Imprimir ticket
-        </label>
-        <select id="descuento" name="descuento">
-          <option value="0">Sin descuento</option>
-          <option value="5">5%</option>
-          <option value="10">10%</option>
-          <option value="15">15%</option>
-          <option value="20">20%</option>
-        </select>
-      </div>
-      <button type="submit" id="confirmarCompra">Confirmar Compra</button>
-    </form>
-  </div>
+        <form method="POST" action="{{ url_for('puntoVenta') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="accion" value="confirmar" />
+            <div class="center">
+                <div class="row-container">
+                    <p style="font-weight: bold">
+                        Cobro:
+                        <span id="totalVenta">${{ total if total else "0.00" }}</span>
+                    </p>
+                    <p style="font-weight: bold">
+                        Recibido:
+                        <input type="number" name="dinero_recibido" id="dineroRecibido"
+                            placeholder="Ingresa el dinero recibido" step="0.01" required />
+                    </p>
+                    <p style="font-weight: bold">
+                        Cambio: <span id="cambio">$0.00</span>
+                    </p>
+                </div>
+                <br /><br /><br /><br />
+                <label>
+                    <input type="checkbox" id="imprimirTicket" name="imprimirTicket" value="1" />
+                    Imprimir ticket
+                </label>
+                <select id="descuento" name="descuento">
+                    <option value="0">Sin descuento</option>
+                    <option value="5">5%</option>
+                    <option value="10">10%</option>
+                    <option value="15">15%</option>
+                    <option value="20">20%</option>
+                </select>
+            </div>
+            <button type="submit" id="confirmarCompra">Confirmar Compra</button>
+        </form>
+    </div>
 </div>
 
 <script>
-  function mostrarModal() {
-    document.getElementById("modal").style.display = "block";
-  }
-  function cerrarModal() {
-    document.getElementById("modal").style.display = "none";
-  }
+    function mostrarModal() {
+        document.getElementById("modal").style.display = "block";
+    }
+    function cerrarModal() {
+        document.getElementById("modal").style.display = "none";
+    }
 </script>
 
 {% endblock %}
