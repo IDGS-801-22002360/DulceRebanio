@@ -1,0 +1,67 @@
+{% extends "admin/index.html" %}
+
+{% block container %}
+{% import "admin/_macros.html" as macro %}
+
+<!-- Main -->
+<div class="row">
+    <div class="card border-0 gb mb-3" style="height: 58px; background-color: #e1e1e1">
+    {% with message = get_flashed_messages() %}
+        {% if message %}
+        {% for messages in message %}
+            <div class="alert alert-success bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+            {{ messages }}
+            </div>
+        {% endfor %}
+        {% endif %}
+    {% endwith %}
+    </div>
+
+    <div class="col-12">
+        <div class="last-login">
+            <p class="mb-0">
+                <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d
+                %H:%M:%S') if ultimo_login else 'Nunca' }}
+            </p>
+        </div>
+    <div class="card border-0 shadow-sm rounded-3 bg-white">
+        <div class="card-header border-0 rounded-top-3 text-center bg-white">
+        <b class="text-center font-Spartan">Ventas de Clientes</b>
+        </div>
+        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+        <table class="table text-center mb-0 table-borderless">
+            <thead class="text-dark">
+                <tr>
+                <th>Nombre Cliente</th>
+                <th>Productos</th>
+                <th>Cantidades</th>
+                <th>Totales</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for cliente, compras in clientes_compras.items() %}
+            <tr>
+                <td rowspan="{{ compras.productos|length }}" style="border-bottom: 1px solid #ddd;">{{ compras.nombreCliente }}</td>
+                <td style="border-bottom: 1px solid #ddd;">{{ compras.productos[0].nombreSabor }}</td>
+                <td style="border-bottom: 1px solid #ddd;">{{ compras.productos[0].cantidad }}</td>
+                <td style="border-bottom: 1px solid #ddd;">${{ compras.productos[0].total }}</td>
+            </tr>
+            {% for producto in compras.productos[1:] %}
+            <tr>
+                <td style="border-bottom: 1px solid #ddd;">{{ producto.nombreSabor }}</td>
+                <td style="border-bottom: 1px solid #ddd;">{{ producto.cantidad }}</td>
+                <td style="border-bottom: 1px solid #ddd;">${{ producto.total }}</td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        <div class="card-footer border-0 rounded-bottom-3 bg-white pt-0">
+        </div>
+    </div>
+    </div>
+
+</div>
+
+{% endblock %}
