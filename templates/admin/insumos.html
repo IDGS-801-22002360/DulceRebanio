@@ -1,4 +1,5 @@
 {% extends "admin/index.html" %} {% block container %}
+<h1>Insumos</h1>
 <div
   class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 mt-5 p-1"
 >
@@ -19,11 +20,8 @@
         <div class="card-header text-center">
           <b>Insumos - Materias Primas</b>
         </div>
-        <div class="table-responsive">
-          <table
-            class="table table-hover table-striped text-center"
-            id="insumosTable"
-          >
+        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+          <table class="table table-hover table-striped text-center" id="insumosTable">
             <thead>
               <tr>
                 <th>ID</th>
@@ -36,12 +34,7 @@
             </thead>
             <tbody id="productosTableBody">
               {% for insumo in insumos %}
-              <tr
-                data-id="{{ insumo.idMateriaPrima }}"
-                data-materia="{{ insumo.materiaPrima }}"
-                data-unidad="{{ insumo.unidadMedida }}"
-                data-fecha="{{ insumo.fechaCaducidad.strftime('%Y-%m-%d') }}"
-              >
+              <tr data-id="{{ insumo.idMateriaPrima }}" data-materia="{{ insumo.materiaPrima }}" data-unidad="{{ insumo.unidadMedida }}" data-fecha="{{ insumo.fechaCaducidad.strftime('%Y-%m-%d') }}">
                 <td>{{ insumo.idMateriaPrima }}</td>
                 <td>{{ insumo.materiaPrima }}</td>
                 <td>{{ insumo.cantidadDisponible }}</td>
@@ -49,25 +42,15 @@
                 <td>{{ insumo.fechaCaducidad.strftime('%d-%m-%Y') }}</td>
                 <td>
                   <!-- Botón Eliminar con SweetAlert2 (ya existente) -->
-                  <a
-                    href="#"
-                    class="btn btn-danger btn-sm"
-                     onclick="confirmDeletion('{{ url_for('eliminar_insumo', id=insumo.idMateriaPrima) }}', '{{ insumo.materiaPrima }}'); return false;"
-                    >Eliminar</a
-                  >
+                  <a href="#" class="btn btn-danger btn-sm" onclick="confirmDeletion('{{ url_for('eliminar_insumo', id=insumo.idMateriaPrima) }}', '{{ insumo.materiaPrima }}'); return false;">Eliminar</a>
                   <!-- Nuevo botón Mermar -->
-                  <a
-                    href="#"
-                    class="btn btn-warning btn-sm"
-                    onclick="mermarInsumo('{{ insumo.idMateriaPrima }}'); return false;"
-                    >Mermar</a
-                  >
+                  <a href="#" class="btn btn-warning btn-sm" onclick="mermarInsumo('{{ insumo.idMateriaPrima }}'); return false;">Mermar</a>
                 </td>
               </tr>
               {% endfor %}
             </tbody>
           </table>
-        </div>
+        </div>        
       </div>
     </div>
     <!-- Formulario -->

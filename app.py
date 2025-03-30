@@ -450,27 +450,30 @@ def mermar_insumo(id, merma):
 @role_required(['Admin'])
 def comprasInsumos():
     form = CompraInsumoForm(request.form)
-    proveedores = Proveedores.query.all()
-    insumos = MateriasPrimas.query.all()
+    proveedores = Proveedores.query.filter(Proveedores.estatus != 0).all()
+    insumos = MateriasPrimas.query.filter(MateriasPrimas.estatus != 0).all()
     form.idProveedor.choices = [(prov.idProveedor, prov.nombreProveedor) for prov in proveedores]
     form.idMateriaPrima.choices = [(insumo.idMateriaPrima, insumo.materiaPrima) for insumo in insumos]
-    # Asignar choices y valor por defecto para el campo 'sabor'
+    # Asigna choices y valor por defecto para el campo 'sabor'
     form.sabor.choices = [('default', 'Default')]
     if not form.sabor.data:
         form.sabor.data = 'default'
 
     if request.method == "POST" and form.validate():
-        # Inserción: si no hay idCompra se usa el SP
         if not request.form.get("idCompra"):
-            sql = text("CALL guardarCompraInsumo(:idProveedor, :idMateriaPrima, :cantidad, :fecha, :totalCompra)")
-            params = {
-                "idProveedor": form.idProveedor.data,
-                "idMateriaPrima": form.idMateriaPrima.data,
-                "cantidad": form.cantidad.data,
-                "fecha": form.fecha.data,
-                "totalCompra": form.totalCompra.data
-            }
-            db.session.execute(sql, params)
+            # Inserción usando ORM
+            new_compra = ComprasInsumos(
+                idProveedor = form.idProveedor.data,
+                idMateriaPrima = form.idMateriaPrima.data,
+                cantidad = form.cantidad.data,
+                fecha = form.fecha.data,
+                totalCompra = form.totalCompra.data
+            )
+            db.session.add(new_compra)
+            # Actualizar la cantidad disponible en MateriasPrimas
+            insumo = MateriasPrimas.query.get(form.idMateriaPrima.data)
+            if insumo:
+                insumo.cantidadDisponible += form.cantidad.data
             db.session.commit()
             flash("Compra registrada correctamente", "success")
         else:
@@ -490,8 +493,13 @@ def comprasInsumos():
         return redirect(url_for("comprasInsumos"))
     else:
         compras = db.session.execute(text("SELECT * FROM vista_comprasInsumos")).fetchall()
-        return render_template("admin/comprasInsumos.html", form=form, compras=compras, proveedores=proveedores, insumos=insumos, ultimo_login=current_user.ultimo_login)
-
+        return render_template("admin/comprasInsumos.html", 
+                               form=form, 
+                               compras=compras, 
+                               proveedores=proveedores, 
+                               insumos=insumos, 
+                               ultimo_login=current_user.ultimo_login)
+        
 @app.route("/editar_compraInsumo", methods=["POST"])
 def editar_compraInsumo():
     form = CompraInsumoForm(request.form)
