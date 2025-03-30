@@ -177,3 +177,7 @@ class RecuperarContrasenaForm(FlaskForm):
     def validate_confirmar_contrasena(self, field):
         if self.nueva_contrasena.data != field.data:
             raise ValidationError('Las contraseñas no coinciden.')
+        
+class OTPVerificationForm(FlaskForm):
+    otp_code = StringField('Código OTP', validators=[DataRequired(), Length(min=6, max=6)])
+    submit = SubmitField('Verificar')
