@@ -1,31 +1,235 @@
 {% extends "admin/index.html" %} {% block container %}
 
 <style>
-    #productosTable {
-        width: 90%;
-        /* Ajusta el ancho */
-        height: 80%;
-        background-color: white;
-        /* Fondo blanco */
-        border-collapse: collapse;
-        margin: auto;
-    }
+  #productosTable {
+      width: 90%;
+      /* Ajusta el ancho */
+      height: 80%;
+      background-color: white;
+      /* Fondo blanco */
+      border-collapse: collapse;
+      margin: auto;
+  }
 
-    #productosTable th,
-    #productosTable td {
-        padding: 5px;
-        text-align: left;
-        border: 1px solid #ddd;
-    }
+  #productosTable th,
+  #productosTable td {
+      padding: 5px;
+      text-align: left;
+      border: 1px solid #ddd;
+  }
 
-    .left-side {
-        width: 40%;
-        /* Ajusta el tamaño del contenedor de la tabla */
-    }
+.left-side {
+flex: 1;
+width: 50%;
+}
 
-    .right-side {
-        width: 60%;
-    }
+.right-side {
+display: flex;
+flex-direction: column;
+gap: 20px;
+min-width: 100px;
+width: 320px;
+}
+
+/* Tablas */
+table {
+width: 100%;
+border-collapse: collapse;
+background-color: #FFF;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+margin-bottom: 20px;
+height: 60%;
+}
+
+th, td {
+border: 1px solid #ccc;
+padding: 12px 20px;
+text-align: center;
+}
+
+th {
+background-color: #F0E68C;
+color: #5B331E;
+font-size: 1.1rem;
+}
+
+td {
+background-color: #fff;
+}
+
+/* Scrollable para inventario */
+.scroll-container {
+overflow: auto;
+max-height: 300px;
+border: 1px solid #ddd;
+border-radius: 8px;
+background-color: #fff;
+padding: 5px;
+box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Inventario: tabla interna */
+#inventarioTable {
+width: 100%;
+border-collapse: collapse;
+}
+
+#inventarioTable th, #inventarioTable td {
+border: 1px solid #ddd;
+padding: 6px;
+font-size: 14px;
+text-align: center;
+}
+
+#inventarioTable th {
+background-color: #f0f0f0;
+}
+
+/* Opciones: formulario para agregar productos */
+.options {
+display: flex;
+flex-direction: column;
+gap: 15px;
+}
+
+.options form, .options button {
+width: 90%;
+padding: 10px;
+border: none;
+border-radius: 30px;
+color: #fff;
+cursor: pointer;
+font-size: 1.2rem;
+font-family: 'League Spartan', sans-serif;
+transition: background-color 0.3s, transform 0.3s ease;
+box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+}
+
+.options form:hover, .options button:hover {
+transform: scale(1.03);
+}
+
+.options form select, .options form input {
+width: 100%;
+padding: 15px;
+border: 2px solid #ccc;
+border-radius: 14px;
+font-size: 1.1rem;
+margin: 5px 0;
+box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+transition: border-color 0.3s ease;
+}
+
+.options form select:focus, .options form input:focus {
+border-color: #FFD700;
+outline: none;
+}
+
+/* Quitar spin a number */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+-webkit-appearance: none;
+margin: 0;
+}
+
+input[type="number"] {
+-moz-appearance: textfield;
+width: 50px;
+text-align: center;
+border: 1px solid #ccc;
+border-radius: 5px;
+padding: 5px;
+font-size: 1rem;
+font-family: 'League Spartan', sans-serif;
+}
+
+/* Botón de compra */
+#buy-button {
+margin-top: 30px;
+background-color: #FFD700;
+color: #fff;
+}
+
+.row-container {
+display: flex;
+justify-content: space-between;
+gap: 20px;
+align-items: center;
+}
+
+.row-container p {
+margin-bottom: 10px;
+font-size: 1.2rem;
+}
+
+.row-container span, .row-container input {
+display: block;
+margin-top: 5px;
+font-size: 1.2rem;
+width: 150px;
+}
+
+#dineroRecibido {
+padding: 10px;
+border: 1px solid #ccc;
+border-radius: 5px;
+width: 150px;
+}
+
+#totalVenta, #cambio {
+background-color: #fff;
+padding: 5px 10px;
+border-radius: 5px;
+}
+
+#add-button{
+margin-top: 30px;
+background-color: #FFD700;
+color: #fff;
+}
+
+#productosTableSmall {
+    width: 90%;
+    background-color: white;
+    border-collapse: collapse;
+    margin: auto;
+    max-height: 150px; 
+    overflow-y: auto;  
+}
+
+#productosTableSmall th,
+#productosTableSmall td {
+    padding: 8px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+#productosTableSmall thead {
+    background-color: #F0E68C;
+    color: #5B331E;
+    font-size: 1.1rem;
+}
+
+#productosTableSmall thead tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+#productosTableSmall tbody {
+    display: block;
+    max-height: 200px; /* Ajusta la altura si es necesario */
+    overflow-y: auto;
+    width: 100%;
+}
+
+#productosTableSmall tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+
 </style>
 
 <!-- Content -->
@@ -37,7 +241,6 @@
         </p>
     </div>
     <div class="left-side">
-        <!-- Tabla de productos de la venta actual -->
         <table id="productosTable">
             <thead>
                 <tr>
@@ -58,7 +261,31 @@
                 {% endfor %}
             </tbody>
         </table>
-    </div>
+        <table id="productosTableSmall" style="margin-top: 20px;">
+            <thead>
+                <tr>
+                    <th>Nombre Cliente</th>
+                    <th>Producto (Granel, Kilo, Med. Kilo)</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cliente, compras in ventas_estatus_1 | groupby('nombreCliente') %}
+                <tr>
+                    <td>{{ cliente }}</td>
+                    <td>
+                        {% for compra in compras %}
+                            {{ compra.nombreSabor }} ({{ compra.cantidad }}){% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        ${{ compras | map(attribute='total') | sum }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>        
 
     <div class="right-side" style="min-width: 320px">
         <!-- Contenedor scrollable para la tabla de inventario -->
