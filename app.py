@@ -162,11 +162,9 @@ def galletas():
     .join(DetallesProducto, ProductosTerminados.idDetalle == DetallesProducto.idDetalle)\
     .filter(ProductosTerminados.idDetalle == 1, ProductosTerminados.estatus == 1).all()
     
-    #* Verificar si estamos en temporada navideña
     today = date.today()
     is_christmas_season = today.month == 12
     
-    #* Ajuste de mínimo stock según la temporada
     min_galletas = 60 if is_christmas_season else 30
     min_paquetes = 6 if is_christmas_season else 3
 
@@ -197,11 +195,9 @@ def galletas():
         (ProductosTerminados.idDetalle.in_([2, 3]) & (ProductosTerminados.cantidadDisponible < min_paquetes))
     ).all()
 
-    #* Generar alertas para productos con bajo stock
     for producto in productos_bajo_stock:
         flash(f"¡Alerta! Bajo stock: {producto.nombreSabor} ({producto.tipoProducto}) - Cantidad: {producto.cantidadDisponible}", "warning")
 
-    #* Marcar los productos con bajo stock
     productos_marcados = []
     for producto in productos:
         bajo_stock = (
@@ -248,7 +244,6 @@ def guardarLote():
             db.session.add(nuevo_producto)
             print("Producto terminado agregado a la sesión")
             
-            # Descontar materias primas
             insumos = {
                 2: Decimal("0.9"),  # Harina (kg)
                 3: Decimal("3"),    # Huevos (pzs)
@@ -271,7 +266,6 @@ def guardarLote():
             db.session.commit()
             print("Transacción confirmada y datos guardados correctamente")
 
-            # Log de la acción
             action_logger.info(f"Usuario: {current_user.correo} - Acción: Guardar lote - Sabor: {nuevo_producto.idSabor} - Cantidad: {nuevo_producto.cantidadDisponible} - Fecha: {datetime.now()}")
             
             flash('Lote guardado y materias primas descontadas correctamente', 'success')
