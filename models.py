@@ -121,3 +121,13 @@ class DetallesPedido(db.Model):
     idProducto = db.Column(db.Integer, db.ForeignKey('productosterminados.idProducto'))
     cantidad = db.Column(db.Integer)
     
+
+class VentasCliente(db.Model):
+    __tablename__ = 'ventascliente'
+    idVentasCliente = db.Column(db.Integer, primary_key=True)
+    nombreCliente = db.Column(db.String(100))
+    nombreSabor = db.Column(db.String(100))
+    cantidad = db.Column(db.Integer)
+    tipoProducto = db.Column(db.String(100))
+    total = db.Column(db.Float)
+    estatus=db.Column(db.Integer, default=1) 
