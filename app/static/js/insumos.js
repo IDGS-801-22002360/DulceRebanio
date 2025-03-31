@@ -72,7 +72,6 @@ function deshabilitarOpciones(opciones) {
     }
 }
 
-
 function mermarInsumo(id) {
     Swal.fire({
         title: 'Merma de Insumo',
@@ -97,12 +96,12 @@ function mermarInsumo(id) {
     }).then((result) => {
         if (result.isConfirmed) {
             var cantidad = result.value;
-            // Construir la URL manualmente siguiendo el patrón definido en la ruta
-            var url = "/mermar_insumo/" + id + "/" + cantidad;
+            var url = "/admin/insumos/mermar_insumo/" + id + "/" + cantidad;
             window.location.href = url;
         }
     });
 }
+
 
 
 

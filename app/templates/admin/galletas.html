@@ -6,16 +6,18 @@
 
 <div class="row">
     <div class="card border-0 gb mb-3" style="height: 58px; background-color: #e1e1e1">
-        {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %}
-        <div class="container col-12">
-            {% for category, message in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %} {% endwith %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="container col-12">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
     </div>
     <div class="col-6">
         <div class="card border-0 shadow-sm rounded-3 bg-white">
@@ -55,7 +57,7 @@
         </div>
     </div>
     <div class="col-6">
-        <form id="formLote" method="POST" action="{{ url_for('guardarLote') }}" novalidate>
+        <form id="formLote" method="POST" action="{{ url_for('produccion.guardarLote') }}" novalidate>
             {{ form.hidden_tag() }}
             <div class="row" style="display: none">
                 <div class="col-md-6">
@@ -123,9 +125,9 @@
                 <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" style="background-color: #eee">
-                <form id="formMerma" method="POST" action="{{ url_for('mermar') }}">
-                    {{ form.hidden_tag() }} {{ macro.merma('mdlCantidad', 'Cantidad a
-                    mermar:', 'flexCheckIndeterminate', 'Mermar Todo') }}
+                <form id="formMerma" method="POST" action="{{ url_for('produccion.mermar') }}">
+                    {{ form.hidden_tag() }}
+                    {{ macro.merma('mdlCantidad', 'Cantidad a mermar:', 'flexCheckIndeterminate', 'Mermar Todo') }}
                     <input type="hidden" id="mdlIdProducto" name="idProducto" />
                 </form>
             </div>
@@ -150,7 +152,7 @@
                 <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" style="background-color: #eee">
-                <form id="formNuevoPaquete" method="POST" action="{{ url_for('guardar_paquete') }}">
+                <form id="formNuevoPaquete" method="POST" action="{{ url_for('produccion.guardar_paquete') }}">
                     {{ paquete_form.hidden_tag() }}
                     <div class="card border-0 rounded-3 shadow-sm">
                         <input type="hidden" id="txtIdGalletaGranel" name="txtIdGalletaGranel" value="" />
@@ -193,8 +195,7 @@
                         </div>
                     </div>
                     <div class="modal-footer border-0" style="background-color: #eee">
-                        {{ paquete_form.submit(class="btn btn-warning font-Spartan
-                        text-white") }}
+                        {{ paquete_form.submit(class="btn btn-warning font-Spartan text-white") }}
                     </div>
                 </form>
             </div>

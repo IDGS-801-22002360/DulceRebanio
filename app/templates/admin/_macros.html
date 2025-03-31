@@ -1,0 +1,110 @@
+{% macro datos(name, placeholder, type="text", disabled=False) %}
+<label for="{{ name }}" class="form-label">{{ name }}:</label>
+<p>
+    <input id="{{ name }}" name="{{ name }}" type="{{ type }}" placeholder="{{ placeholder }}"
+        class="form-control rounded-2 shadow border-0" {% if disabled %}disabled{% endif %} />
+</p>
+{% endmacro %}
+
+{% macro Lote(field) %}
+<label for="{{ field.id }}" class="form-label">{{ field.label }}</label>
+{{ field(class_='form-control rounded-2 shadow border-0') | safe }}
+{% if field.errors %}
+<div class="invalid-feedback d-block">
+    <ul class="list-unstyled mb-0">
+        {% for error in field.errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+{% endmacro %}
+
+{% macro merma(input_id, input_placeholder, checkbox_id, checkbox_label) %}
+<div class="col-md-12 mt-3">
+    <div class="form-floating">
+        <input type="text" class="form-control border-0" id="{{ input_id }}" name="cantidad"
+            placeholder="{{ input_placeholder }}" />
+        <label for="{{ input_id }}">{{ input_placeholder }}</label>
+    </div>
+</div>
+<div class="form-check mt-2">
+    <input class="form-check-input border-1 shadow-lg" type="checkbox" id="{{ checkbox_id }}" name="mermar_todo" />
+    <label class="form-check-label font-Spartan" for="{{ checkbox_id }}">
+        {{ checkbox_label }}
+    </label>
+</div>
+{% endmacro %}
+
+{% macro input_field(field, placeholder="", type="text") %}
+<div class="form-floating mb-3">
+    {{ field(class_='form-control border-0', placeholder=placeholder, type=type) }}
+    <label for="{{ field.id }}">{{ field.label }}</label>
+    {% if field.errors %}
+    <div class="invalid-feedback d-block">
+        <ul class="list-unstyled mb-0">
+            {% for error in field.errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro submit_button(label) %}
+<button type="submit" class="btn btn-warning w-100 font-Spartan text-white">
+    {{ label }}
+</button>
+{% endmacro %}
+
+{% macro Lote(field) %}
+<div class="form-floating mb-3">
+    {{ field(class_='form-control rounded-2 shadow border-0', placeholder=field.label.text) }}
+    <label for="{{ field.id }}">{{ field.label }}</label>
+    {% if field.errors %}
+    <div class="invalid-feedback d-block">
+        <ul class="list-unstyled mb-0">
+            {% for error in field.errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro merma(input_id, input_placeholder, checkbox_id, checkbox_label) %}
+<div class="col-md-12 mt-3">
+    <div class="form-floating">
+        <input type="text" class="form-control border-0" id="{{ input_id }}" name="cantidad"
+            placeholder="{{ input_placeholder }}" />
+        <label for="{{ input_id }}">{{ input_placeholder }}</label>
+    </div>
+</div>
+<div class="form-check mt-2">
+    <input class="form-check-input border-1 shadow-lg" type="checkbox" id="{{ checkbox_id }}" name="mermar_todo" />
+    <label class="form-check-label font-Spartan" for="{{ checkbox_id }}">
+        {{ checkbox_label }}
+    </label>
+</div>
+{% endmacro %}
+
+{% macro cantidad_input(input_id, label) %}
+<div class="form-floating">
+    <input type="number" class="form-control border-0" id="{{ input_id }}" name="{{ input_id }}"
+        placeholder="{{ label }}" />
+    <label for="{{ input_id }}">{{ label }}</label>
+</div>
+{% endmacro %}
+
+{% macro tipo_producto_select(select_id, label, options) %}
+<div class="form-floating">
+    <select class="form-control form-select border-0" id="{{ select_id }}" name="{{ select_id }}">
+        {% for value, text in options %}
+        <option value="{{ value }}">{{ text }}</option>
+        {% endfor %}
+    </select>
+    <label for="{{ select_id }}">{{ label }}</label>
+</div>
+{% endmacro %}

@@ -322,7 +322,7 @@
 
         <div class="options" style="margin-top: 15px">
             <!-- Formulario para agregar un producto a la venta -->
-            <form method="POST" action="{{ url_for('puntoVenta') }}">
+            <form method="POST" action="{{ url_for('ventas.puntoVenta') }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                 <input type="hidden" name="accion" value="agregar" />
                 <select id="flavor" name="idSabor" required>
@@ -354,7 +354,7 @@
         <div class="modal-header">
             <span class="close" onclick="cerrarModal()">&times;</span>
         </div>
-        <form method="POST" action="{{ url_for('puntoVenta') }}">
+        <form method="POST" action="{{ url_for('ventas.puntoVenta') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <input type="hidden" name="accion" value="confirmar" />
             <div class="center">

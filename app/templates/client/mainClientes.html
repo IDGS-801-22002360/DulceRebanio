@@ -45,7 +45,7 @@ input_field, submit_button %} {% block container %}
 
     <div class="tab-content">
       <div class="tab-pane fade show active" id="login">
-        <form id="loginForm" method="POST" action="{{ url_for('login') }}">
+        <form id="loginForm" method="POST" action="{{ url_for('auth.login') }}">
           {{ login_form.hidden_tag() }} {{ input_field(login_form.correo,
           placeholder="Correo Electrónico", type="email") }} {{
           input_field(login_form.contrasena, placeholder="Contraseña",
@@ -67,7 +67,7 @@ input_field, submit_button %} {% block container %}
         <form
           id="registerForm"
           method="POST"
-          action="{{ url_for('register') }}"
+          action="{{ url_for('usuarios.register') }}"
         >
           {{ register_form.hidden_tag() }} {{ input_field(register_form.nombre,
           placeholder="Nombre", type="text") }} {{
@@ -105,7 +105,7 @@ input_field, submit_button %} {% block container %}
         ></button>
       </div>
       <div class="modal-body">
-        <form method="POST" action="{{ url_for('recuperar_contrasena') }}">
+        <form method="POST" action="{{ url_for('usuarios.recuperar_contrasena') }}">
           {{ recuperar_contrasena_form.hidden_tag() }}
           <div class="mb-3">
             {{ input_field(recuperar_contrasena_form.correo, placeholder="Correo

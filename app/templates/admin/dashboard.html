@@ -7,13 +7,7 @@
         <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d%H:%M:%S') if ultimo_login else 'Nunca' }}
     </p>
 </div>
-<div class="d-flex justify-content-between align-items-center">
-    <h2 class="text-center titulo-productos">
-        Productos <span>dulce rebaño</span>
-    </h2>
-    <img src="../../static/img/donGalleto2.png" alt="Logo" class="img-fluid ms-3" style="max-width: 100px; height: auto;">
-</div>
-<div class="row">
+<div class="row mt-5">
     <div class="col-md-6">
         <h5 class="text-center">Productos más Vendidos</h5>
         <canvas id="productosMasVendidos"></canvas>
@@ -24,7 +18,7 @@
     </div>
 </div>
 <h4 class="text-center mt-4">Ventas</h4>
-<table class="table table-bordered table-striped">
+<table class="table table-borderless table-hover">
     <thead class="table-warning">
         <tr>
             <th>Sabor</th>

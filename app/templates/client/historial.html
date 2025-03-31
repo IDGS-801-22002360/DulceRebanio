@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dulce Rebaño</title>
-    <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="static/sweetalert2/sweetalert2.min.css">
-    <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.min.css"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap-utilities.min.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap-grid.min.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='sweetalert2/sweetalert2.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome-free-6.4.0-web/css/all.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome-free-6.4.0-web/css/all.min.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ventas.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700&display=swap" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -118,24 +122,35 @@
             <!-- Navbar Lateral -->
             <nav class="col-md-1 col-lg-1 d-md-block sidebar text-center">
                 <div class="position-sticky pt-3">
-                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px;">
-                        <i class="fa fa-2x fa-home"></i><br>
+                    <a href="{{ url_for('clientes.index') }}" class="btn border-0 rounded-4 text-white btn-hover font-Spartan d-flex flex-column justify-content-center align-items-center" style="width: 100%; height: 115px;">
+                        <i class="fa fa-2x fa-home mb-2"></i>
                         <b>Inicio</b>
-                    </button>
-                    <button href="{{ url_for('clientes') }}" class="btn border-0 rounded-4 text-white btn-hover font-Spartan position-relative" style="width: 100%; height: 115px" data-bs-toggle="offcanvas" href="#modalCarrito">
-                        <i class="fas fa-2x fa-shopping-cart"></i> 
+                    </a>
+                    <a href="{{ url_for('clientes.clientes') }}" class="btn border-0 rounded-4 text-white btn-hover font-Spartan d-flex flex-column justify-content-center align-items-center" style="width: 100%; height: 115px;">
+                        <i class="fa fa-2x fa-cookie mb-2"></i>
+                        <b>Productos</b>
+                    </a>
+                    <a href="#" class="btn border-0 rounded-4 text-white btn-hover font-Spartan position-relative d-flex flex-column justify-content-center align-items-center" 
+                        style="width: 100%; height: 115px" 
+                        data-bs-toggle="offcanvas" 
+                        data-bs-target="#modalCarrito">
+                        <i class="fas fa-2x fa-shopping-cart mb-2"></i>
                         {% if carrito|length > 0 %}
                             <span class="position-absolute top-0 start-100 badge rounded-pill bg-danger d-flex align-items-center justify-content-center" 
                                 style="font-size: 0.8rem; width: 22px; height: 22px; transform: translate(-20px, -50%);">
                                 {{ carrito|length }} 
                             </span>
                         {% endif %}
-                        <br><b>Carrito</b>
-                    </button>          
-                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
-                        <i class="fa fa-2x fa-history"></i><br>
+                        <b>Carrito</b>
+                    </a>
+                    <a href="{{ url_for('clientes.historialCompras') }}" class="btn border-0 rounded-4 text-white btn-hover font-Spartan d-flex flex-column justify-content-center align-items-center" style="width: 100%; height: 115px">
+                        <i class="fa fa-2x fa-history mb-2"></i>
                         <b>Historial</b>
-                    </button>                                      
+                    </a>   
+                    <a href="{{ url_for('auth.logout') }}" class="btn border-0 rounded-4 text-white btn-del btn-del-hover font-Spartan d-flex flex-column justify-content-center align-items-center" style="width: 100%; height: 115px">
+                        <i class="fa fa-2x fa-sign-out-alt mb-2"></i>
+                        <b>Cerrar sesión</b>
+                    </a>                                   
                 </div>
             </nav>
             <div class="col-md-11 col-lg-11 content">
@@ -175,8 +190,9 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="static/sweetalert2/sweetalert2.all.min.js"></script>
-    <script src="static/fontawesome-free-6.4.0-web/js/all.js"></script>
-</body>
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.esm.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='sweetalert2/sweetalert2.all.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='fontawesome-free-6.4.0-web/js/all.js') }}"></script>
+    </body>
 </html>

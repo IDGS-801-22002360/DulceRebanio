@@ -1,0 +1,93 @@
+{% extends "admin/index.html" %} {% block container %}
+
+<div class="row">
+    <div class="card border-0 gb mb-3" style="height: 58px; background-color: #e1e1e1">
+        {% with messages = get_flashed_messages() %} {% if messages %} {% for
+        message in messages %}
+        <div class="alert alert-success" role="alert">{{ message }}</div>
+        {% endfor %} {% endif %} {% endwith %}
+    </div>
+
+    <!-- Listado de Proveedores -->
+    <div class="col-7">
+        <div class="last-login">
+            <p class="mb-0">
+                <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d
+                %H:%M:%S') if ultimo_login else 'Nunca' }}
+            </p>
+        </div>
+        <div class="card shadow-sm rounded-3 border-0 bg-white">
+            <div class="card-header text-center rounded-3 border-0 bg-white">
+                <b>Proveedores</b>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover text-center table-borderless" id="proveedoresTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Teléfono</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="proveedoresTableBody">
+                        {% for proveedor in proveedores %}
+                        <tr data-id="{{ proveedor.idProveedor }}" data-nombre="{{ proveedor.nombreProveedor }}"
+                            data-correo="{{ proveedor.correo }}" data-telefono="{{ proveedor.telefono }}">
+                            <td>{{ proveedor.idProveedor }}</td>
+                            <td>{{ proveedor.nombreProveedor }}</td>
+                            <td>{{ proveedor.correo }}</td>
+                            <td>{{ proveedor.telefono }}</td>
+                            <td>
+                                <a href="#" class="btn btn-danger btn-sm"
+                                    onclick="confirmDeletion('{{ url_for('proveedores.eliminar_proveedor', id=proveedor.idProveedor) }}', '{{ proveedor.nombreProveedor }}'); return false;"> <i class="fa fa-trash text-white"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario de creación/edición de Proveedor -->
+    <div class="col-5">
+        <form id="formProveedores" method="POST" action="{{ url_for('proveedores.proveedores') }}">
+            {{ form.csrf_token }}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" id="idProveedor" name="idProveedor" value="" />
+            
+            <div class="form-floating mb-2">
+                {{ form.nombreProveedor(class="form-control", id="nombreProveedor", placeholder="Nombre del proveedor") }}
+                <label for="nombreProveedor">Nombre del Proveedor</label>
+            </div>
+            
+            <div class="form-floating mb-2">
+                {{ form.correo(class="form-control", id="correo", placeholder="Correo electrónico") }}
+                <label for="correo">Correo</label>
+            </div>
+            
+            <div class="form-floating mb-2">
+                {{ form.telefono(class="form-control", id="telefono", placeholder="Teléfono") }}
+                <label for="telefono">Teléfono</label>
+            </div>
+            
+            <div>
+                <button type="submit" class="btn btn-warning text-white font-Spartan col-12" id="btnGuardar">
+                    Guardar Proveedor
+                </button>
+                <button type="button" class="btn btn-primary text-white font-Spartan col-12 mt-2" id="btnEditar"onclick="editarProveedor()">
+                    Editar Proveedor
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    var proveedoresEditarUrl = "{{ url_for('proveedores.editar_proveedor') }}";
+</script>
+<script src="{{ url_for('static', filename='js/sweetalert2.all.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/proveedores.js') }}"></script>
+{% endblock %}

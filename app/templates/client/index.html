@@ -4,11 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dulce Rebaño</title>
-    <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css" />
-    <link
-      rel="stylesheet"
-      href="static/fontawesome-free-6.4.0-web/css/all.css"
-    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome-free-6.4.0-web/css/all.css') }}" />
   </head>
   <style>
     .navbar {
@@ -115,7 +112,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
       <div class="container">
         <a class="navbar-brand" href="#">
-          <img src="../static/img/donGalleto2.png" alt="Dulce Rebaño" />
+          <img src="{{ url_for('static', filename='img/donGalleto2.png') }}" alt="Dulce Rebaño" />
         </a>
         <button
           class="navbar-toggler"
@@ -129,8 +126,8 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav me-auto">
             <li class="nav-item"><a class="nav-link" href="#">Inicio</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Productos</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Contacto</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('clientes.clientes') }}">Productos</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('clientes.historialCompras') }}">Historial</a></li>
           </ul>
 
           <button
@@ -201,6 +198,6 @@
       </div>
     </footer>
 
-    <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.bundle.min.js') }}"></script>
   </body>
 </html>
