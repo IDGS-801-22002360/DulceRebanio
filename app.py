@@ -834,7 +834,6 @@ venta_actual = []
 
 @app.route("/puntoVenta", methods=["GET", "POST"])
 @login_required
-@role_required(['Admin', 'Ventas'])
 def puntoVenta():
     # Consulta optimizada para obtener solo productos disponibles
     productos_disponibles = db.session.query(
@@ -850,84 +849,145 @@ def puntoVenta():
 
     ventas_estatus_1 = VentasCliente.query.filter_by(estatus=1).all()
 
+    sabores = Sabores.query.all()
+    tiposVenta = DetallesProducto.query.all()
+    
     if request.method == "POST":
         accion = request.form.get("accion")
-
+        
         if accion == "agregar":
             try:
-                idProducto = int(request.form.get("idProducto"))
-                cantidad = int(request.form.get(f"cantidad_{idProducto}"))
+                idSabor = int(request.form.get("idSabor"))
+                idTipoVenta = int(request.form.get("idTipoVenta"))
+                cantidad = int(request.form.get("cantidad"))
             except (ValueError, TypeError):
+                flash("Datos inválidos para agregar producto.", "danger")
                 return redirect(url_for("puntoVenta"))
-
-            # Buscar el producto en la lista de productos disponibles
-            producto = next((p for p in productos_disponibles if p.idProducto == idProducto), None)
-            if not producto or cantidad <= 0:
+            
+            sabor = Sabores.query.get(idSabor)
+            tipo_venta = DetallesProducto.query.get(idTipoVenta)
+            if not sabor or not tipo_venta or cantidad <= 0:
+                flash("Producto o cantidad inválida.", "danger")
                 return redirect(url_for("puntoVenta"))
-
-            # Verificar si el producto ya está en la venta
+            
+            # Evitar duplicados
             for prod in venta_actual:
-                if prod["idProducto"] == idProducto:
+                if prod["idSabor"] == idSabor and prod["idTipoVenta"] == idTipoVenta:
+                    flash("El producto ya está en la venta.", "warning")
                     return redirect(url_for("puntoVenta"))
-
-            # Agregar el producto a la venta actual
-            precio_total = float(producto.precio) * cantidad
-            venta_actual.append({
-                "idProducto": producto.idProducto,
-                "sabor": producto.nombreSabor,
-                "tipo": producto.tipoProducto,
+            
+            precio_total = float(tipo_venta.precio) * cantidad
+            producto = {
+                "idSabor": sabor.idSabor,
+                "sabor": sabor.nombreSabor,
+                "idTipoVenta": tipo_venta.idDetalle,
+                "tipo": tipo_venta.tipoProducto,
                 "cantidad": cantidad,
-                "precio_unitario": float(producto.precio),
+                "precio_unitario": float(tipo_venta.precio),
                 "precio_total": precio_total
-            })
+            }
+            venta_actual.append(producto)
+            flash("Producto agregado correctamente.", "success")
             return redirect(url_for("puntoVenta"))
-
+        
+        # Actualizar cantidad del producto en la venta
+        elif accion == "actualizar":
+            try:
+                idSabor = int(request.form.get("idSabor"))
+                idTipoVenta = int(request.form.get("idTipoVenta"))
+            except (ValueError, TypeError):
+                flash("Datos inválidos para actualizar producto.", "danger")
+                return redirect(url_for("puntoVenta"))
+            
+            operacion = request.form.get("operacion") 
+            for prod in venta_actual:
+                if prod["idSabor"] == idSabor and prod["idTipoVenta"] == idTipoVenta:
+                    if operacion == "subir":
+                        prod["cantidad"] += 1
+                    elif operacion == "bajar":
+                        prod["cantidad"] -= 1
+                        if prod["cantidad"] <= 0:
+                            venta_actual.remove(prod)
+                            flash("Producto eliminado.", "warning")
+                            break
+                    if prod in venta_actual:
+                        prod["precio_total"] = prod["cantidad"] * prod["precio_unitario"]
+                    flash("Producto actualizado.", "success")
+                    break
+            else:
+                flash("Producto no encontrado.", "danger")
+            return redirect(url_for("puntoVenta"))
+        
         elif accion == "confirmar":
             try:
                 descuento = float(request.form.get("descuento", 0))
                 dinero_recibido = float(request.form.get("dinero_recibido"))
             except (ValueError, TypeError):
+                flash("Datos de confirmación inválidos.", "danger")
                 return redirect(url_for("puntoVenta"))
-
+            
             total = sum(prod["precio_total"] for prod in venta_actual)
             total_con_descuento = total - (total * (descuento / 100))
-
+            
             if dinero_recibido < total_con_descuento:
+                flash("El dinero recibido no es suficiente.", "danger")
                 return redirect(url_for("puntoVenta"))
-
-            # Actualizar inventario y registrar la venta
+            
             for prod in venta_actual:
-                productoTerminado = ProductosTerminados.query.get(prod["idProducto"])
+                productoTerminado = ProductosTerminados.query.filter_by(
+                    idSabor=prod["idSabor"],
+                    idDetalle=prod["idTipoVenta"],
+                    estatus=1
+                ).filter(ProductosTerminados.cantidadDisponible > 0).first()
+                if productoTerminado is None:
+                    flash(f"Producto terminado no encontrado o no disponible para {prod['sabor']}.", "danger")
+                    return redirect(url_for("puntoVenta"))
                 if productoTerminado.cantidadDisponible < prod["cantidad"]:
-                    flash(f"Inventario insuficiente para {prod['sabor']}.")
+                    flash(f"Inventario insuficiente para {prod['sabor']}.", "danger")
                     return redirect(url_for("puntoVenta"))
                 productoTerminado.cantidadDisponible -= prod["cantidad"]
-
             db.session.commit()
-
+            
             nueva_venta = Ventas(total=total_con_descuento)
             db.session.add(nueva_venta)
-            db.session.flush()
-
+            db.session.flush() 
+            
             for prod in venta_actual:
+                productoTerminado = ProductosTerminados.query.filter_by(
+                    idSabor=prod["idSabor"],
+                    idDetalle=prod["idTipoVenta"],
+                    estatus=1
+                ).filter(ProductosTerminados.cantidadDisponible >= 0).first()
                 detalle = DetallesVenta(
                     idVenta=nueva_venta.idVenta,
-                    idProducto=prod["idProducto"],
+                    idProducto=productoTerminado.idProducto,
                     cantidad=prod["cantidad"],
                     subtotal=prod["precio_total"]
                 )
                 db.session.add(detalle)
-            db.session.commit()
-
+            db.session.commit() 
+            
+            pdf_path = generar_pdf(venta_actual, descuento, dinero_recibido, total_con_descuento)
+            flash("Venta confirmada. Ticket generado en: " + pdf_path, "success")
             venta_actual.clear()
             return redirect(url_for("puntoVenta"))
+    
+    productos = ProductosTerminados.query.filter(
+        ProductosTerminados.estatus == 1,
+        ProductosTerminados.cantidadDisponible > 0
+    ).all()
+    inventario = {}
+    for producto in productos:
+        inventario[(producto.idSabor, producto.idDetalle)] = producto.cantidadDisponible
 
     total = sum(prod["precio_total"] for prod in venta_actual)
 
     return render_template("admin/ventas.html",
-                            productos_disponibles=productos_disponibles,
+                            sabores=sabores,
+                            tiposVenta=tiposVenta,
                             venta=venta_actual,
                             total=total,
+                            inventario=inventario,
                             ventas_estatus_1=ventas_estatus_1, 
                             ultimo_login=current_user.ultimo_login)
 
@@ -940,7 +1000,7 @@ def generar_pdf(venta, descuento, dinero_recibido, total_con_descuento):
     pdf.set_font("Helvetica", "", 12)
     pdf.cell(0, 10, "Ticket de Compra", ln=True, align="C")
     pdf.line(10, 30, 200, 30)
-    now = datetime.datetime.now()
+    now = date.today()
     pdf.set_font("Helvetica", "", 10)
     pdf.cell(0, 10, f"Fecha: {now.strftime('%d/%m/%Y')}", ln=True)
     pdf.cell(0, 10, f"Hora: {now.strftime('%H:%M:%S')}", ln=True)
@@ -1050,15 +1110,15 @@ def login():
     
     if form.errors:
         return render_template("client/mainClientes.html", 
-                             login_form=form, 
-                             register_form=RegisterForm(),
-                             recuperar_contrasena_form=RecuperarContrasenaForm(),
-                             show_modal=True)
+                            login_form=form, 
+                            register_form=RegisterForm(),
+                            recuperar_contrasena_form=RecuperarContrasenaForm(),
+                            show_modal=True)
     
     return render_template("client/mainClientes.html", 
-                         login_form=form, 
-                         register_form=RegisterForm(),
-                         recuperar_contrasena_form=RecuperarContrasenaForm())
+                        login_form=form, 
+                        register_form=RegisterForm(),
+                        recuperar_contrasena_form=RecuperarContrasenaForm())
 
 @app.route("/logout")
 @login_required 
@@ -1163,11 +1223,11 @@ def register():
                             active_tab='register')
     
     return render_template("client/mainClientes.html", 
-                         login_form=login_form, 
-                         register_form=form,
-                         recuperar_contrasena_form=recuperar_contrasena_form,
-                         show_modal=True,
-                         active_tab='register')
+                        login_form=login_form, 
+                        register_form=form,
+                        recuperar_contrasena_form=recuperar_contrasena_form,
+                        show_modal=True,
+                        active_tab='register')
 
 @app.route("/verify-otp/<int:user_id>", methods=["GET", "POST"])
 def verify_otp(user_id):
