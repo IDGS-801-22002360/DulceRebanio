@@ -1,6 +1,17 @@
 {% extends "client/index.html" %} {% from "admin/_macros.html" import
 input_field, submit_button %} {% block container %}
-<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasAuth">
+<div
+  class="offcanvas offcanvas-end {% if show_modal %}show{% endif %}"
+  tabindex="-1"
+  id="offcanvasAuth"
+  {%
+  if
+  show_modal
+  %}style="visibility: visible;"
+  {%
+  endif
+  %}
+>
   <div class="offcanvas-header">
     <h5 class="offcanvas-title">Cuenta</h5>
     <button
@@ -32,19 +43,28 @@ input_field, submit_button %} {% block container %}
 
     <ul class="nav nav-tabs mb-3">
       <li class="nav-item">
-        <a class="nav-link active" data-bs-toggle="tab" href="#login"
+        <a
+          class="nav-link {% if not active_tab or active_tab == 'login' %}active{% endif %}"
+          data-bs-toggle="tab"
+          href="#login"
           >Ingresar</a
         >
       </li>
       <li class="nav-item">
-        <a class="nav-link" data-bs-toggle="tab" href="#register"
+        <a
+          class="nav-link {% if active_tab == 'register' %}active{% endif %}"
+          data-bs-toggle="tab"
+          href="#register"
           >Crear Cuenta</a
         >
       </li>
     </ul>
 
     <div class="tab-content">
-      <div class="tab-pane fade show active" id="login">
+      <div
+        class="tab-pane fade {% if not active_tab or active_tab == 'login' %}show active{% endif %}"
+        id="login"
+      >
         <form id="loginForm" method="POST" action="{{ url_for('login') }}">
           {{ login_form.hidden_tag() }} {{ input_field(login_form.correo,
           placeholder="Correo Electrónico", type="email") }} {{
@@ -63,7 +83,10 @@ input_field, submit_button %} {% block container %}
         </p>
       </div>
 
-      <div class="tab-pane fade" id="register">
+      <div
+        class="tab-pane fade {% if active_tab == 'register' %}show active{% endif %}"
+        id="register"
+      >
         <form
           id="registerForm"
           method="POST"
@@ -79,13 +102,17 @@ input_field, submit_button %} {% block container %}
           placeholder="Contraseña", type="password") }} {{
           submit_button('Registrarse') }}
         </form>
+        <p class="text-center mt-3">
+          Al registrarte, recibirás un código de verificación en tu correo
+          electrónico.
+        </p>
       </div>
     </div>
   </div>
 </div>
 
 <div
-  class="modal fade"
+  class="modal fade {% if show_recuperar_modal %}show d-block{% endif %}"
   id="recuperarContrasenaModal"
   tabindex="-1"
   aria-labelledby="recuperarContrasenaModalLabel"
@@ -105,6 +132,28 @@ input_field, submit_button %} {% block container %}
         ></button>
       </div>
       <div class="modal-body">
+        <!-- Mostrar solo mensajes de error de recuperación -->
+        {% with messages =
+        get_flashed_messages(category_filter=["recuperar_error"]) %} {% if
+        messages %}
+        <div class="flash-messages mb-3">
+          {% for message in messages %}
+          <div
+            class="alert alert-danger alert-dismissible fade show"
+            role="alert"
+          >
+            {{ message }}
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %} {% endwith %}
+
         <form method="POST" action="{{ url_for('recuperar_contrasena') }}">
           {{ recuperar_contrasena_form.hidden_tag() }}
           <div class="mb-3">
@@ -136,6 +185,14 @@ input_field, submit_button %} {% block container %}
     </div>
   </div>
 </div>
+
+{% if show_recuperar_modal %}
+<script>
+  $(document).ready(function () {
+    $("#recuperarContrasenaModal").modal("show");
+  });
+</script>
+{% endif %}
 
 <div id="carouselExampleDark" class="carousel carousel-dark slide">
   <div class="carousel-indicators"></div>
