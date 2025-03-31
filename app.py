@@ -786,7 +786,7 @@ def generar_pdf(venta, descuento, dinero_recibido, total_con_descuento):
     pdf.set_font("Helvetica", "", 12)
     pdf.cell(0, 10, "Ticket de Compra", ln=True, align="C")
     pdf.line(10, 30, 200, 30)
-    now = datetime.datetime.now()
+    now = date.today()
     pdf.set_font("Helvetica", "", 10)
     pdf.cell(0, 10, f"Fecha: {now.strftime('%d/%m/%Y')}", ln=True)
     pdf.cell(0, 10, f"Hora: {now.strftime('%H:%M:%S')}", ln=True)
