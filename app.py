@@ -1,5 +1,7 @@
 from functools import wraps
 from models import DetallesVenta, Usuarios, Ventas, ComprasInsumos, DetallesProducto, Proveedores, Sabores, db, ProductosTerminados, MateriasPrimas
+from forms import CompraInsumoForm, LoteForm, InsumoForm, MermaForm, OTPVerificationForm, ProveedorForm, PaqueteForm, RecuperarContrasenaForm
+from models import VentasCliente, DetallesVenta, Usuarios, Ventas, ComprasInsumos, DetallesProducto, Proveedores, Sabores, db, ProductosTerminados, MateriasPrimas
 from forms import CompraInsumoForm, LoteForm, InsumoForm, MermaForm, ProveedorForm, PaqueteForm, RecuperarContrasenaForm
 from flask import Flask, render_template, request, jsonify, redirect, session, url_for, flash,session
 import forms
@@ -12,19 +14,50 @@ import os
 
 from logger import action_logger
 
+from flask_wtf.csrf import CSRFProtect
+from sqlalchemy import text
+from fpdf import FPDF
+import os
+import datetime
 from config import DevelopmentConfig
 from flask_wtf import FlaskForm
 from forms import EmpleadoForm, HiddenField, SubmitField, LoginForm, RecuperarContrasenaForm, RegisterForm
 from decimal import Decimal
 from datetime import datetime, timedelta, date
+import secrets
+import string
+from flask_mail import Mail, Message
+import pyotp
+import json
+import time
+import ntplib
 
 app = Flask(__name__)
+app.secret_key = "dongalleto" 
 app.config.from_object(DevelopmentConfig)
 csrf = CSRFProtect()
 
 app.config["RECAPTCHA_PUBLIC_KEY"] = "6Lcb1f0qAAAAAMLjkyE44X40_nQq_FZns9Sj8CVs"
 app.config["RECAPTCHA_PRIVATE_KEY"] = "6Lcb1f0qAAAAADFk-w_f5-Da5MyzdN2E8HdY-Vcs"
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'fabian.anrey@gmail.com'
+app.config['MAIL_PASSWORD'] = 'pksh vgjq rbur axnc'
+app.config['MAIL_DEFAULT_SENDER'] = 'fabian.anrey@gmail.com'
+
+mail = Mail(app)
 # app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=200)
+
+def sync_time():
+    try:
+        c = ntplib.NTPClient()
+        response = c.request('pool.ntp.org')
+        time.time = lambda: response.tx_time
+    except:
+        pass
+
+sync_time()
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -59,29 +92,37 @@ def role_required(roles):
         return decorated_function
     return decorator
 
-
 @app.route("/", methods=["GET", "POST"])
 @app.route("/index")
 def index():
     login_form = LoginForm()
     register_form = RegisterForm()
     recuperar_contrasena_form = RecuperarContrasenaForm()
+    show_recuperar_modal = request.args.get('show_recuperar_modal', False)
     return render_template("client/mainClientes.html", 
                          login_form=login_form, 
                          register_form=register_form,
-                         recuperar_contrasena_form=recuperar_contrasena_form)
+                         recuperar_contrasena_form=recuperar_contrasena_form,
+                         show_recuperar_modal=show_recuperar_modal)
 
 @app.route("/clientes", methods=["GET", "POST"])
 @login_required
-@role_required(['Cliente','Admin'])
+@role_required(["Cliente", "Admin"])
 def clientes():
-    sabores = Sabores.query.all()
-    detalles_productos = DetallesProducto.query.all()
+    tipo_seleccionado = request.args.get("tipo", "todos")  
+    
+    sabores = Sabores.query.join(ProductosTerminados).filter(ProductosTerminados.cantidadDisponible > 0).distinct().all()
+
+    tipos_productos = [producto.tipoProducto for producto in DetallesProducto.query.distinct(DetallesProducto.tipoProducto)]
+    if tipo_seleccionado == "todos":
+        detalles_productos = DetallesProducto.query.join(ProductosTerminados).filter(ProductosTerminados.cantidadDisponible > 0).distinct().all()
+    else:
+        detalles_productos = DetallesProducto.query.join(ProductosTerminados).filter(DetallesProducto.tipoProducto == tipo_seleccionado, ProductosTerminados.cantidadDisponible > 0).distinct().all()
 
     if "carrito" not in session:
         session["carrito"] = []
-    return render_template("client/clientes.html", sabores=sabores, detalles_productos=detalles_productos, carrito=session["carrito"], ultimo_login=current_user.ultimo_login)
 
+    return render_template("client/clientes.html", sabores=sabores, detalles_productos=detalles_productos, tipos_productos=tipos_productos, carrito=session["carrito"], ultimo_login=current_user.ultimo_login)
 
 @app.route("/agregar_carrito", methods=["POST"])
 def agregar_carrito():
@@ -100,7 +141,7 @@ def agregar_carrito():
             session["carrito"] = []
 
         carrito = session["carrito"]
-        producto_existente = next((item for item in carrito if item["id"] == sabor.idSabor), None)
+        producto_existente = next((item for item in carrito if item["id"] == sabor.idSabor and item["tipo"] == tipo.tipoProducto), None)
 
         if producto_existente:
             producto_existente["cantidad"] += cantidad
@@ -123,7 +164,6 @@ def agregar_carrito():
         session.modified = True  
     return redirect(url_for("clientes"))
 
-
 @app.route("/eliminar_carrito/<int:item_id>", methods=["POST"])
 def eliminar_carrito(item_id):
     session["carrito"] = [item for item in session["carrito"] if item["id"] != item_id]
@@ -133,13 +173,181 @@ def eliminar_carrito(item_id):
     session.modified = True  
     return redirect(url_for("clientes"))
 
+@app.route("/procesar_compra", methods=["POST"])
+def procesar_compra():
+    carrito = session.get("carrito", [])
+
+    if not carrito:
+        flash("Carrito vacío o falta nombre del cliente", "warning")
+        return redirect(url_for("clientes"))
+
+    if not current_user.is_authenticated:
+        flash("Debes iniciar sesión para realizar la compra", "warning")
+        return redirect(url_for("login"))
+
+    for item in carrito:
+        venta_existente = VentasCliente.query.filter_by(
+            nombreCliente=current_user.nombre,
+            nombreSabor=item["nombre"],
+            tipoProducto=item["tipo"]
+        ).first()
+
+        if venta_existente:
+            venta_existente.cantidad += item["cantidad"]
+            venta_existente.total = venta_existente.cantidad * item["precio"]
+            venta_existente.estatus = 1 
+        else:
+            nueva_venta = VentasCliente(
+                nombreCliente=current_user.nombre,
+                nombreSabor=item["nombre"],
+                cantidad=item["cantidad"],
+                tipoProducto=item["tipo"],
+                total=item["cantidad"] * item["precio"],
+                estatus=1  
+            )
+            db.session.add(nueva_venta)
+
+        producto = ProductosTerminados.query.join(DetallesProducto).filter(
+            ProductosTerminados.idSabor == item["id"],
+            DetallesProducto.tipoProducto == item["tipo"]
+        ).first()
+
+        if producto:
+            if producto.cantidadDisponible >= item["cantidad"]:
+                producto.cantidadDisponible -= item["cantidad"]
+            else:
+                flash(f"No hay suficiente stock para {item['nombre']} ({item['tipo']})", "danger")
+                return redirect(url_for("clientes"))
+        else:
+            flash(f"Producto no encontrado: {item['nombre']} ({item['tipo']})", "danger")
+            return redirect(url_for("clientes"))
+
+    db.session.commit()
+    print("Compra procesada correctamente con estatus 1")  
+
+    session["carrito"] = []
+    flash("¡Compra realizada con éxito!", "success")
+    return redirect(url_for("clientes"))
+
+@app.route("/historial", methods=["GET"])
+def historialCompras():
+    if not current_user.is_authenticated:
+        flash("Debes iniciar sesión para ver tu historial de compras", "warning")
+        return redirect(url_for("login"))  
+
+    ventas = VentasCliente.query.filter_by(nombreCliente=current_user.nombre).all()  
+
+    return render_template("client/historial.html", ventas=ventas)
+
+@app.route("/ventasClientes", methods=["GET", "POST"])
+@login_required
+@role_required(['Admin'])
+def ventasClientes():
+    ventas_estatus_1 = db.session.query(
+        Usuarios.nombre,
+        Usuarios.apaterno,
+        Usuarios.amaterno,
+        VentasCliente.nombreCliente,
+        VentasCliente.nombreSabor,
+        VentasCliente.cantidad,
+        VentasCliente.total,
+        VentasCliente.tipoProducto 
+    ).join(VentasCliente, VentasCliente.nombreCliente == Usuarios.nombre) \
+    .filter(Usuarios.rol == 'Cliente') \
+    .all()
+
+    clientes_compras = {}
+    for venta in ventas_estatus_1:
+        if venta.nombreCliente not in clientes_compras:
+            clientes_compras[venta.nombreCliente] = {'nombreCliente': venta.nombreCliente, 'productos': []}
+
+        producto_existente = None
+        for producto in clientes_compras[venta.nombreCliente]['productos']:
+            if producto['nombreSabor'] == venta.nombreSabor and producto['tipoProducto'] == venta.tipoProducto:
+                producto_existente = producto
+                break
+
+        if producto_existente:
+            producto_existente['cantidad'] += venta.cantidad
+            producto_existente['total'] += venta.total 
+        else:
+            clientes_compras[venta.nombreCliente]['productos'].append({
+                'nombreSabor': venta.nombreSabor,
+                'cantidad': venta.cantidad,
+                'total': venta.total,
+                'tipoProducto': venta.tipoProducto 
+            })
+
+    return render_template("admin/usuariosClientes.html", clientes_compras=clientes_compras, ultimo_login=current_user.ultimo_login)
+
+
+
 #!============================== Modulo dashboard ==============================# 
 
-@app.route("/dashboard", methods=["GET", "POST"])
+@app.route("/dashboard", methods=["GET"])
 @login_required
 @role_required(['Admin', 'Ventas'])
 def dashboard():
-    return render_template("admin/dashboard.html", ultimo_login=current_user.ultimo_login)
+    carrito = session.get("carrito", [])
+    ventas_clientes = db.session.query(
+        VentasCliente.nombreCliente,
+        VentasCliente.nombreSabor,
+        VentasCliente.tipoProducto,
+        VentasCliente.cantidad,
+        VentasCliente.total
+    ).filter(VentasCliente.estatus == 1).all()
+
+    todas_las_ventas = []
+
+    for item in carrito:
+        todas_las_ventas.append({
+            "nombreCliente": current_user.nombre,
+            "nombreSabor": item["nombre"],
+            "tipoProducto": item["tipo"],
+            "cantidad": item["cantidad"],
+            "total": item["cantidad"] * item["precio"],
+            "metodo": "Carrito"
+        })
+
+    for venta in ventas_clientes:
+        todas_las_ventas.append({
+            "nombreCliente": venta.nombreCliente,
+            "nombreSabor": venta.nombreSabor,
+            "tipoProducto": venta.tipoProducto,
+            "cantidad": venta.cantidad,
+            "total": venta.total,
+        })
+    productos_vendidos = {}
+    presentaciones_vendidas = {}
+
+    for venta in todas_las_ventas:
+        if venta["nombreSabor"] in productos_vendidos:
+            productos_vendidos[venta["nombreSabor"]] += venta["cantidad"]
+        else:
+            productos_vendidos[venta["nombreSabor"]] = venta["cantidad"]
+        if venta["tipoProducto"] in presentaciones_vendidas:
+            presentaciones_vendidas[venta["tipoProducto"]] += venta["cantidad"]
+        else:
+            presentaciones_vendidas[venta["tipoProducto"]] = venta["cantidad"]
+
+    productos_vendidos = sorted(productos_vendidos.items(), key=lambda x: x[1], reverse=True)
+    presentaciones_vendidas = sorted(presentaciones_vendidas.items(), key=lambda x: x[1], reverse=True)
+
+    productos_labels = [producto[0] for producto in productos_vendidos]
+    productos_data = [producto[1] for producto in productos_vendidos]
+
+    presentaciones_labels = [presentacion[0] for presentacion in presentaciones_vendidas]
+    presentaciones_data = [presentacion[1] for presentacion in presentaciones_vendidas]
+
+    return render_template("admin/dashboard.html", 
+                        ventas_combinadas=todas_las_ventas,
+                        productos_labels=productos_labels, 
+                        productos_data=productos_data,
+                        presentaciones_labels=presentaciones_labels, 
+                        presentaciones_data=presentaciones_data,
+                        ultimo_login=current_user.ultimo_login)
+
+
 
 
 #!============================== Modulo de Productos ==============================#  
@@ -384,6 +592,10 @@ def guardar_paquete():
 def recetas():
     return render_template("admin/recetas.html")
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
 #!============================== Modulo de Insumos ==============================#
 #INSERCIÓN INSUMOS
 @app.route("/insumos", methods=["GET", "POST"])
@@ -447,7 +659,6 @@ def editar_insumo():
     return redirect(url_for("insumos"))
 
 
-
 # Endpoint para eliminar un insumo
 @app.route("/eliminar_insumo/<int:id>", methods=["GET"])
 def eliminar_insumo(id):
@@ -487,30 +698,27 @@ def mermar_insumo(id, merma):
 @role_required(['Admin'])
 def comprasInsumos():
     form = CompraInsumoForm(request.form)
-    proveedores = Proveedores.query.filter(Proveedores.estatus != 0).all()
-    insumos = MateriasPrimas.query.filter(MateriasPrimas.estatus != 0).all()
+    proveedores = Proveedores.query.filter(Proveedores.estatus != 0 ).all()
+    insumos = MateriasPrimas.query.filter(MateriasPrimas.estatus != 0 ).all()
     form.idProveedor.choices = [(prov.idProveedor, prov.nombreProveedor) for prov in proveedores]
     form.idMateriaPrima.choices = [(insumo.idMateriaPrima, insumo.materiaPrima) for insumo in insumos]
-    # Asigna choices y valor por defecto para el campo 'sabor'
+    # Asignar choices y valor por defecto para el campo 'sabor'
     form.sabor.choices = [('default', 'Default')]
     if not form.sabor.data:
         form.sabor.data = 'default'
 
     if request.method == "POST" and form.validate():
+        # Inserción: si no hay idCompra se usa el SP
         if not request.form.get("idCompra"):
-            # Inserción usando ORM
-            new_compra = ComprasInsumos(
-                idProveedor = form.idProveedor.data,
-                idMateriaPrima = form.idMateriaPrima.data,
-                cantidad = form.cantidad.data,
-                fecha = form.fecha.data,
-                totalCompra = form.totalCompra.data
-            )
-            db.session.add(new_compra)
-            # Actualizar la cantidad disponible en MateriasPrimas
-            insumo = MateriasPrimas.query.get(form.idMateriaPrima.data)
-            if insumo:
-                insumo.cantidadDisponible += form.cantidad.data
+            sql = text("CALL guardarCompraInsumo(:idProveedor, :idMateriaPrima, :cantidad, :fecha, :totalCompra)")
+            params = {
+                "idProveedor": form.idProveedor.data,
+                "idMateriaPrima": form.idMateriaPrima.data,
+                "cantidad": form.cantidad.data,
+                "fecha": form.fecha.data,
+                "totalCompra": form.totalCompra.data
+            }
+            db.session.execute(sql, params)
             db.session.commit()
             flash("Compra registrada correctamente", "success")
         else:
@@ -530,13 +738,8 @@ def comprasInsumos():
         return redirect(url_for("comprasInsumos"))
     else:
         compras = db.session.execute(text("SELECT * FROM vista_comprasInsumos")).fetchall()
-        return render_template("admin/comprasInsumos.html", 
-                               form=form, 
-                               compras=compras, 
-                               proveedores=proveedores, 
-                               insumos=insumos, 
-                               ultimo_login=current_user.ultimo_login)
-        
+        return render_template("admin/comprasInsumos.html", form=form, compras=compras, proveedores=proveedores, insumos=insumos, ultimo_login=current_user.ultimo_login)
+
 @app.route("/editar_compraInsumo", methods=["POST"])
 def editar_compraInsumo():
     form = CompraInsumoForm(request.form)
@@ -651,6 +854,8 @@ def puntoVenta():
     .filter(ProductosTerminados.estatus == 1, ProductosTerminados.cantidadDisponible > 0)\
     .order_by(ProductosTerminados.idDetalle.asc()).all()
 
+    ventas_estatus_1 = VentasCliente.query.filter_by(estatus=1).all()
+
     if request.method == "POST":
         accion = request.form.get("accion")
 
@@ -729,8 +934,8 @@ def puntoVenta():
                             productos_disponibles=productos_disponibles,
                             venta=venta_actual,
                             total=total,
+                            ventas_estatus_1=ventas_estatus_1, 
                             ultimo_login=current_user.ultimo_login)
-
 
 
 def generar_pdf(venta, descuento, dinero_recibido, total_con_descuento):
@@ -789,12 +994,26 @@ def login():
     if form.validate_on_submit():
         correo = form.correo.data
         contrasena = form.contrasena.data
+        now = datetime.now()
 
+        # Verificar intentos fallidos previos
         if correo in failed_attempts:
             last_attempt_time, attempts = failed_attempts[correo]
-            if attempts >= 3 and datetime.now() - last_attempt_time < timedelta(minutes=1):
+            
+            # Si han pasado más de 1 minuto desde el último intento, reiniciar el contador
+            if now - last_attempt_time > timedelta(minutes=1):
+                failed_attempts[correo] = (now, 1)
+            # Si hay 3 o más intentos en menos de 1 minuto
+            elif attempts >= 3:
                 flash('Demasiados intentos fallidos. Por favor, espera un minuto antes de intentar nuevamente.', 'danger')
-                return render_template("client/mainClientes.html", login_form=form, register_form=RegisterForm(), recuperar_contrasena_form=RecuperarContrasenaForm())
+                return render_template("client/mainClientes.html", 
+                                    login_form=form, 
+                                    register_form=RegisterForm(),
+                                    recuperar_contrasena_form=RecuperarContrasenaForm(),
+                                    show_modal=True)
+        else:
+            # Primer intento fallido para este correo
+            failed_attempts[correo] = (now, 0)
 
         usuario = Usuarios.query.filter_by(correo=correo).first()
 
@@ -803,38 +1022,49 @@ def login():
                 flash('Tu cuenta ha sido desactivada. Por favor, contacta al administrador.', 'danger')
                 return render_template("client/mainClientes.html", login_form=form, register_form=RegisterForm())
 
-        if usuario:
-            if usuario.check_contrasena(contrasena): 
-                login_user(usuario) 
-                usuario.ultimo_login = datetime.now()
-                db.session.commit()
-                flash('Inicio de sesión exitoso.', 'success')
-                if correo in failed_attempts:
-                    del failed_attempts[correo]
-                form.correo.data = ''
-                form.contrasena.data = ''
-                
-                if usuario.rol == 'Cliente':
-                    return redirect(url_for('clientes'))
-                elif usuario.rol == 'Ventas':
-                    return redirect(url_for('puntoVenta'))
-                elif usuario.rol == 'Admin':
-                    return redirect(url_for('miembros'))
-                elif usuario.rol == 'Produccion':
-                    return redirect(url_for('galletas'))
-            else:
-                flash('Correo o contraseña incorrectos. Por favor, intenta de nuevo.', 'danger')
-                if correo in failed_attempts:
-                    failed_attempts[correo] = (datetime.now(), failed_attempts[correo][1] + 1)
-                else:
-                    failed_attempts[correo] = (datetime.now(), 1)
-        else:
-            flash('Correo o contraseña incorrectos. Por favor, intenta de nuevo.', 'danger')
+        if usuario and usuario.check_contrasena(contrasena):
+            # Login exitoso - resetear intentos fallidos
             if correo in failed_attempts:
-                failed_attempts[correo] = (datetime.now(), failed_attempts[correo][1] + 1)
+                del failed_attempts[correo]
+            
+            login_user(usuario) 
+            usuario.ultimo_login = now
+            db.session.commit()
+                
+            if usuario.rol == 'Cliente':
+                return redirect(url_for('clientes'))
+            elif usuario.rol == 'Ventas':
+                return redirect(url_for('puntoVenta', _anchor='login-success'))
+            elif usuario.rol == 'Admin':
+                return redirect(url_for('miembros', _anchor='login-success'))
+            elif usuario.rol == 'Produccion':
+                return redirect(url_for('galletas', _anchor='login-success'))
+        else:
+            # Login fallido - incrementar contador
+            if correo in failed_attempts:
+                last_time, attempts = failed_attempts[correo]
+                failed_attempts[correo] = (now, attempts + 1)
             else:
-                failed_attempts[correo] = (datetime.now(), 1)
-    return render_template("client/mainClientes.html", login_form=form, register_form=RegisterForm(), recuperar_contrasena_form=RecuperarContrasenaForm())
+                failed_attempts[correo] = (now, 1)
+            
+            flash('Correo o contraseña incorrectos. Por favor, intenta de nuevo.', 'danger')
+            return render_template("client/mainClientes.html", 
+                                login_form=form, 
+                                register_form=RegisterForm(),
+                                recuperar_contrasena_form=RecuperarContrasenaForm(),
+                                show_modal=True)
+    
+    if form.errors:
+        return render_template("client/mainClientes.html", 
+                             login_form=form, 
+                             register_form=RegisterForm(),
+                             recuperar_contrasena_form=RecuperarContrasenaForm(),
+                             show_modal=True)
+    
+    return render_template("client/mainClientes.html", 
+                         login_form=form, 
+                         register_form=RegisterForm(),
+                         recuperar_contrasena_form=RecuperarContrasenaForm())
 
 @app.route("/logout")
 @login_required 
@@ -847,6 +1077,9 @@ def logout():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     form = RegisterForm()
+    login_form = LoginForm()
+    recuperar_contrasena_form = RecuperarContrasenaForm()
+    
     if form.validate_on_submit():
         nombre = form.nombre.data
         apaterno = form.apaterno.data
@@ -856,19 +1089,126 @@ def register():
 
         if is_password_insecure(contrasena):
             flash('La contraseña es insegura. Por favor, elige una contraseña más segura.', 'danger')
-            return render_template("client/mainClientes.html", login_form=LoginForm(), register_form=form)
+            return render_template("client/mainClientes.html", 
+                                login_form=login_form, 
+                                register_form=form,
+                                recuperar_contrasena_form=recuperar_contrasena_form,
+                                show_modal=True,
+                                active_tab='register')
 
         usuario_existente = Usuarios.query.filter_by(correo=correo).first()
         if usuario_existente:
             flash('El correo ya está registrado. Por favor, utiliza otro correo.', 'danger')
-        else:
-            nuevo_usuario = Usuarios(nombre=nombre, apaterno=apaterno, amaterno=amaterno, correo=correo, rol='Cliente')
-            nuevo_usuario.set_contrasena(contrasena)
-            db.session.add(nuevo_usuario)
+            return render_template("client/mainClientes.html", 
+                                login_form=login_form, 
+                                register_form=form,
+                                recuperar_contrasena_form=recuperar_contrasena_form,
+                                show_modal=True,
+                                active_tab='register')
+        
+        # Generar secreto OTP
+        otp_secret = pyotp.random_base32()
+        
+        # Crear usuario temporal con datos de registro
+        temp_user = Usuarios(
+            nombre=form.nombre.data,
+            apaterno=form.apaterno.data,
+            amaterno=form.amaterno.data,
+            correo=form.correo.data,
+            otp_secret=otp_secret,
+            registration_data=json.dumps({
+                'contrasena': form.contrasena.data,
+                'rol': 'Cliente',
+                'activo': 1
+            }),
+            activo=0  # Inactivo hasta verificación OTP
+        )
+        
+        try:
+            db.session.add(temp_user)
             db.session.commit()
-            flash('Cuenta creada exitosamente. Ahora puedes iniciar sesión.', 'success')
-            return redirect(url_for('login'))
-    return render_template("client/mainClientes.html", login_form=LoginForm(), register_form=form,  recuperar_contrasena_form=RecuperarContrasenaForm())
+            
+            # Generar y enviar código OTP
+            totp = pyotp.TOTP(temp_user.otp_secret, interval=600)
+            otp_code = totp.now()
+            
+            # Enviar correo con el código OTP
+            msg = Message(
+                subject="Código de verificación para tu registro en Dulce Rebaño",
+                recipients=[temp_user.correo],
+                html=f"""
+                <h2>Verificación de correo electrónico</h2>
+                <p>Gracias por registrarte en Dulce Rebaño. Tu código de verificación es:</p>
+                <h3 style="background: #f0f0f0; padding: 10px; display: inline-block; border-radius: 5px;">
+                    {otp_code}
+                </h3>
+                <p>Este código expirará en 10 minutos.</p>
+                """
+            )
+            mail.send(msg)
+            
+            flash('Se ha enviado un código de verificación a tu correo electrónico.', 'success')
+            return redirect(url_for('verify_otp', user_id=temp_user.idUsuario))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al registrar: {str(e)}', 'danger')
+            return render_template("client/mainClientes.html", 
+                                login_form=login_form, 
+                                register_form=form,
+                                recuperar_contrasena_form=recuperar_contrasena_form,
+                                show_modal=True,
+                                active_tab='register')
+    
+    if form.errors:
+        return render_template("client/mainClientes.html", 
+                            login_form=login_form, 
+                            register_form=form,
+                            recuperar_contrasena_form=recuperar_contrasena_form,
+                            show_modal=True,
+                            active_tab='register')
+    
+    return render_template("client/mainClientes.html", 
+                         login_form=login_form, 
+                         register_form=form,
+                         recuperar_contrasena_form=recuperar_contrasena_form,
+                         show_modal=True,
+                         active_tab='register')
+
+@app.route("/verify-otp/<int:user_id>", methods=["GET", "POST"])
+def verify_otp(user_id):
+    form = OTPVerificationForm()
+    user = Usuarios.query.get_or_404(user_id)
+    
+    if form.validate_on_submit():
+        # Usar el mismo intervalo (600 segundos) que en el registro
+        totp = pyotp.TOTP(user.otp_secret, interval=600)
+        
+        # Verificar con un margen de 1 código (10 minutos en total)
+        if totp.verify(form.otp_code.data, valid_window=1):
+            # OTP válido, activar la cuenta
+            try:
+                reg_data = json.loads(user.registration_data)
+                user.set_contrasena(reg_data['contrasena'])
+                user.rol = reg_data['rol']
+                user.activo = 1
+                user.otp_verified = True
+                user.registration_data = None  # Limpiar datos temporales
+                
+                db.session.commit()
+                
+                flash('¡Registro completado con éxito! Ahora puedes iniciar sesión.', 'success')
+                return redirect(url_for('index'))
+                
+            except Exception as e:
+                db.session.rollback()
+                flash('Error al completar el registro. Por favor intenta nuevamente.', 'danger')
+                return redirect(url_for('verify_otp', user_id=user_id))
+        else:
+            flash('Código OTP inválido o expirado. Por favor, intenta de nuevo.', 'danger')
+    
+    return render_template("client/verify_otp.html", form=form, user_id=user_id)
+
 
 @app.route("/miembros", methods=["GET", "POST"])
 @login_required
@@ -936,38 +1276,38 @@ def editar_usuario(id_usuario):
 @app.route("/recuperar_contrasena", methods=["POST"])
 def recuperar_contrasena():
     form = RecuperarContrasenaForm()
+    login_form = LoginForm()
+    register_form = RegisterForm()
+    
     if form.validate_on_submit():
         correo = form.correo.data
         nueva_contrasena = form.nueva_contrasena.data
         confirmar_contrasena = form.confirmar_contrasena.data
 
-        # Verificar si el correo existe en la base de datos
         usuario = Usuarios.query.filter_by(correo=correo).first()
         if not usuario:
-            flash('El correo no está registrado.', 'danger')
-            return redirect(url_for('login'))
+            flash('El correo no está registrado.', 'recuperar_error')
+            return redirect(url_for('index', show_recuperar_modal=True))
 
-        # Verificar que las contraseñas coincidan
         if nueva_contrasena != confirmar_contrasena:
-            flash('Las contraseñas no coinciden.', 'danger')
-            return redirect(url_for('login'))
+            flash('Las contraseñas no coinciden.', 'recuperar_error')
+            return redirect(url_for('index', show_recuperar_modal=True))
 
-        # Validar la contraseña
         if is_password_insecure(nueva_contrasena):
-            flash('La contraseña es insegura. Por favor, elige una contraseña más segura.', 'danger')
-            return redirect(url_for('login'))
+            flash('La contraseña es insegura. Por favor, elige una contraseña más segura.', 'recuperar_error')
+            return redirect(url_for('index', show_recuperar_modal=True))
 
-        # Actualizar la contraseña en la base de datos
         usuario.set_contrasena(nueva_contrasena)
         db.session.commit()
-        flash('Contraseña actualizada correctamente.', 'success')
-        return redirect(url_for('login'))
+        flash('Contraseña actualizada correctamente. Ahora puedes iniciar sesión.', 'success')
+        return redirect(url_for('index'))
 
-    # Si el formulario no es válido, mostrar errores
+    # Si hay errores de validación del formulario
     for field, errors in form.errors.items():
         for error in errors:
-            flash(f'{error}', 'danger')
-    return redirect(url_for('login'))
+            flash(f'{error}', 'recuperar_error')
+    
+    return redirect(url_for('index', show_recuperar_modal=True))
 
 
 def is_password_insecure(contrasena):

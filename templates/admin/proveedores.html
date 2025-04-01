@@ -1,6 +1,11 @@
 {% extends "admin/index.html" %} {% block container %}
 
 <h1>Proveedores</h1>
+<div class="d-flex">
+  <a href="{{ url_for('insumos') }}" class="btn btn-warning text-white font-Spartan me-2" style="max-width: 80px;">Insumos</a>
+  <a href="{{ url_for('comprasInsumos') }}" class="btn btn-warning text-white font-Spartan" style="max-width: 180px;">Compra de Insumos</a>
+</div>
+
 <div
   class="col-md-12 ms-sm-auto col-lg-12 px-md-4 container rounded-3 mt-5 p-1"
 >
