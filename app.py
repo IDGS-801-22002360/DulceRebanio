@@ -100,11 +100,10 @@ def index():
     recuperar_contrasena_form = RecuperarContrasenaForm()
     show_recuperar_modal = request.args.get('show_recuperar_modal', False)
     return render_template("client/mainClientes.html", 
-                         login_form=login_form, 
-                         register_form=register_form,
-                         recuperar_contrasena_form=recuperar_contrasena_form,
-                         show_recuperar_modal=show_recuperar_modal)
-
+                        login_form=login_form, 
+                        register_form=register_form,
+                        recuperar_contrasena_form=recuperar_contrasena_form,
+                        show_recuperar_modal=show_recuperar_modal)
 @app.route("/clientes", methods=["GET", "POST"])
 @login_required
 @role_required(["Cliente", "Admin"])
@@ -195,7 +194,7 @@ def procesar_compra():
         if venta_existente:
             venta_existente.cantidad += item["cantidad"]
             venta_existente.total = venta_existente.cantidad * item["precio"]
-            venta_existente.estatus = 1 
+            venta_existente.estatus = 1  
         else:
             nueva_venta = VentasCliente(
                 nombreCliente=current_user.nombre,
@@ -207,19 +206,25 @@ def procesar_compra():
             )
             db.session.add(nueva_venta)
 
-        producto = ProductosTerminados.query.join(DetallesProducto).filter(
-            ProductosTerminados.idSabor == item["id"],
-            DetallesProducto.tipoProducto == item["tipo"]
-        ).first()
+        # Obtener los lotes disponibles en orden de inserción
+        lotes = ProductosTerminados.query.filter_by(idSabor=item["id"]).order_by("idSabor").all()
 
-        if producto:
-            if producto.cantidadDisponible >= item["cantidad"]:
-                producto.cantidadDisponible -= item["cantidad"]
+        cantidad_restante = item["cantidad"]
+        for lote in lotes:
+            if cantidad_restante <= 0:
+                break  # Ya se descontó toda la cantidad necesaria
+
+            if lote.cantidadDisponible >= cantidad_restante:
+                lote.cantidadDisponible -= cantidad_restante
+                cantidad_restante = 0
             else:
-                flash(f"No hay suficiente stock para {item['nombre']} ({item['tipo']})", "danger")
-                return redirect(url_for("clientes"))
-        else:
-            flash(f"Producto no encontrado: {item['nombre']} ({item['tipo']})", "danger")
+                cantidad_restante -= lote.cantidadDisponible
+                lote.cantidadDisponible = 0
+
+            db.session.commit()
+
+        if cantidad_restante > 0:
+            flash(f"No hay suficiente stock para {item['nombre']} ({item['tipo']})", "danger")
             return redirect(url_for("clientes"))
 
     db.session.commit()
@@ -228,6 +233,7 @@ def procesar_compra():
     session["carrito"] = []
     flash("¡Compra realizada con éxito!", "success")
     return redirect(url_for("clientes"))
+
 
 @app.route("/historial", methods=["GET"])
 def historialCompras():
@@ -279,7 +285,6 @@ def ventasClientes():
             })
 
     return render_template("admin/usuariosClientes.html", clientes_compras=clientes_compras, ultimo_login=current_user.ultimo_login)
-
 
 
 #!============================== Modulo dashboard ==============================# 
@@ -486,8 +491,6 @@ def guardarLote():
     print("Error: El formulario no pasó la validación")
     flash('Error al guardar el lote. Verifica los datos ingresados.', 'danger')
     return redirect(url_for('galletas'))
-
-
 
 
 @app.route("/mermar", methods=["POST"])
