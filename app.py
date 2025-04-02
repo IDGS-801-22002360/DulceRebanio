@@ -1,36 +1,38 @@
-from functools import wraps
-from models import DetallesVenta, Usuarios, Ventas, ComprasInsumos, DetallesProducto, Proveedores, Sabores, db, ProductosTerminados, MateriasPrimas
-from forms import CompraInsumoForm, LoteForm, InsumoForm, MermaForm, OTPVerificationForm, ProveedorForm, PaqueteForm, RecuperarContrasenaForm
-from models import VentasCliente, DetallesVenta, Usuarios, Ventas, ComprasInsumos, DetallesProducto, Proveedores, Sabores, db, ProductosTerminados, MateriasPrimas
-from forms import CompraInsumoForm, LoteForm, InsumoForm, MermaForm, ProveedorForm, PaqueteForm, RecuperarContrasenaForm
-from flask import Flask, render_template, request, jsonify, redirect, session, url_for, flash,session
-import forms
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from flask_wtf import CSRFProtect, RecaptchaField
-from flask_wtf.csrf import CSRFProtect
-from sqlalchemy import text
-from fpdf import FPDF
 import os
-
-from logger import action_logger
-
-from flask_wtf.csrf import CSRFProtect
-from sqlalchemy import text
-from fpdf import FPDF
-import os
-import datetime
-from config import DevelopmentConfig
-from flask_wtf import FlaskForm
-from forms import EmpleadoForm, HiddenField, SubmitField, LoginForm, RecuperarContrasenaForm, RegisterForm
-from decimal import Decimal
-from datetime import datetime, timedelta, date
-import secrets
-import string
-from flask_mail import Mail, Message
-import pyotp
 import json
 import time
+import secrets
+import string
+import pyotp
 import ntplib
+import datetime
+from datetime import datetime, timedelta, date
+from decimal import Decimal
+from functools import wraps
+
+from flask import Flask, render_template, request, jsonify, redirect, session, url_for, flash
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_mail import Mail, Message
+from flask_wtf import FlaskForm, CSRFProtect, RecaptchaField
+from flask_wtf.csrf import CSRFProtect
+from sqlalchemy import text
+from fpdf import FPDF
+
+from config import DevelopmentConfig
+from logger import action_logger
+
+# Modelos
+from models import (
+    db, Usuarios, Ventas, DetallesVenta, ComprasInsumos, Proveedores, 
+    ProductosTerminados, MateriasPrimas, Receta, RecetaDetalle, VentasCliente
+)
+
+# Formularios
+from forms import (
+    CompraInsumoForm, LoteForm, InsumoForm, MermaForm, ProveedorForm, PaqueteForm, 
+    RecuperarContrasenaForm, EmpleadoForm, HiddenField, SubmitField, LoginForm, RegisterForm
+)
+
 
 app = Flask(__name__)
 app.secret_key = "dongalleto" 
@@ -92,6 +94,8 @@ def role_required(roles):
         return decorated_function
     return decorator
 
+#!============================== Clientes Index ==============================#
+
 @app.route("/", methods=["GET", "POST"])
 @app.route("/index")
 def index():
@@ -104,13 +108,16 @@ def index():
                         register_form=register_form,
                         recuperar_contrasena_form=recuperar_contrasena_form,
                         show_recuperar_modal=show_recuperar_modal)
+
+#!============================== Modulo Carrito que no es carrito ==============================#
+
 @app.route("/clientes", methods=["GET", "POST"])
 @login_required
 @role_required(["Cliente", "Admin"])
 def clientes():
     tipo_seleccionado = request.args.get("tipo", "todos")  
     
-    sabores = Sabores.query.join(ProductosTerminados).filter(ProductosTerminados.cantidadDisponible > 0).distinct().all()
+    #sabores = Sabores.query.join(ProductosTerminados).filter(ProductosTerminados.cantidadDisponible > 0).distinct().all()
 
     tipos_productos = [producto.tipoProducto for producto in DetallesProducto.query.distinct(DetallesProducto.tipoProducto)]
     if tipo_seleccionado == "todos":
@@ -121,7 +128,7 @@ def clientes():
     if "carrito" not in session:
         session["carrito"] = []
 
-    return render_template("client/clientes.html", sabores=sabores, detalles_productos=detalles_productos, tipos_productos=tipos_productos, carrito=session["carrito"], ultimo_login=current_user.ultimo_login)
+    return render_template("client/clientes.html", detalles_productos=detalles_productos, tipos_productos=tipos_productos, carrito=session["carrito"], ultimo_login=current_user.ultimo_login)
 
 @app.route("/agregar_carrito", methods=["POST"])
 def agregar_carrito():
@@ -129,7 +136,7 @@ def agregar_carrito():
     tipo_producto = request.form.get("tipo_producto")
     cantidad = int(request.form.get("cantidad", 1))
 
-    sabor = Sabores.query.get(sabor_id)
+    #sabor = Sabores.query.get(sabor_id)
     tipo = DetallesProducto.query.get(tipo_producto)
 
     if sabor and tipo:
@@ -287,7 +294,7 @@ def ventasClientes():
     return render_template("admin/usuariosClientes.html", clientes_compras=clientes_compras, ultimo_login=current_user.ultimo_login)
 
 
-#!============================== Modulo dashboard ==============================# 
+#!============================== Modulo dashboard ==============================#
 
 @app.route("/dashboard", methods=["GET"])
 @login_required
@@ -353,143 +360,141 @@ def dashboard():
                         ultimo_login=current_user.ultimo_login)
 
 
-
-
 #!============================== Modulo de Productos ==============================#  
 
 @app.route("/galletas", methods=["GET", "POST"])
 @login_required  
 @role_required(['Admin', 'Ventas', 'Produccion'])
 def galletas():
-    form = LoteForm()
-    paquete_form = PaqueteForm()
-    form.sabor.choices = [(sabor.idSabor, sabor.nombreSabor) for sabor in Sabores.query.all()]
-    
-    #* Estas son unicamente las galletas a granel
-    productos_granel = db.session.query(
-        ProductosTerminados.idProducto,
-        Sabores.nombreSabor,
-        DetallesProducto.tipoProducto,
-        ProductosTerminados.cantidadDisponible
-    ).join(Sabores, ProductosTerminados.idSabor == Sabores.idSabor)\
-    .join(DetallesProducto, ProductosTerminados.idDetalle == DetallesProducto.idDetalle)\
-    .filter(ProductosTerminados.idDetalle == 1, ProductosTerminados.estatus == 1).all()
-    
-    today = date.today()
-    is_christmas_season = today.month == 12
-    
-    min_galletas = 60 if is_christmas_season else 30
-    min_paquetes = 6 if is_christmas_season else 3
-
-    #* Obtener todos los productos y marcar los de bajo stock
-    productos = db.session.query(
-        ProductosTerminados.idProducto,
-        Sabores.nombreSabor,
-        DetallesProducto.tipoProducto,
-        ProductosTerminados.fechaCaducidad,
-        ProductosTerminados.cantidadDisponible,
-        ProductosTerminados.estatus
-    ).join(Sabores, ProductosTerminados.idSabor == Sabores.idSabor)\
-    .join(DetallesProducto, ProductosTerminados.idDetalle == DetallesProducto.idDetalle)\
-    .filter(ProductosTerminados.estatus == 1)\
-    .order_by(ProductosTerminados.idDetalle.asc()).all()
-    
-    #* Verificar productos con bajo stock
-    productos_bajo_stock = db.session.query(
-        ProductosTerminados.idProducto,
-        Sabores.nombreSabor,
-        DetallesProducto.tipoProducto,
-        ProductosTerminados.cantidadDisponible
-    ).join(Sabores, ProductosTerminados.idSabor == Sabores.idSabor)\
-    .join(DetallesProducto, ProductosTerminados.idDetalle == DetallesProducto.idDetalle)\
-    .filter(
-        ProductosTerminados.estatus == 1,
-        (ProductosTerminados.idDetalle == 1) & (ProductosTerminados.cantidadDisponible < min_galletas) |
-        (ProductosTerminados.idDetalle.in_([2, 3]) & (ProductosTerminados.cantidadDisponible < min_paquetes))
-    ).all()
-
-    for producto in productos_bajo_stock:
-        flash(f"¡Alerta! Bajo stock: {producto.nombreSabor} ({producto.tipoProducto}) - Cantidad: {producto.cantidadDisponible}", "warning")
-
-    productos_marcados = []
-    for producto in productos:
-        bajo_stock = (
-            (producto.tipoProducto == "Granel" and producto.cantidadDisponible < min_galletas) or
-            (producto.tipoProducto in ["Kilo", "Med. Kilo"] and producto.cantidadDisponible < min_paquetes)
-        )
-        productos_marcados.append({
-            "idProducto": producto.idProducto,
-            "nombreSabor": producto.nombreSabor,
-            "tipoProducto": producto.tipoProducto,
-            "fechaCaducidad": producto.fechaCaducidad,
-            "cantidadDisponible": producto.cantidadDisponible,
-            "estatus": producto.estatus,
-            "bajo_stock": bajo_stock
-        })
-
+    #form = LoteForm()
+    #paquete_form = PaqueteForm()
+    #form.sabor.choices = [(sabor.idSabor, sabor.nombreSabor) for sabor in Sabores.query.all()]
+    #
+    ##* Estas son unicamente las galletas a granel
+    #productos_granel = db.session.query(
+    #    ProductosTerminados.idProducto,
+    #    #Sabores.nombreSabor,
+    #    DetallesProducto.tipoProducto,
+    #    ProductosTerminados.cantidadDisponible
+    #).join(ProductosTerminados.idSabor == Sabores.idSabor)\
+    #.join(DetallesProducto, ProductosTerminados.idDetalle == DetallesProducto.idDetalle)\
+    #.filter(ProductosTerminados.idDetalle == 1, ProductosTerminados.estatus == 1).all()
+    #
+    #today = date.today()
+    #is_christmas_season = today.month == 12
+    #
+    #min_galletas = 60 if is_christmas_season else 30
+    #min_paquetes = 6 if is_christmas_season else 3
+#
+    ##* Obtener todos los productos y marcar los de bajo stock
+    #productos = db.session.query(
+    #    ProductosTerminados.idProducto,
+    #    Sabores.nombreSabor,
+    #    DetallesProducto.tipoProducto,
+    #    ProductosTerminados.fechaCaducidad,
+    #    ProductosTerminados.cantidadDisponible,
+    #    ProductosTerminados.estatus
+    #).join(Sabores, ProductosTerminados.idSabor == Sabores.idSabor)\
+    #.join(DetallesProducto, ProductosTerminados.idDetalle == DetallesProducto.idDetalle)\
+    #.filter(ProductosTerminados.estatus == 1)\
+    #.order_by(ProductosTerminados.idDetalle.asc()).all()
+    #
+    ##* Verificar productos con bajo stock
+    #productos_bajo_stock = db.session.query(
+    #    ProductosTerminados.idProducto,
+    #    Sabores.nombreSabor,
+    #    DetallesProducto.tipoProducto,
+    #    ProductosTerminados.cantidadDisponible
+    #).join(Sabores, ProductosTerminados.idSabor == Sabores.idSabor)\
+    #.join(DetallesProducto, ProductosTerminados.idDetalle == DetallesProducto.idDetalle)\
+    #.filter(
+    #    ProductosTerminados.estatus == 1,
+    #    (ProductosTerminados.idDetalle == 1) & (ProductosTerminados.cantidadDisponible < min_galletas) |
+    #    (ProductosTerminados.idDetalle.in_([2, 3]) & (ProductosTerminados.cantidadDisponible < min_paquetes))
+    #).all()
+#
+    #for producto in productos_bajo_stock:
+    #    flash(f"¡Alerta! Bajo stock: {producto.nombreSabor} ({producto.tipoProducto}) - Cantidad: {producto.cantidadDisponible}", "warning")
+#
+    #productos_marcados = []
+    #for producto in productos:
+    #    bajo_stock = (
+    #        (producto.tipoProducto == "Granel" and producto.cantidadDisponible < min_galletas) or
+    #        (producto.tipoProducto in ["Kilo", "Med. Kilo"] and producto.cantidadDisponible < min_paquetes)
+    #    )
+    #    productos_marcados.append({
+    #        "idProducto": producto.idProducto,
+    #        "nombreSabor": producto.nombreSabor,
+    #        "tipoProducto": producto.tipoProducto,
+    #        "fechaCaducidad": producto.fechaCaducidad,
+    #        "cantidadDisponible": producto.cantidadDisponible,
+    #        "estatus": producto.estatus,
+    #        "bajo_stock": bajo_stock
+    #    })
+#
     return render_template(
         "admin/galletas.html",
-        productos=productos_marcados,
-        productos_granel=productos_granel,
-        form=form,
-        paquete_form=paquete_form, ultimo_login=current_user.ultimo_login
+        #productos=productos_marcados,
+        #productos_granel=productos_granel,
+        #form=form,
+        #paquete_form=paquete_form, ultimo_login=current_user.ultimo_login
     )
 
 @app.route("/guardarLote", methods=["POST"])
 def guardarLote():
-    form = LoteForm()
-    form.sabor.choices = [(sabor.idSabor, sabor.nombreSabor) for sabor in Sabores.query.all()]
-    
-    if form.validate_on_submit():
-        try:
-            print("Formulario validado correctamente")
-            sabor_id = form.sabor.data
-            id_detalle = 1
-            print(f"Sabor seleccionado: {sabor_id}")
-
-            nuevo_producto = ProductosTerminados(
-                idSabor=sabor_id,
-                cantidadDisponible=150,
-                fechaCaducidad=date.today() + timedelta(days=7),
-                idDetalle=id_detalle,
-                estatus=1
-            )
-            db.session.add(nuevo_producto)
-            print("Producto terminado agregado a la sesión")
-            
-            insumos = {
-                2: Decimal("0.9"),  # Harina (kg)
-                3: Decimal("3"),    # Huevos (pzs)
-                4: Decimal("0.3"),  # Azúcar (kg)
-                7: Decimal("0.45"), # Mantequilla (kg)
-                5: Decimal("0.015") # Sal (kg)
-            }
-            
-            for id_materia, cantidad_usada in insumos.items():
-                materia_prima = MateriasPrimas.query.get(id_materia)
-                print(f"Procesando materia prima ID {id_materia}, Cantidad disponible: {materia_prima.cantidadDisponible}")
-                if materia_prima and materia_prima.cantidadDisponible >= cantidad_usada:
-                    materia_prima.cantidadDisponible -= cantidad_usada
-                    print(f"Nueva cantidad disponible para ID {id_materia}: {materia_prima.cantidadDisponible}")
-                else:
-                    print(f"Error: No hay suficiente {materia_prima.materiaPrima} en inventario o ID no encontrado")
-                    flash(f'No hay suficiente {materia_prima.materiaPrima} en inventario.', 'danger')
-                    return redirect(url_for('galletas'))
-            
-            db.session.commit()
-            print("Transacción confirmada y datos guardados correctamente")
-
-            action_logger.info(f"Usuario: {current_user.correo} - Acción: Guardar lote - Sabor: {nuevo_producto.idSabor} - Cantidad: {nuevo_producto.cantidadDisponible} - Fecha: {datetime.now()}")
-            
-            flash('Lote guardado y materias primas descontadas correctamente', 'success')
-        except Exception as e:
-            db.session.rollback()
-            print(f"Error en guardarLote: {str(e)}")
-            flash(f'Error al guardar el lote: {str(e)}', 'danger')
-        return redirect(url_for('galletas'))
-
-    print("Error: El formulario no pasó la validación")
-    flash('Error al guardar el lote. Verifica los datos ingresados.', 'danger')
+    #form = LoteForm()
+    #form.sabor.choices = [(sabor.idSabor, sabor.nombreSabor) for sabor in Sabores.query.all()]
+    #
+    #if form.validate_on_submit():
+    #    try:
+    #        print("Formulario validado correctamente")
+    #        sabor_id = form.sabor.data
+    #        id_detalle = 1
+    #        print(f"Sabor seleccionado: {sabor_id}")
+#
+    #        nuevo_producto = ProductosTerminados(
+    #            idSabor=sabor_id,
+    #            cantidadDisponible=150,
+    #            fechaCaducidad=date.today() + timedelta(days=7),
+    #            idDetalle=id_detalle,
+    #            estatus=1
+    #        )
+    #        db.session.add(nuevo_producto)
+    #        print("Producto terminado agregado a la sesión")
+    #        
+    #        insumos = {
+    #            2: Decimal("0.9"),  # Harina (kg)
+    #            3: Decimal("3"),    # Huevos (pzs)
+    #            4: Decimal("0.3"),  # Azúcar (kg)
+    #            7: Decimal("0.45"), # Mantequilla (kg)
+    #            5: Decimal("0.015") # Sal (kg)
+    #        }
+    #        
+    #        for id_materia, cantidad_usada in insumos.items():
+    #            materia_prima = MateriasPrimas.query.get(id_materia)
+    #            print(f"Procesando materia prima ID {id_materia}, Cantidad disponible: {materia_prima.cantidadDisponible}")
+    #            if materia_prima and materia_prima.cantidadDisponible >= cantidad_usada:
+    #                materia_prima.cantidadDisponible -= cantidad_usada
+    #                print(f"Nueva cantidad disponible para ID {id_materia}: {materia_prima.cantidadDisponible}")
+    #            else:
+    #                print(f"Error: No hay suficiente {materia_prima.materiaPrima} en inventario o ID no encontrado")
+    #                flash(f'No hay suficiente {materia_prima.materiaPrima} en inventario.', 'danger')
+    #                return redirect(url_for('galletas'))
+    #        
+    #        db.session.commit()
+    #        print("Transacción confirmada y datos guardados correctamente")
+#
+    #        action_logger.info(f"Usuario: {current_user.correo} - Acción: Guardar lote - Sabor: {nuevo_producto.idSabor} - Cantidad: {nuevo_producto.cantidadDisponible} - Fecha: {datetime.now()}")
+    #        
+    #        flash('Lote guardado y materias primas descontadas correctamente', 'success')
+    #    except Exception as e:
+    #        db.session.rollback()
+    #        print(f"Error en guardarLote: {str(e)}")
+    #        flash(f'Error al guardar el lote: {str(e)}', 'danger')
+    #    return redirect(url_for('galletas'))
+#
+    #print("Error: El formulario no pasó la validación")
+    #flash('Error al guardar el lote. Verifica los datos ingresados.', 'danger')
     return redirect(url_for('galletas'))
 
 
@@ -584,10 +589,122 @@ def guardar_paquete():
 
 #!============================== Modulo de Recetas ==============================#  
 
-@app.route("/recetas", methods=["GET", "POST"])
+@app.route('/recetas', methods=['GET', 'POST'])
 @login_required
 def recetas():
-    return render_template("admin/recetas.html")
+    if request.method == 'POST':
+        # Manejar renombrado
+        if 'action' in request.form and request.form['action'] == 'renombrar':
+            receta_id = request.form.get('id_receta')
+            nuevo_nombre = request.form.get('nombre_receta')
+            
+            if receta_id and nuevo_nombre:
+                receta = Receta.query.get(receta_id)
+                if receta:
+                    try:
+                        receta.nombreReceta = nuevo_nombre
+                        db.session.commit()
+                        flash('Receta renombrada exitosamente', 'success')
+                    except Exception as e:
+                        db.session.rollback()
+                        flash('Error al renombrar la receta: el nombre ya existe', 'danger')
+    
+    # Resto de tu lógica actual...
+    receta_seleccionada = None
+    detalles = []
+    
+    if request.method == 'POST' and 'receta_id' in request.form:
+        receta_id = request.form['receta_id']
+        receta_seleccionada = Receta.query.get(receta_id)
+        if receta_seleccionada:
+            detalles = db.session.query(RecetaDetalle, MateriasPrimas)\
+                .join(MateriasPrimas)\
+                .filter(RecetaDetalle.idReceta == receta_id)\
+                .all()
+
+    return render_template(
+        'admin/recetas.html',
+        recetas=Receta.query.all(),
+        receta_seleccionada=receta_seleccionada,
+        receta_actual=receta_seleccionada,
+        detalles=detalles,
+        materias_primas=MateriasPrimas.query.all(),
+        ultimo_login=current_user.ultimo_login
+    )
+
+@app.route('/receta/<int:id>/detalles', methods=['GET'])
+@login_required
+def get_receta_detalles(id):
+    try:
+        receta = Receta.query.get_or_404(id)
+        detalles = db.session.query(
+            RecetaDetalle,
+            MateriasPrimas
+        ).join(
+            MateriasPrimas, 
+            RecetaDetalle.idMateriaPrima == MateriasPrimas.idMateriaPrima
+        ).filter(
+            RecetaDetalle.idReceta == id
+        ).all()
+
+        return jsonify([{
+            'idRecetaDetalle': d.RecetaDetalle.idRecetaDetalle,
+            'materiaPrima': d.MateriasPrimas.materiaPrima,
+            'cantidad': float(d.RecetaDetalle.cantidad),
+            'unidadMedida': d.MateriasPrimas.unidadMedida
+        } for d in detalles])
+    
+    except Exception as e:
+        app.logger.error(f"Error: {str(e)}")
+        return jsonify({'error': 'Error al cargar detalles'}), 500
+
+@app.route('/actualizar_receta', methods=['POST'])
+@login_required
+def actualizar_receta():
+    receta_id = request.form.get('receta_id')
+    for key, value in request.form.items():
+        if key.startswith('cantidad_'):
+            detalle_id = key.split('_')[1]
+            detalle = RecetaDetalle.query.get(detalle_id)
+            if detalle:
+                detalle.cantidad = float(value)
+    db.session.commit()
+    flash('Cambios guardados correctamente', 'success')
+    return redirect(url_for('recetas'))
+
+@app.route('/eliminar_detalle/<int:id>', methods=['POST'])
+@login_required
+def eliminar_detalle(id):
+    detalle = RecetaDetalle.query.get_or_404(id)
+    db.session.delete(detalle)
+    db.session.commit()
+    flash('Insumo eliminado de la receta', 'info')
+    return redirect(url_for('recetas'))
+
+
+@app.route('/agregar_receta', methods=['POST'])
+@login_required
+@role_required(['Admin', 'Produccion'])
+def agregar_receta():
+    nombre_receta = request.form.get('nombreReceta')
+    if not nombre_receta:
+        flash('El nombre de la receta es obligatorio', 'danger')
+        return redirect(url_for('recetas'))
+
+    nueva_receta = Receta(nombreReceta=nombre_receta, precio=7)  # Puedes ajustar el precio según sea necesario
+    db.session.add(nueva_receta)
+    db.session.commit()
+    flash('Receta agregada correctamente', 'success')
+    return redirect(url_for('recetas'))
+
+
+
+
+
+
+
+
+
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -1272,8 +1389,11 @@ def verify_otp(user_id):
 @role_required(['Admin'])
 def miembros():
     form = EmpleadoForm()
-    usuarios = Usuarios.query.filter_by(activo=1).filter(Usuarios.rol != 'Cliente').all()
-    
+    usuarios = Usuarios.query.filter_by(activo=1)\
+                .filter(Usuarios.rol != 'Cliente')\
+                .order_by(Usuarios.rol.desc())\
+                .all()
+
     if form.validate_on_submit():
         nombre = form.nombre.data
         apaterno = form.apaterno.data
@@ -1296,7 +1416,7 @@ def miembros():
             db.session.commit()
             flash('Usuario registrado exitosamente.', 'success')
         return redirect(url_for('miembros'))
-    
+
     return render_template("admin/usuarios.html", form=form, usuarios=usuarios, ultimo_login=current_user.ultimo_login)
 
 @app.route("/eliminar_usuario/<int:id_usuario>", methods=["POST"])

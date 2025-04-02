@@ -57,42 +57,36 @@ class ComprasInsumos(db.Model):
     fecha = db.Column(db.Date)
     totalCompra = db.Column(db.Numeric(10,2)) #AGREGUÉ TOTAL COMPRA A COMPRAS DE INSUMOS -Oscar
 
+#!==================================================================================
 
-class Recetas(db.Model):
+class Receta(db.Model):
     __tablename__ = 'recetas'
-    idReceta = db.Column(db.Integer, primary_key=True)
-    nombreReceta = db.Column(db.String(100))
+    idReceta = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    nombreReceta = db.Column(db.String(100), unique=True, nullable=False)
+    precio = db.Column(db.Numeric(10, 2), nullable=False, default=7)
+    imagen = db.Column(db.Text)
+    estatus = db.Column(db.Integer, default=1)
 
-class IngredientesReceta(db.Model):
-    __tablename__ = 'ingredientesreceta'
-    idIngrediente = db.Column(db.Integer, primary_key=True)
-    idReceta = db.Column(db.Integer, db.ForeignKey('recetas.idReceta'))
-    idMateriaPrima = db.Column(db.Integer, db.ForeignKey('materiasprimas.idMateriaPrima'))
-    cantidadNecesaria = db.Column(db.Numeric(10, 2))
+    detalles = db.relationship('RecetaDetalle', backref='receta', cascade='all, delete-orphan')
 
-
-
-class Sabores(db.Model):
-    __tablename__ = 'sabores'
-    idSabor = db.Column(db.Integer, primary_key=True)
-    nombreSabor = db.Column(db.String(100), unique=True, nullable=False)
-
-class DetallesProducto(db.Model):
-    __tablename__ = 'detallesproducto'
-    idDetalle = db.Column(db.Integer, primary_key=True)
-    tipoProducto = db.Column(db.String(30), unique=True, nullable=False)
-    precio = db.Column(db.Numeric(10, 2), nullable=False)
+class RecetaDetalle(db.Model):
+    __tablename__ = 'recetadetalle'
+    idRecetaDetalle = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    idReceta = db.Column(db.Integer, db.ForeignKey('recetas.idReceta', ondelete='CASCADE'), nullable=False)
+    idMateriaPrima = db.Column(db.Integer, db.ForeignKey('materiasprimas.idMateriaPrima', ondelete='CASCADE'), nullable=False)
+    cantidad = db.Column(db.Numeric(10, 2), nullable=False)
+    unidadMedida = db.Column(db.String(20), nullable=False)
 
 class ProductosTerminados(db.Model):
     __tablename__ = 'productosterminados'
-    idProducto = db.Column(db.Integer, primary_key=True)
-    idSabor = db.Column(db.Integer, db.ForeignKey('sabores.idSabor'), nullable=False)
+    idProducto = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    idReceta = db.Column(db.Integer, db.ForeignKey('recetas.idReceta', ondelete='CASCADE'), nullable=False)
     cantidadDisponible = db.Column(db.Integer)
     fechaCaducidad = db.Column(db.Date)
-    idDetalle = db.Column(db.Integer, db.ForeignKey('detallesproducto.idDetalle'), nullable=False)
+    idDetalle = db.Column(db.Integer, db.ForeignKey('detallesproducto.idDetalle', ondelete='CASCADE'), nullable=False)
     estatus = db.Column(db.Integer, default=1)
 
-
+#!==================================================================================
 
 class Ventas(db.Model):
     __tablename__ = 'ventas'
