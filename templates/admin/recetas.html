@@ -5,48 +5,54 @@
 <div class="row">
     <div class="card border-0 gb mb-3" style="height: 58px; background-color: #f1f1f1">
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-            <div class="container col-12">
-                {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                {% endfor %}
+        {% if messages %}
+        <div class="container col-12">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
         {% endwith %}
     </div>
-    
+
     <!--!  Tabla de Recetas  -->
     <div class="col-5">
-        <div class="card border-0 shadow-sm rounded-3 bg-white" style="max-height: 450px;">
+        <div class="card border-0 shadow-sm rounded-3 bg-white" style="max-height: 400px;">
             <div class="card-header border-0 rounded-top-3 text-center bg-white">
                 <b class="text-center font-Spartan">Recetas</b>
             </div>
-            <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
-                <form method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="table-responsive">
+                <!-- Formulario para editar receta -->
+                <form method="POST" action="{{ url_for('editar_receta') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                     <div class="row px-4">
-                        <div class="form-floating mb-3">
-                            <input type="text" 
-                                class="form-control border-0 shadow" 
-                                id="txtNombreReceta" 
-                                placeholder="Receta"
-                                value="{{ receta_actual.nombreReceta if receta_actual else '' }}"
-                                >
+                        <div class="col-6 form-floating mb-3">
+                            <input type="text" class="form-control border-0 shadow-sm" id="txtNombreReceta" name="nombre_receta" placeholder="Receta" value="{{ receta_actual.nombreReceta if receta_actual else '' }}">
                             <label class="ms-3" for="txtNombreReceta">Receta</label>
                         </div>
+                        <div class="col-3 form-floating mb-3">
+                            <input type="text" class="form-control border-0 shadow-sm" id="txtPrecioReceta" name="precio_receta" placeholder="precio" value="{{ receta_actual.precio if receta_actual else '' }}">
+                            <label class="ms-3" for="txtPrecioReceta">Precio</label>
+                        </div>
+                        <div class="col-3 form-floating mb-3">
+                            <button type="submit" class="btn btn-lg btn-warning rounded-2 text-white shadow-sm border-0" style="height: 58px; width: 100%;">
+                                Editar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row px-4">
                         <div class="form-floating" hidden>
-                            <input type="text" 
-                                class="form-control" 
-                                id="txtIdReceta" 
-                                placeholder="ID"
-                                value="{{ receta_actual.idReceta if receta_actual else '' }}"
-                                readonly>
+                            <input type="text" class="form-control" id="txtIdReceta" name="receta_id" placeholder="ID" value="{{ receta_actual.idReceta if receta_actual else '' }}" readonly>
                             <label for="txtIdReceta">ID Receta</label>
                         </div>
                     </div>
+                </form>
+                <!-- Formulario para seleccionar receta -->
+                <form method="POST" action="{{ url_for('seleccionar_receta') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                     <table class="table table-hover text-center mb-0 table-borderless">
                         <thead class="text-dark">
                             <tr>
@@ -63,9 +69,9 @@
                                 <td>{{ receta.nombreReceta }}</td>
                                 <td>${{ receta.precio }}</td>
                                 <td>
-                                    <button type="submit" 
-                                            name="receta_id" 
-                                            value="{{ receta.idReceta }} "class="btn-sm btn btn-warning" style="width: 31px;"><i class="fa fa-info text-white"></i></button>    
+                                    <button type="submit" name="receta_id" value="{{ receta.idReceta }}" class="btn-sm btn btn-warning" style="width: 31px;">
+                                        <i class="fa fa-info text-white"></i>
+                                    </button>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -75,36 +81,40 @@
             </div>
             <div class="card-footer border-0 rounded-bottom-3 bg-white pt-0"></div>
         </div>
-        
+
         <div class="row mt-4">
             <div class="col-12">
-                <button class="btn btn-warning text-white col-12 rounded-3 font-Spartan" data-bs-toggle="modal"
-                    data-bs-target="#modalAgregarReceta">
+                <button class="btn btn-warning text-white col-12 rounded-3 font-Spartan" data-bs-toggle="modal" data-bs-target="#modalAgregarReceta">
                     Nueva Receta
                 </button>
-                <button class="btn btn-warning mt-2 text-white col-12 rounded-3 font-Spartan">
-                    Editar Receta
-                </button>
+                <form method="POST" action="{{ url_for('asignar_imagen') }}" enctype="multipart/form-data" id="formAsignarImagen">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <input type="hidden" name="receta_id" value="{{ receta_actual.idReceta if receta_actual else '' }}">
+                    <input type="file" name="imagen_receta" id="inputImagenReceta" accept="image/*" style="display: none;" onchange="document.getElementById('formAsignarImagen').submit();">
+                    <button type="button" class="btn btn-warning text-white col-12 rounded-3 font-Spartan mt-2" onclick="document.getElementById('inputImagenReceta').click();">
+                        Asignar Imagen
+                    </button>
             </div>
         </div>
     </div>
 
-    <!-- Sección de Insumos (Columna Derecha) -->
+
+    <!--! Insumos agregados -->
     <div class="col-7">
-        <div class="card border-0 shadow-sm rounded-3 bg-white" style="max-height: 450px;">
+        <div class="card border-0 shadow-sm rounded-3 bg-white" style="max-height: 400px;">
             <div class="card-header border-0 rounded-top-3 text-center bg-white">
                 <b class="text-center font-Spartan">
                     {% if receta_seleccionada %}
-                        Insumos para: {{ receta_seleccionada.nombreReceta }}
+                    Insumos para: {{ receta_seleccionada.nombreReceta }}
                     {% else %}
-                        Insumos Agregados
+                    Insumos Agregados
                     {% endif %}
                 </b>
             </div>
-            <div class="table-responsive" style="max-height: 450px;">
+            <div class="table-responsive">
                 {% if receta_seleccionada %}
                 <form method="POST" action="{{ url_for('actualizar_receta') }}" id="form-receta">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                     <input type="hidden" name="receta_id" value="{{ receta_seleccionada.idReceta }}">
                     <table class="table table-hover text-center table-borderless">
                         <thead>
@@ -122,17 +132,16 @@
                                 <td>{{ materia.idMateriaPrima }}</td>
                                 <td>{{ materia.materiaPrima }}</td>
                                 <td>
-                                    <input type="number" 
-                                        name="cantidad_{{ detalle.idRecetaDetalle }}" 
+                                    <input type="number" name="cantidad_{{ detalle.idRecetaDetalle }}"
                                         value="{{ detalle.cantidad }}"
-                                        class="form-control form-control-sm border-0 shadow-sm mx-auto"
-                                        step="0.01" min="0" style="width: 200px;">
+                                        class="form-control form-control-sm border-0 shadow-sm mx-auto" step="0.01"
+                                        min="0" style="width: 200px;">
                                 </td>
                                 <td>{{ materia.unidadMedida }}</td>
                                 <td>
-                                    <button type="submit" 
-                                            formaction="{{ url_for('eliminar_detalle', id=detalle.idRecetaDetalle) }}"
-                                            class="btn btn-sm btn-danger">
+                                    <button type="submit"
+                                        formaction="{{ url_for('eliminar_detalle', id=detalle.idRecetaDetalle) }}"
+                                        class="btn btn-sm btn-danger">
                                         <i class="fa fa-trash"></i>
                                     </button>
                                 </td>
@@ -147,21 +156,21 @@
                 </div>
                 {% endif %}
             </div>
-            <div class="card-footer border-0 bg-white text-center py-3">
+            <div class="card-footer border-0 bg-white text-center p-0 rounded-3 ">
                 {% if receta_seleccionada %}
-                <button type="submit" form="form-receta" class="btn btn-primary px-4">
+                <button type="submit" form="form-receta" class="btn btn-warning col-12 px-0 rounded-top-0 text-white">
                     <i class="fa fa-save me-2"></i>Guardar Cambios
                 </button>
                 {% endif %}
             </div>
         </div>
-        
+
         <!--! Sección de Insumos en Inventario -->
-        <div class="card border-0 shadow-sm rounded-3 bg-white mt-4" style="height: 450px;">
+        <div class="card border-0 shadow-sm rounded-3 bg-white mt-4" style="height: 400px;">
             <div class="card-header border-0 rounded-top-3 text-center bg-white">
                 <b class="text-center font-Spartan">Insumos en inventario</b>
             </div>
-            <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
+            <div class="table-responsive">
                 <table class="table table-hover text-center mb-0 table-borderless">
                     <thead class="text-dark">
                         <tr>
@@ -178,9 +187,16 @@
                             <td>{{ materia.materiaPrima }}</td>
                             <td>{{ materia.unidadMedida }}</td>
                             <td>
-                                <button class="btn-sm btn btn-success">
-                                    <i class="fa fa-plus"></i>
-                                </button>
+                                <form method="POST" action="{{ url_for('agregar_insumo_receta') }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                    <input type="hidden" name="receta_id" value="{{ receta_seleccionada.idReceta }}">
+                                    <input type="hidden" name="insumo_id" value="{{ materia.idMateriaPrima }}">
+                                    <input type="hidden" name="unidad_medida" value="{{ materia.unidadMedida }}">
+                                    <input type="hidden" name="cantidad" value="0.00">
+                                    <button type="submit" class="btn-sm btn btn-success">
+                                        <i class="fa fa-plus"></i>
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                         {% endfor %}
@@ -198,13 +214,14 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="POST" action="{{ url_for('agregar_receta') }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                 <div class="modal-header border-0">
                     <h5 class="modal-title" id="modalAgregarRecetaLabel">Agregar Receta</h5>
                 </div>
                 <div class="modal-body">
                     <label for="nombreReceta" class="form-label">Nombre de la Receta</label>
-                    <input type="text" class="form-control" id="nombreReceta" name="nombreReceta" placeholder="Ingrese el nombre" required>
+                    <input type="text" class="form-control" id="nombreReceta" name="nombreReceta"
+                        placeholder="Ingrese el nombre" required>
                 </div>
                 <div class="modal-footer border-0">
                     <button type="submit" class="btn btn-primary">Guardar</button>
@@ -214,8 +231,6 @@
     </div>
 </div>
 
-
-<!-- Modal para seleccionar insumos (original) -->
 <div class="modal fade" id="modalSeleccionarInsumos" tabindex="-1" aria-labelledby="modalSeleccionarInsumosLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -237,9 +252,11 @@
                         <tbody>
                             {% for materia in materias_primas %}
                             <tr>
-                                <td><input type="checkbox" class="form-check-input" name="insumo_{{ materia.idMateriaPrima }}"></td>
+                                <td><input type="checkbox" class="form-check-input"
+                                        name="insumo_{{ materia.idMateriaPrima }}"></td>
                                 <td>{{ materia.materiaPrima }}</td>
-                                <td><input type="number" class="form-control" min="1" value="1" name="cantidad_{{ materia.idMateriaPrima }}"></td>
+                                <td><input type="number" class="form-control" min="1" value="1"
+                                        name="cantidad_{{ materia.idMateriaPrima }}"></td>
                             </tr>
                             {% endfor %}
                         </tbody>
