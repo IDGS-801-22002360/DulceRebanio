@@ -81,6 +81,7 @@ class ProductosTerminados(db.Model):
     __tablename__ = 'productosterminados'
     idProducto = db.Column(db.Integer, primary_key=True, autoincrement=True)
     idReceta = db.Column(db.Integer, db.ForeignKey('recetas.idReceta', ondelete='CASCADE'), nullable=False)
+    tipoProducto = db.Column(db.String(50))
     cantidadDisponible = db.Column(db.Integer)
     fechaCaducidad = db.Column(db.Date)
     estatus = db.Column(db.Integer, default=1)

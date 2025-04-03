@@ -367,72 +367,101 @@ def dashboard():
 @login_required  
 @role_required(['Admin', 'Ventas', 'Produccion'])
 def galletas():
+    
     form = LoteForm()
     paquete_form = PaqueteForm()
-
-    # Definir los umbrales de stock mínimo
-    today = date.today()
-    is_christmas_season = today.month == 12
-    min_galletas = 60 if is_christmas_season else 30
-    min_paquetes = 6 if is_christmas_season else 3
-
-    # Obtener los productos a granel
-    productos_granel = db.session.query(
-        ProductosTerminados.idProducto,
-        Receta.nombreReceta,
-        ProductosTerminados.cantidadDisponible
-    ).join(Receta, ProductosTerminados.idReceta == Receta.idReceta)\
-    .filter(ProductosTerminados.idReceta == 1, ProductosTerminados.estatus == 1).all()
-
-    # Obtener todos los productos y marcar los de bajo stock
+    
     productos = db.session.query(
-        ProductosTerminados.idProducto,
-        Receta.nombreReceta,
-        ProductosTerminados.fechaCaducidad,
-        ProductosTerminados.cantidadDisponible,
-        ProductosTerminados.estatus
-    ).join(Receta, ProductosTerminados.idReceta == Receta.idReceta)\
-    .filter(ProductosTerminados.estatus == 1)\
-    .order_by(ProductosTerminados.idReceta.asc()).all()
-
-    # Verificar productos con bajo stock
-    productos_bajo_stock = db.session.query(
-        ProductosTerminados.idProducto,
-        Receta.nombreReceta,
-        ProductosTerminados.cantidadDisponible
-    ).join(Receta, ProductosTerminados.idReceta == Receta.idReceta)\
-    .filter(
-        ProductosTerminados.estatus == 1,
-        (ProductosTerminados.idReceta == 1) & (ProductosTerminados.cantidadDisponible < min_galletas) |
-        (ProductosTerminados.idReceta.in_([2, 3]) & (ProductosTerminados.cantidadDisponible < min_paquetes))
+        ProductosTerminados,
+        Receta
+    ).join(
+        Receta,
+        ProductosTerminados.idReceta == Receta.idReceta
+    ).filter(
+        ProductosTerminados.estatus == 1
     ).all()
 
-    for producto in productos_bajo_stock:
-        flash(f"¡Alerta! Bajo stock: {producto.nombreReceta} - Cantidad: {producto.cantidadDisponible}", "warning")
+    productos_data = [{
+        'id_producto': pt.idProducto,
+        'nombre_receta': receta.nombreReceta,
+        'tipo_producto': pt.tipoProducto,
+        'cantidad': pt.cantidadDisponible,
+        'fecha_caducidad': pt.fechaCaducidad.strftime('%Y-%m-%d') if pt.fechaCaducidad else 'N/A',
+        'precio': float(receta.precio)
+    } for pt, receta in productos]
 
-    productos_marcados = []
-    for producto in productos:
-        bajo_stock = (
-            (producto.idReceta == 1 and producto.cantidadDisponible < min_galletas) or
-            (producto.idReceta in [2, 3] and producto.cantidadDisponible < min_paquetes)
-        )
-        productos_marcados.append({
-            "idProducto": producto.idProducto,
-            "nombreReceta": producto.nombreReceta,
-            "fechaCaducidad": producto.fechaCaducidad,
-            "cantidadDisponible": producto.cantidadDisponible,
-            "estatus": producto.estatus,
-            "bajo_stock": bajo_stock
-        })
-
-    return render_template(
-        "admin/galletas.html",
-        productos=productos_marcados,
-        productos_granel=productos_granel,
+    return render_template('admin/galletas.html', productos=productos_data,
         form=form,
         paquete_form=paquete_form,
-        ultimo_login=current_user.ultimo_login
-    )
+        ultimo_login=current_user.ultimo_login)
+
+
+#    form = LoteForm()
+#    paquete_form = PaqueteForm()
+#
+#    # Definir los umbrales de stock mínimo
+#    today = date.today()
+#    is_christmas_season = today.month == 12
+#    min_galletas = 60 if is_christmas_season else 30
+#    min_paquetes = 6 if is_christmas_season else 3
+#
+#    # Obtener los productos a granel
+#    productos_granel = db.session.query(
+#        ProductosTerminados.idProducto,
+#        Receta.nombreReceta,
+#        ProductosTerminados.cantidadDisponible
+#    ).join(Receta, ProductosTerminados.idReceta == Receta.idReceta)\
+#    .filter(ProductosTerminados.idReceta == 1, ProductosTerminados.estatus == 1).all()
+#
+#    # Obtener todos los productos y marcar los de bajo stock
+#    productos = db.session.query(
+#        ProductosTerminados.idProducto,
+#        Receta.nombreReceta,
+#        ProductosTerminados.fechaCaducidad,
+#        ProductosTerminados.cantidadDisponible,
+#        ProductosTerminados.estatus
+#    ).join(Receta, ProductosTerminados.idReceta == Receta.idReceta)\
+#    .filter(ProductosTerminados.estatus == 1)\
+#    .order_by(ProductosTerminados.idReceta.asc()).all()
+#
+#    # Verificar productos con bajo stock
+#    productos_bajo_stock = db.session.query(
+#        ProductosTerminados.idProducto,
+#        Receta.nombreReceta,
+#        ProductosTerminados.cantidadDisponible
+#    ).join(Receta, ProductosTerminados.idReceta == Receta.idReceta)\
+#    .filter(
+#        ProductosTerminados.estatus == 1,
+#        (ProductosTerminados.idReceta == 1) & (ProductosTerminados.cantidadDisponible < min_galletas) |
+#        (ProductosTerminados.idReceta.in_([2, 3]) & (ProductosTerminados.cantidadDisponible < min_paquetes))
+#    ).all()
+#
+#    for producto in productos_bajo_stock:
+#        flash(f"¡Alerta! Bajo stock: {producto.nombreReceta} - Cantidad: {producto.cantidadDisponible}", "warning")
+#
+#    productos_marcados = []
+#    for producto in productos:
+#        bajo_stock = (
+#            (producto.idReceta == 1 and producto.cantidadDisponible < min_galletas) or
+#            (producto.idReceta in [2, 3] and producto.cantidadDisponible < min_paquetes)
+#        )
+#        productos_marcados.append({
+#            "idProducto": producto.idProducto,
+#            "nombreReceta": producto.nombreReceta,
+#            "fechaCaducidad": producto.fechaCaducidad,
+#            "cantidadDisponible": producto.cantidadDisponible,
+#            "estatus": producto.estatus,
+#            "bajo_stock": bajo_stock
+#        })
+#
+#    return render_template(
+#        "admin/galletas.html",
+#        productos=productos_marcados,
+#        productos_granel=productos_granel,
+#        form=form,
+#        paquete_form=paquete_form,
+#        ultimo_login=current_user.ultimo_login
+#    )
 
 
 
@@ -657,15 +686,33 @@ def get_receta_detalles(id):
 @login_required
 def actualizar_receta():
     receta_id = request.form.get('receta_id')
+    if not receta_id:
+        flash('Receta ID no encontrado en la solicitud', 'danger')
+        return redirect(url_for('recetas'))
+
+    detalles_actualizados = []
     for key, value in request.form.items():
         if key.startswith('cantidad_'):
             detalle_id = key.split('_')[1]
             detalle = RecetaDetalle.query.get(detalle_id)
             if detalle:
-                detalle.cantidad = float(value)
-    db.session.commit()
-    flash('Cambios guardados correctamente', 'success')
+                try:
+                    detalle.cantidad = float(value)
+                    detalles_actualizados.append(detalle_id)
+                except ValueError:
+                    flash(f'Valor inválido para cantidad en detalle ID {detalle_id}', 'danger')
+                    return redirect(url_for('recetas'))
+
+    if detalles_actualizados:
+        db.session.commit()
+        flash('Cambios guardados correctamente', 'success')
+    else:
+        flash('No se actualizaron detalles', 'warning')
+
     return redirect(url_for('recetas'))
+
+
+
 
 @app.route('/eliminar_detalle/<int:id>', methods=['POST'])
 @login_required
@@ -686,7 +733,7 @@ def agregar_receta():
         flash('El nombre de la receta es obligatorio', 'danger')
         return redirect(url_for('recetas'))
 
-    nueva_receta = Receta(nombreReceta=nombre_receta, precio=7)  # Puedes ajustar el precio según sea necesario
+    nueva_receta = Receta(nombreReceta=nombre_receta, precio=7)
     db.session.add(nueva_receta)
     db.session.commit()
     flash('Receta agregada correctamente', 'success')
@@ -792,7 +839,6 @@ def asignar_imagen():
         return redirect(url_for('recetas'))
 
     try:
-        # Convertir la imagen a base64
         imagen_b64 = base64.b64encode(imagen.read()).decode('utf-8')
         receta.imagen = imagen_b64
         db.session.commit()
@@ -802,6 +848,7 @@ def asignar_imagen():
         flash('Error al asignar la imagen', 'danger')
 
     return redirect(url_for('recetas'))
+
 
 
 

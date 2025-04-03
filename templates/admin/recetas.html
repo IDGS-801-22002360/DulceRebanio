@@ -20,7 +20,7 @@
 
     <!--!  Tabla de Recetas  -->
     <div class="col-5">
-        <div class="card border-0 shadow-sm rounded-3 bg-white" style="max-height: 400px;">
+        <div class="card border-0 shadow-sm rounded-3 bg-white" style="height: 400px;">
             <div class="card-header border-0 rounded-top-3 text-center bg-white">
                 <b class="text-center font-Spartan">Recetas</b>
             </div>
@@ -53,7 +53,7 @@
                 <!-- Formulario para seleccionar receta -->
                 <form method="POST" action="{{ url_for('seleccionar_receta') }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                    <table class="table table-hover text-center mb-0 table-borderless">
+                    <table class="table table-hover text-center mb-0 table-borderless" style="width: 100%; height: 100%; overflow: auto; padding: 0 10px;;">
                         <thead class="text-dark">
                             <tr>
                                 <th>Nº</th>
@@ -65,10 +65,10 @@
                         <tbody>
                             {% for receta in recetas %}
                             <tr>
-                                <td>{{ receta.idReceta }}</td>
-                                <td>{{ receta.nombreReceta }}</td>
-                                <td>${{ receta.precio }}</td>
-                                <td>
+                                <td class="col-1">{{ receta.idReceta }}</td>
+                                <td class="col-7">{{ receta.nombreReceta }}</td>
+                                <td class="col-2">${{ receta.precio }}</td>
+                                <td class="col-2">
                                     <button type="submit" name="receta_id" value="{{ receta.idReceta }}" class="btn-sm btn btn-warning" style="width: 31px;">
                                         <i class="fa fa-info text-white"></i>
                                     </button>
@@ -94,6 +94,7 @@
                     <button type="button" class="btn btn-warning text-white col-12 rounded-3 font-Spartan mt-2" onclick="document.getElementById('inputImagenReceta').click();">
                         Asignar Imagen
                     </button>
+                </form>                
             </div>
         </div>
     </div>
@@ -101,7 +102,7 @@
 
     <!--! Insumos agregados -->
     <div class="col-7">
-        <div class="card border-0 shadow-sm rounded-3 bg-white" style="max-height: 400px;">
+        <div class="card border-0 shadow-sm rounded-3 bg-white" style="height: 400px;">
             <div class="card-header border-0 rounded-top-3 text-center bg-white">
                 <b class="text-center font-Spartan">
                     {% if receta_seleccionada %}
@@ -116,6 +117,14 @@
                 <form method="POST" action="{{ url_for('actualizar_receta') }}" id="form-receta">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                     <input type="hidden" name="receta_id" value="{{ receta_seleccionada.idReceta }}">
+                    
+                    <!-- Botón arriba de la tabla -->
+                    <div class="px-3 pt-3 pb-2">
+                        <button type="submit" class="btn btn-warning col-12 text-white shadow-sm">
+                            <i class="fa fa-save me-2"></i>Guardar Cambios
+                        </button>
+                    </div>
+                    
                     <table class="table table-hover text-center table-borderless">
                         <thead>
                             <tr>
@@ -128,17 +137,17 @@
                         </thead>
                         <tbody>
                             {% for detalle, materia in detalles %}
-                            <tr>
-                                <td>{{ materia.idMateriaPrima }}</td>
-                                <td>{{ materia.materiaPrima }}</td>
-                                <td>
+                            <tr class="col-12">
+                                <td class="col-1">{{ materia.idMateriaPrima }}</td>
+                                <td class="col-4">{{ materia.materiaPrima }}</td>
+                                <td class="col-4">
                                     <input type="number" name="cantidad_{{ detalle.idRecetaDetalle }}"
                                         value="{{ detalle.cantidad }}"
                                         class="form-control form-control-sm border-0 shadow-sm mx-auto" step="0.01"
                                         min="0" style="width: 200px;">
                                 </td>
-                                <td>{{ materia.unidadMedida }}</td>
-                                <td>
+                                <td class="col-1">{{ materia.unidadMedida }}</td>
+                                <td class="col-2">
                                     <button type="submit"
                                         formaction="{{ url_for('eliminar_detalle', id=detalle.idRecetaDetalle) }}"
                                         class="btn btn-sm btn-danger">
@@ -156,12 +165,7 @@
                 </div>
                 {% endif %}
             </div>
-            <div class="card-footer border-0 bg-white text-center p-0 rounded-3 ">
-                {% if receta_seleccionada %}
-                <button type="submit" form="form-receta" class="btn btn-warning col-12 px-0 rounded-top-0 text-white">
-                    <i class="fa fa-save me-2"></i>Guardar Cambios
-                </button>
-                {% endif %}
+            <div class=" card-footer border-0 rounded-bottom-3 text-center bg-white pt-1">
             </div>
         </div>
 
@@ -182,18 +186,18 @@
                     </thead>
                     <tbody>
                         {% for materia in materias_primas %}
-                        <tr>
-                            <td>{{ materia.idMateriaPrima }}</td>
-                            <td>{{ materia.materiaPrima }}</td>
-                            <td>{{ materia.unidadMedida }}</td>
-                            <td>
+                        <tr class="col-12">
+                            <td class="col-1">{{ materia.idMateriaPrima }}</td>
+                            <td class="col-8">{{ materia.materiaPrima }}</td>
+                            <td class="col-1">{{ materia.unidadMedida }}</td>
+                            <td class="col-2">
                                 <form method="POST" action="{{ url_for('agregar_insumo_receta') }}">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                     <input type="hidden" name="receta_id" value="{{ receta_seleccionada.idReceta }}">
                                     <input type="hidden" name="insumo_id" value="{{ materia.idMateriaPrima }}">
                                     <input type="hidden" name="unidad_medida" value="{{ materia.unidadMedida }}">
                                     <input type="hidden" name="cantidad" value="0.00">
-                                    <button type="submit" class="btn-sm btn btn-success">
+                                    <button type="submit" class="btn-sm btn btn-warning text-white">
                                         <i class="fa fa-plus"></i>
                                     </button>
                                 </form>

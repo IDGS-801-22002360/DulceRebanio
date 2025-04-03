@@ -34,18 +34,14 @@
                             <th></th>
                         </tr>
                     </thead>
-                    <tbody id="productosTableBody">
-                        {% for producto in productos %}
-                        <tr class="{% if producto.bajo_stock %}table-danger{% endif %}"
-                            onclick="selectProduct('{{ producto.idProducto }}', '{{ producto.estatus }}')">
-                            <td>{{ producto.idProducto }}</td>
-                            <td>{{ producto.nombreSabor }}</td>
-                            <td>{{ producto.tipoProducto }}</td>
-                            <td>{{ producto.fechaCaducidad.strftime('%d-%m-%Y') }}</td>
-                            <td>{{ producto.cantidadDisponible }}</td>
-                            <td class="">
-                                <a class="fs-5 fa fa-info-circle text-decoration-none text-warning"></a>
-                            </td>
+                    <tbody>
+                        {% for p in productos %}
+                        <tr>
+                            <td>{{ p.id_producto }}</td>
+                            <td>{{ p.nombre_receta }}</td>
+                            <td>{{ p.tipo_producto }}</td>
+                            <td>{{ p.cantidad }}</td>
+                            <td>{{ p.fecha_caducidad }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -113,7 +109,7 @@
 </div>
 
 <!--* Modal Merma -->
-<div class="modal fade mt-5" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade mt-5 col-12" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content border-0">
             <div class="modal-header border-0" style="background-color: #eee">
@@ -139,17 +135,17 @@
 </div>
 
 <!--* Modal Nuevo Paquete -->
-<div class="modal fade mt-5" id="modalNuevoPaquete" tabindex="-1" aria-labelledby="modalNuevoPaqueteLabel"
+<div class="modal modal-lg fade mt-5" id="modalNuevoPaquete" tabindex="-1" aria-labelledby="modalNuevoPaqueteLabel"
     aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content border-0">
-            <div class="modal-header border-0" style="background-color: #eee">
+            <div class="modal-header border-0" style="background-color: #fff">
                 <h1 class="modal-title fs-5 font-Spartan" id="modalNuevoPaqueteLabel">
                     <b>Nuevo Paquete</b>
                 </h1>
                 <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" style="background-color: #eee">
+            <div class="modal-body" style="background-color: #fff">
                 <form id="formNuevoPaquete" method="POST" action="{{ url_for('guardar_paquete') }}">
                     {{ paquete_form.hidden_tag() }}
                     <div class="card border-0 rounded-3 shadow-sm">
@@ -184,19 +180,19 @@
                         <div class="row">
                             <div class="col-6 form-floating">
                                 {{ paquete_form.tipo_producto(class="form-select border-0") }}
-                                <label for="paquete_form.tipo_producto">Tipo de Producto</label>
+                                <label class="ms-2" for="paquete_form.tipo_producto">Tipo de Producto</label>
                             </div>
                             <div class="col-6 form-floating">
                                 {{ paquete_form.cantidad(class="form-control border-0") }}
-                                <label for="paquete_form.cantidad">Cantidad</label>
+                                <label class="ms-2" for="paquete_form.cantidad">Cantidad</label>
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer border-0" style="background-color: #eee">
-                        {{ paquete_form.submit(class="btn btn-warning font-Spartan
-                        text-white") }}
-                    </div>
                 </form>
+            </div>
+            <div class="modal-footer border-0" style="background-color: #fff">
+                {{ paquete_form.submit(class="btn btn-warning font-Spartan
+                text-white") }}
             </div>
         </div>
     </div>

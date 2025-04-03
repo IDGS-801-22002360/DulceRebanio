@@ -20,7 +20,7 @@ class PaqueteForm(FlaskForm):
         "Tipo de Producto",
         choices=[
             (2, "Kilo"),
-            (3, "Medio Kilo")
+            (3, "700 gr")
         ],
         coerce=int,
         validators=[DataRequired(message="El campo es requerido")]
