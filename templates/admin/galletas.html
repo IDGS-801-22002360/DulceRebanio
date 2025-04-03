@@ -17,6 +17,7 @@
         </div>
         {% endif %} {% endwith %}
     </div>
+    
     <div class="col-6">
         <div class="card border-0 shadow-sm rounded-3 bg-white">
             <div class="card-header border-0 rounded-top-3 text-center bg-white">
@@ -42,6 +43,11 @@
                             <td>{{ p.tipo_producto }}</td>
                             <td>{{ p.cantidad }}</td>
                             <td>{{ p.fecha_caducidad }}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" style="width: 31px;">
+                                    <i class="fa fa-info text-white"></i>
+                                </button>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -50,10 +56,13 @@
             <div class="card-footer border-0 rounded-bottom-3 bg-white pt-0"></div>
         </div>
     </div>
+
+
     <div class="col-6">
         <form id="formLote" method="POST" action="{{ url_for('guardarLote') }}" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             {{ form.hidden_tag() }}
-            <div class="row" style="display: none">
+            <div class="row">
                 <div class="col-md-6">
                     {{ macro.datos('txtIdGalleta', '', 'text', disabled=true) }}
                 </div>
@@ -72,7 +81,7 @@
 
             <!--* Botones -->
             <div class="row mt-2">
-                <div class="col-4">
+                <div class="col-6">
                     <div class="form-floating text-end">
                         <button class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan"
                             type="button" data-bs-toggle="modal" data-bs-target="#modalNuevoPaquete">
@@ -80,16 +89,10 @@
                         </button>
                     </div>
                 </div>
-                <div class="col-4">
+                <div class="col-6">
                     <div class="form-floating text-end">
-                        <button class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan" type="button">
-                            <b>Nuevo Lote</b><i class="fa fa-plus ms-1"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="col-4">
-                    <div class="form-floating text-end">
-                        <button class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan" type="button" onclick="guardarLote()">
+                        <button class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan"
+                            type="button" onclick="guardarLote()">
                             <b>Guardar</b>
                         </button>
                     </div>
@@ -99,7 +102,9 @@
         <div class="row mt-2">
             <div class="col-12">
                 <div class="form-floating text-end">
-                    <button class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">
+                    <button class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan"
+                        type="button" data-bs-toggle="modal" data-bs-target="#exampleModal"
+                        data-bs-whatever="@getbootstrap">
                         <b>Mermar</b><i class="fa fa-trash-alt ms-2"></i>
                     </button>
                 </div>
@@ -109,23 +114,24 @@
 </div>
 
 <!--* Modal Merma -->
-<div class="modal fade mt-5 col-12" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade mt-5 col-12" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content border-0">
-            <div class="modal-header border-0" style="background-color: #eee">
+            <div class="modal-header border-0" style="background-color: #fff">
                 <h1 class="modal-title fs-5 font-Spartan" id="exampleModalLabel">
                     <b>Merma de Productos</b>
                 </h1>
                 <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" style="background-color: #eee">
+            <div class="modal-body" style="background-color: #fff">
                 <form id="formMerma" method="POST" action="{{ url_for('mermar') }}">
                     {{ form.hidden_tag() }} {{ macro.merma('mdlCantidad', 'Cantidad a
                     mermar:', 'flexCheckIndeterminate', 'Mermar Todo') }}
                     <input type="hidden" id="mdlIdProducto" name="idProducto" />
                 </form>
             </div>
-            <div class="modal-footer border-0" style="background-color: #eee">
+            <div class="modal-footer border-0" style="background-color: #fff">
                 <button type="submit" class="btn btn-warning font-Spartan text-white" form="formMerma">
                     Mermar
                 </button>
@@ -179,11 +185,11 @@
                     <div class="col-md-12 mt-2">
                         <div class="row">
                             <div class="col-6 form-floating">
-                                {{ paquete_form.tipo_producto(class="form-select border-0") }}
+                                {{ paquete_form.tipo_producto(class="form-select border-0 shadow") }}
                                 <label class="ms-2" for="paquete_form.tipo_producto">Tipo de Producto</label>
                             </div>
                             <div class="col-6 form-floating">
-                                {{ paquete_form.cantidad(class="form-control border-0") }}
+                                {{ paquete_form.cantidad(class="form-control border-0 shadow") }}
                                 <label class="ms-2" for="paquete_form.cantidad">Cantidad</label>
                             </div>
                         </div>

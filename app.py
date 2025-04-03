@@ -367,10 +367,12 @@ def dashboard():
 @login_required  
 @role_required(['Admin', 'Ventas', 'Produccion'])
 def galletas():
-    
     form = LoteForm()
-    paquete_form = PaqueteForm()
+    # Cargar opciones de recetas en el select
+    form.sabor.choices = [(receta.idReceta, receta.nombreReceta) 
+                        for receta in Receta.query.filter_by(estatus=1).all()]
     
+    # Resto de tu lógica actual...
     productos = db.session.query(
         ProductosTerminados,
         Receta
@@ -390,10 +392,11 @@ def galletas():
         'precio': float(receta.precio)
     } for pt, receta in productos]
 
-    return render_template('admin/galletas.html', productos=productos_data,
-        form=form,
-        paquete_form=paquete_form,
-        ultimo_login=current_user.ultimo_login)
+    return render_template('admin/galletas.html', 
+                        productos=productos_data,
+                        form=form,
+                        paquete_form=PaqueteForm(),
+                        ultimo_login=current_user.ultimo_login)
 
 
 #    form = LoteForm()
@@ -464,62 +467,43 @@ def galletas():
 #    )
 
 
-
 @app.route("/guardarLote", methods=["POST"])
 def guardarLote():
-    #form = LoteForm()
-    #form.sabor.choices = [(sabor.idSabor, sabor.nombreSabor) for sabor in Sabores.query.all()]
-    #
-    #if form.validate_on_submit():
-    #    try:
-    #        print("Formulario validado correctamente")
-    #        sabor_id = form.sabor.data
-    #        id_detalle = 1
-    #        print(f"Sabor seleccionado: {sabor_id}")
-#
-    #        nuevo_producto = ProductosTerminados(
-    #            idSabor=sabor_id,
-    #            cantidadDisponible=150,
-    #            fechaCaducidad=date.today() + timedelta(days=7),
-    #            idDetalle=id_detalle,
-    #            estatus=1
-    #        )
-    #        db.session.add(nuevo_producto)
-    #        print("Producto terminado agregado a la sesión")
-    #        
-    #        insumos = {
-    #            2: Decimal("0.9"),  # Harina (kg)
-    #            3: Decimal("3"),    # Huevos (pzs)
-    #            4: Decimal("0.3"),  # Azúcar (kg)
-    #            7: Decimal("0.45"), # Mantequilla (kg)
-    #            5: Decimal("0.015") # Sal (kg)
-    #        }
-    #        
-    #        for id_materia, cantidad_usada in insumos.items():
-    #            materia_prima = MateriasPrimas.query.get(id_materia)
-    #            print(f"Procesando materia prima ID {id_materia}, Cantidad disponible: {materia_prima.cantidadDisponible}")
-    #            if materia_prima and materia_prima.cantidadDisponible >= cantidad_usada:
-    #                materia_prima.cantidadDisponible -= cantidad_usada
-    #                print(f"Nueva cantidad disponible para ID {id_materia}: {materia_prima.cantidadDisponible}")
-    #            else:
-    #                print(f"Error: No hay suficiente {materia_prima.materiaPrima} en inventario o ID no encontrado")
-    #                flash(f'No hay suficiente {materia_prima.materiaPrima} en inventario.', 'danger')
-    #                return redirect(url_for('galletas'))
-    #        
-    #        db.session.commit()
-    #        print("Transacción confirmada y datos guardados correctamente")
-#
-    #        action_logger.info(f"Usuario: {current_user.correo} - Acción: Guardar lote - Sabor: {nuevo_producto.idSabor} - Cantidad: {nuevo_producto.cantidadDisponible} - Fecha: {datetime.now()}")
-    #        
-    #        flash('Lote guardado y materias primas descontadas correctamente', 'success')
-    #    except Exception as e:
-    #        db.session.rollback()
-    #        print(f"Error en guardarLote: {str(e)}")
-    #        flash(f'Error al guardar el lote: {str(e)}', 'danger')
-    #    return redirect(url_for('galletas'))
-#
-    #print("Error: El formulario no pasó la validación")
-    #flash('Error al guardar el lote. Verifica los datos ingresados.', 'danger')
+    form = LoteForm()
+    form.sabor.choices = [(receta.idReceta, receta.nombreReceta) 
+                        for receta in Receta.query.filter_by(estatus=1).all()]
+    
+    if form.validate_on_submit():
+        try:
+            print("Formulario validado correctamente")
+            idReceta = form.sabor.data
+            id_detalle = "Granel"
+            print(f"Receta seleccionada: {idReceta}")
+
+            nuevo_producto = ProductosTerminados(
+                idReceta=idReceta,
+                cantidadDisponible=300,
+                fechaCaducidad=date.today() + timedelta(days=7),
+                tipoProducto=id_detalle,
+                estatus=1
+            )
+            db.session.add(nuevo_producto)
+            print("Producto terminado agregado a la sesión")
+            
+            db.session.commit()
+            print("Transacción confirmada y datos guardados correctamente")
+
+            action_logger.info(f"Usuario: {current_user.correo} - Acción: Guardar lote - Sabor: {nuevo_producto.idSabor} - Cantidad: {nuevo_producto.cantidadDisponible} - Fecha: {datetime.now()}")
+            
+            flash('Lote guardado y materias primas descontadas correctamente', 'success')
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error en guardarLote: {str(e)}")
+            flash(f'Error al guardar el lote: {str(e)}', 'danger')
+        return redirect(url_for('galletas'))
+
+    print("Error: El formulario no pasó la validación")
+    flash('Error al guardar el lote. Verifica los datos ingresados.', 'danger')
     return redirect(url_for('galletas'))
 
 

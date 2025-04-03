@@ -6,7 +6,9 @@ import re
 
 #!======================= Modulo de Galletas =======================#  
 class LoteForm(FlaskForm):
-    sabor = SelectField('Sabor', validators=[DataRequired()])
+    sabor = SelectField('Sabor', 
+                    choices=[],
+                    validators=[DataRequired()])
     submit = SubmitField('Guardar')
 
 class MermaForm(FlaskForm):
