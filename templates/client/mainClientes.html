@@ -1,227 +1,199 @@
 {% extends "client/index.html" %} {% from "admin/_macros.html" import
 input_field, submit_button %} {% block container %}
-<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasAuth">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title">Cuenta</h5>
-    <button
-      type="button"
-      class="btn-close"
-      data-bs-dismiss="offcanvas"
-    ></button>
-  </div>
-  <div class="offcanvas-body">
-    {% with messages = get_flashed_messages(with_categories=true) %} {% if
-    messages %}
-    <div class="flash-messages">
-      {% for category, message in messages %}
-      <div
-        class="alert alert-{{ category }} alert-dismissible fade show"
-        role="alert"
-      >
-        {{ message }}
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="alert"
-          aria-label="Close"
-        ></button>
-      </div>
-      {% endfor %}
+<div class="offcanvas offcanvas-end {% if show_modal %}show{% endif %}" tabindex="-1" id="offcanvasAuth" {% if
+    show_modal %}style="visibility: visible;" {% endif %}>
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Cuenta</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
     </div>
-    {% endif %} {% endwith %}
+    <div class="offcanvas-body">
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %} {% endwith %}
 
-    <ul class="nav nav-tabs mb-3">
-      <li class="nav-item">
-        <a class="nav-link active" data-bs-toggle="tab" href="#login"
-          >Ingresar</a
-        >
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-bs-toggle="tab" href="#register"
-          >Crear Cuenta</a
-        >
-      </li>
-    </ul>
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+                <a class="nav-link {% if not active_tab or active_tab == 'login' %}active{% endif %}"
+                    data-bs-toggle="tab" href="#login">Ingresar</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_tab == 'register' %}active{% endif %}" data-bs-toggle="tab"
+                    href="#register">Crear Cuenta</a>
+            </li>
+        </ul>
 
-    <div class="tab-content">
-      <div class="tab-pane fade show active" id="login">
-        <form id="loginForm" method="POST" action="{{ url_for('login') }}">
-          {{ login_form.hidden_tag() }} {{ input_field(login_form.correo,
-          placeholder="Correo Electrónico", type="email") }} {{
-          input_field(login_form.contrasena, placeholder="Contraseña",
-          type="password") }}
-          <div class="form-group mb-3">{{ login_form.recaptcha }}</div>
-          {{ submit_button('Ingresar') }}
-        </form>
-        <p class="text-center mt-3">
-          <a
-            href="#"
-            data-bs-toggle="modal"
-            data-bs-target="#recuperarContrasenaModal"
-            >¿Olvidaste tu contraseña?</a
-          >
-        </p>
-      </div>
+        <div class="tab-content">
+            <div class="tab-pane fade {% if not active_tab or active_tab == 'login' %}show active{% endif %}"
+                id="login">
+                <form id="loginForm" method="POST" action="{{ url_for('login') }}">
+                    {{ login_form.hidden_tag() }} {{ input_field(login_form.correo,
+                    placeholder="Correo Electrónico", type="email") }} {{
+                    input_field(login_form.contrasena, placeholder="Contraseña",
+                    type="password") }}
+                    <div class="form-group mb-3">{{ login_form.recaptcha }}</div>
+                    {{ submit_button('Ingresar') }}
+                </form>
+                <p class="text-center mt-3">
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#recuperarContrasenaModal">¿Olvidaste tu
+                        contraseña?</a>
+                </p>
+            </div>
 
-      <div class="tab-pane fade" id="register">
-        <form
-          id="registerForm"
-          method="POST"
-          action="{{ url_for('register') }}"
-        >
-          {{ register_form.hidden_tag() }} {{ input_field(register_form.nombre,
-          placeholder="Nombre", type="text") }} {{
-          input_field(register_form.apaterno, placeholder="Apellido Paterno",
-          type="text") }} {{ input_field(register_form.amaterno,
-          placeholder="Apellido Materno", type="text") }} {{
-          input_field(register_form.correo, placeholder="Correo Electrónico",
-          type="email") }} {{ input_field(register_form.contrasena,
-          placeholder="Contraseña", type="password") }} {{
-          submit_button('Registrarse') }}
-        </form>
-      </div>
+            <div class="tab-pane fade {% if active_tab == 'register' %}show active{% endif %}" id="register">
+                <form id="registerForm" method="POST" action="{{ url_for('register') }}">
+                    {{ register_form.hidden_tag() }} {{ input_field(register_form.nombre,
+                    placeholder="Nombre", type="text") }} {{
+                    input_field(register_form.apaterno, placeholder="Apellido Paterno",
+                    type="text") }} {{ input_field(register_form.amaterno,
+                    placeholder="Apellido Materno", type="text") }} {{
+                    input_field(register_form.correo, placeholder="Correo Electrónico",
+                    type="email") }} {{ input_field(register_form.contrasena,
+                    placeholder="Contraseña", type="password") }} {{
+                    submit_button('Registrarse') }}
+                </form>
+                <p class="text-center mt-3">
+                    Al registrarte, recibirás un código de verificación en tu correo
+                    electrónico.
+                </p>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
-<div
-  class="modal fade"
-  id="recuperarContrasenaModal"
-  tabindex="-1"
-  aria-labelledby="recuperarContrasenaModalLabel"
-  aria-hidden="true"
->
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="recuperarContrasenaModalLabel">
-          Recuperar Contraseña
-        </h5>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-          aria-label="Close"
-        ></button>
-      </div>
-      <div class="modal-body">
-        <form method="POST" action="{{ url_for('recuperar_contrasena') }}">
-          {{ recuperar_contrasena_form.hidden_tag() }}
-          <div class="mb-3">
-            {{ input_field(recuperar_contrasena_form.correo, placeholder="Correo
-            Electrónico", type="email") }}
-          </div>
-          <div class="mb-3">
-            {{ input_field(recuperar_contrasena_form.nueva_contrasena,
-            placeholder="Nueva Contraseña", type="password") }}
-          </div>
-          <div class="mb-3">
-            {{ input_field(recuperar_contrasena_form.confirmar_contrasena,
-            placeholder="Confirmar Contraseña", type="password") }}
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Cerrar
-            </button>
-            <button type="submit" class="btn btn-primary">
-              Cambiar Contraseña
-            </button>
-          </div>
-        </form>
-      </div>
+<div class="modal fade {% if show_recuperar_modal %}show d-block{% endif %}" id="recuperarContrasenaModal" tabindex="-1"
+    aria-labelledby="recuperarContrasenaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="recuperarContrasenaModalLabel">
+                    Recuperar Contraseña
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Mostrar solo mensajes de error de recuperación -->
+                {% with messages =
+                get_flashed_messages(category_filter=["recuperar_error"]) %} {% if
+                messages %}
+                <div class="flash-messages mb-3">
+                    {% for message in messages %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %} {% endwith %}
+
+                <form method="POST" action="{{ url_for('recuperar_contrasena') }}">
+                    {{ recuperar_contrasena_form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ input_field(recuperar_contrasena_form.correo, placeholder="Correo
+                        Electrónico", type="email") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ input_field(recuperar_contrasena_form.nueva_contrasena,
+                        placeholder="Nueva Contraseña", type="password") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ input_field(recuperar_contrasena_form.confirmar_contrasena,
+                        placeholder="Confirmar Contraseña", type="password") }}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cerrar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Cambiar Contraseña
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
+
+{% if show_recuperar_modal %}
+<script>
+    $(document).ready(function () {
+        $("#recuperarContrasenaModal").modal("show");
+    });
+</script>
+{% endif %}
 
 <div id="carouselExampleDark" class="carousel carousel-dark slide">
-  <div class="carousel-indicators"></div>
-  <div class="carousel-inner">
-    <div class="carousel-item active" data-bs-interval="10000">
-      <img
-        src="../../static/img/carruselDulce.png"
-        class="d-block w-100"
-        alt="..."
-      />
-      <div class="carousel-caption d-none d-md-block"></div>
+    <div class="carousel-indicators"></div>
+    <div class="carousel-inner">
+        <div class="carousel-item active" data-bs-interval="10000">
+            <img src="../../static/img/carruselDulce.png" class="d-block w-100" alt="..." />
+            <div class="carousel-caption d-none d-md-block"></div>
+        </div>
     </div>
-  </div>
 </div>
 <br />
 <div class="text-center">
-  <h1>
-    Descubre nuestra variedad de <span style="color: #703d02">productos</span>
-  </h1>
+    <h1>
+        Descubre nuestra variedad de <span style="color: #703d02">productos</span>
+    </h1>
 </div>
 <div class="container mt-4">
-  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
-    <div class="col">
-      <div class="card h-100">
-        <img
-          src="../static/img/donGalleto2.png"
-          class="card-img-top"
-          alt="..."
-        />
-        <div class="card-body">
-          <h5 class="card-title">Card title</h5>
-          <p class="card-text">
-            Some quick example text to build on the card title.
-          </p>
-          <a href="#" class="btn btn-primary">Go somewhere</a>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        <div class="col">
+            <div class="card h-100">
+                <img src="../static/img/donGalleto2.png" class="card-img-top" alt="..." />
+                <div class="card-body">
+                    <h5 class="card-title">Card title</h5>
+                    <p class="card-text">
+                        Some quick example text to build on the card title.
+                    </p>
+                    <a href="#" class="btn btn-primary">Go somewhere</a>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="card h-100">
-        <img
-          src="../static/img/donGalleto2.png"
-          class="card-img-top"
-          alt="..."
-        />
-        <div class="card-body">
-          <h5 class="card-title">Card title</h5>
-          <p class="card-text">
-            Some quick example text to build on the card title.
-          </p>
-          <a href="#" class="btn btn-primary">Go somewhere</a>
+        <div class="col">
+            <div class="card h-100">
+                <img src="../static/img/donGalleto2.png" class="card-img-top" alt="..." />
+                <div class="card-body">
+                    <h5 class="card-title">Card title</h5>
+                    <p class="card-text">
+                        Some quick example text to build on the card title.
+                    </p>
+                    <a href="#" class="btn btn-primary">Go somewhere</a>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="card h-100">
-        <img
-          src="../static/img/donGalleto2.png"
-          class="card-img-top"
-          alt="..."
-        />
-        <div class="card-body">
-          <h5 class="card-title">Card title</h5>
-          <p class="card-text">
-            Some quick example text to build on the card title.
-          </p>
-          <a href="#" class="btn btn-primary">Go somewhere</a>
+        <div class="col">
+            <div class="card h-100">
+                <img src="../static/img/donGalleto2.png" class="card-img-top" alt="..." />
+                <div class="card-body">
+                    <h5 class="card-title">Card title</h5>
+                    <p class="card-text">
+                        Some quick example text to build on the card title.
+                    </p>
+                    <a href="#" class="btn btn-primary">Go somewhere</a>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="card h-100">
-        <img
-          src="../static/img/donGalleto2.png"
-          class="card-img-top"
-          alt="..."
-        />
-        <div class="card-body">
-          <h5 class="card-title">Card title</h5>
-          <p class="card-text">
-            Some quick example text to build on the card title.
-          </p>
-          <a href="#" class="btn btn-primary">Go somewhere</a>
+        <div class="col">
+            <div class="card h-100">
+                <img src="../static/img/donGalleto2.png" class="card-img-top" alt="..." />
+                <div class="card-body">
+                    <h5 class="card-title">Card title</h5>
+                    <p class="card-text">
+                        Some quick example text to build on the card title.
+                    </p>
+                    <a href="#" class="btn btn-primary">Go somewhere</a>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
 {% endblock %}

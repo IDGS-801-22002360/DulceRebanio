@@ -3,18 +3,25 @@
 
 <!--* Main -->
 <div class="row">
-  <div class="card border-0 gb mb-3" style="height: 58px; background-color: #e1e1e1">
-  {% with message = get_flashed_messages() %}
-    {% if message %}
-      {% for messages in message %}
-        <div class="alert alert-success bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-          {{ messages }}
-        </div>
-      {% endfor %} 
-    {% endif %}
-  {% endwith %}
-  </div>
-
+  {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %}
+    <div class="flash-messages">
+      {% for category, message in messages %}
+      <div
+        class="alert alert-{{ category }} alert-dismissible fade show"
+        role="alert"
+      >
+        {{ message }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %} {% endwith %}  
   <div class="col-6">
   <div class="last-login">
       <p class="mb-0">

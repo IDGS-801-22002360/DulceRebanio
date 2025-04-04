@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
+from datetime import datetime
 import hashlib
 import datetime
 
@@ -16,6 +17,9 @@ class Usuarios(db.Model, UserMixin):
     rol = db.Column(db.Enum('Admin', 'Ventas', 'Produccion', 'Cliente'))
     activo = db.Column(db.Integer, default=1)
     ultimo_login = db.Column(db.DateTime)
+    otp_secret = db.Column(db.String(16)) 
+    otp_verified = db.Column(db.Boolean, default=False) 
+    registration_data = db.Column(db.JSON)  
     
 
     def set_contrasena(self, contrasena):
@@ -54,12 +58,6 @@ class ComprasInsumos(db.Model):
     fecha = db.Column(db.Date)
     totalCompra = db.Column(db.Numeric(10,2)) #AGREGUÉ TOTAL COMPRA A COMPRAS DE INSUMOS -Oscar
 
-
-class Recetas(db.Model):
-    __tablename__ = 'recetas'
-    idReceta = db.Column(db.Integer, primary_key=True)
-    nombreReceta = db.Column(db.String(100))
-
 class IngredientesReceta(db.Model):
     __tablename__ = 'ingredientesreceta'
     idIngrediente = db.Column(db.Integer, primary_key=True)
@@ -83,10 +81,10 @@ class DetallesProducto(db.Model):
 class ProductosTerminados(db.Model):
     __tablename__ = 'productosterminados'
     idProducto = db.Column(db.Integer, primary_key=True)
-    idSabor = db.Column(db.Integer, db.ForeignKey('sabores.idSabor'), nullable=False)
+    idReceta = db.Column(db.Integer, db.ForeignKey('recetas.idReceta'), nullable=False)
+    tipoProducto = db.Column(db.String(50), nullable=False)
     cantidadDisponible = db.Column(db.Integer)
     fechaCaducidad = db.Column(db.Date)
-    idDetalle = db.Column(db.Integer, db.ForeignKey('detallesproducto.idDetalle'), nullable=False)
     estatus = db.Column(db.Integer, default=1)
 
 
@@ -120,7 +118,6 @@ class DetallesPedido(db.Model):
     idPedido = db.Column(db.Integer, db.ForeignKey('pedidos.idPedido'))
     idProducto = db.Column(db.Integer, db.ForeignKey('productosterminados.idProducto'))
     cantidad = db.Column(db.Integer)
-    
 
 class VentasCliente(db.Model):
     __tablename__ = 'ventascliente'
@@ -130,4 +127,23 @@ class VentasCliente(db.Model):
     cantidad = db.Column(db.Integer)
     tipoProducto = db.Column(db.String(100))
     total = db.Column(db.Float)
-    estatus=db.Column(db.Integer, default=1) 
+    estatus = db.Column(db.Integer, default=1)
+    fechaEntrega = db.Column(db.Date, nullable=True)
+
+class Recetas(db.Model):
+    __tablename__ = 'recetas'
+    idReceta = db.Column(db.Integer, primary_key=True)
+    nombreReceta = db.Column(db.String(100), unique=True, nullable=False)
+    precio = db.Column(db.Numeric(10, 2), nullable=False, default=7)
+    imagen = db.Column(db.Text)
+    estatus = db.Column(db.Integer, default=1)
+
+class RecetaDetalle(db.Model):
+    __tablename__ = 'recetadetalle'
+    idRecetaDetalle = db.Column(db.Integer, primary_key=True)
+    idReceta = db.Column(db.Integer, db.ForeignKey('recetas.idReceta'), nullable=False)
+    idMateriaPrima = db.Column(db.Integer, db.ForeignKey('materiasprimas.idMateriaPrima'), nullable=False)
+    cantidad = db.Column(db.Numeric(10, 2), nullable=False)
+    unidadMedida = db.Column(db.String(20), nullable=False)
+
+
