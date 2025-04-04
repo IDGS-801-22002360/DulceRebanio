@@ -35,3 +35,17 @@
 2025-03-27 19:34:39,965 - action_logger - INFO - Usuario: markolfin@gmail.com - AcciÃ³n: Guardar paquete - Sabor: 11 - Tipo: 3 - Cantidad: 5 - Fecha: 2025-03-27 19:34:39.965326
 2025-03-28 20:34:22,288 - action_logger - INFO - Usuario: ad@gmail.com - Acción: Mermar producto - Producto ID: 2 - Cantidad mermada: 12 - Fecha: 2025-03-28 20:34:22.288797
 2025-03-28 20:34:45,537 - action_logger - INFO - Usuario: ad@gmail.com - Acción: Mermar producto - Producto ID: 8 - Cantidad mermada: 50 - Fecha: 2025-03-28 20:34:45.537339
+2025-03-30 21:39:44,822 - action_logger - INFO - Usuario: ad@gmail.com - Acción: Guardar paquete - Sabor: 1 - Tipo: 3 - Cantidad: 4 - Fecha: 2025-03-30 22:02:19.814786
+2025-03-31 15:35:21,058 - action_logger - INFO - Usuario: ad@gmail.com - Acción: Guardar paquete - Sabor: 1 - Tipo: 2 - Cantidad: 1 - Fecha: 2025-03-31 15:35:21.058621
+2025-03-31 15:35:52,653 - action_logger - INFO - Usuario: ad@gmail.com - Acción: Guardar paquete - Sabor: 1 - Tipo: 2 - Cantidad: 4 - Fecha: 2025-03-31 15:35:52.653763
+2025-03-31 15:37:03,857 - action_logger - INFO - Usuario: ad@gmail.com - Acción: Guardar paquete - Sabor: 2 - Tipo: 3 - Cantidad: 10 - Fecha: 2025-03-31 15:37:03.857242
+2025-03-31 15:37:19,353 - action_logger - INFO - Usuario: ad@gmail.com - Acción: Mermar producto - Producto ID: 3 - Cantidad mermada: 1 - Fecha: 2025-03-31 15:37:19.353695
+2025-03-31 15:38:54,224 - action_logger - INFO - Usuario: ad@gmail.com - Acción: Guardar paquete - Sabor: 1 - Tipo: 2 - Cantidad: 1 - Fecha: 2025-03-31 15:38:54.224657
+2025-03-31 15:39:32,470 - action_logger - INFO - Usuario: ad@gmail.com - Acción: Guardar paquete - Sabor: 2 - Tipo: 3 - Cantidad: 2 - Fecha: 2025-03-31 15:39:32.470824
+2025-03-31 15:39:48,954 - action_logger - INFO - Usuario: ad@gmail.com - Acción: Mermar producto - Producto ID: 5 - Cantidad mermada: 10 - Fecha: 2025-03-31 15:39:48.954306
+2025-03-31 15:39:52,987 - action_logger - INFO - Usuario: ad@gmail.com - Acción: Mermar producto - Producto ID: 1 - Cantidad mermada: 6 - Fecha: 2025-03-31 15:39:52.987349
+2025-03-31 15:39:56,006 - action_logger - INFO - Usuario: ad@gmail.com - Acción: Mermar producto - Producto ID: 2 - Cantidad mermada: 6 - Fecha: 2025-03-31 15:39:56.006005
+2025-03-31 15:40:04,505 - action_logger - INFO - Usuario: ad@gmail.com - Acción: Mermar producto - Producto ID: 4 - Cantidad mermada: 3 - Fecha: 2025-03-31 15:40:04.505566
+2025-03-31 15:40:11,603 - action_logger - INFO - Usuario: ad@gmail.com - Acción: Mermar producto - Producto ID: 4 - Cantidad mermada: 1 - Fecha: 2025-03-31 15:40:11.603888
+2025-03-31 15:40:14,736 - action_logger - INFO - Usuario: ad@gmail.com - Acción: Mermar producto - Producto ID: 6 - Cantidad mermada: 1 - Fecha: 2025-03-31 15:40:14.735782
+2025-03-31 15:40:17,669 - action_logger - INFO - Usuario: ad@gmail.com - Acción: Mermar producto - Producto ID: 7 - Cantidad mermada: 2 - Fecha: 2025-03-31 15:40:17.669792

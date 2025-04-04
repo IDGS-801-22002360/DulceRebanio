@@ -15,9 +15,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-
-
-
 //!  Funcion guardarLote
 function guardarLote() {
     var sabor = $('#txtSabor').val();
@@ -25,12 +22,12 @@ function guardarLote() {
 
     if (sabor) {
         $.ajax({
-            url: '/guardarLote',
+            url: '/produccion/guardarLote', // Ruta corregida con el prefijo del Blueprint
             type: 'POST',
             data: { sabor: sabor, csrf_token: csrfToken },
             success: function () {
                 // Redirigir a la página de galletas para que se muestren los mensajes flash
-                window.location.href = '/galletas';
+                window.location.href = '/produccion/galletas'; // Ruta corregida con el prefijo del Blueprint
             },
             error: function (xhr, status, error) {
                 console.error('Error al guardar el lote:', error);

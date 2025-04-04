@@ -1,4 +1,5 @@
 {% extends "admin/index.html" %} {% block container %}
+<h1>Compras de insumos</h1>
 <div
   class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 mt-5 p-1"
 >
@@ -20,11 +21,8 @@
         <div class="card-header text-center">
           <b>Compras de Insumos</b>
         </div>
-        <div class="table-responsive">
-          <table
-            class="table table-hover table-striped text-center"
-            id="comprasTable"
-          >
+        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+          <table class="table table-hover table-striped text-center" id="comprasTable">
             <thead>
               <tr>
                 <th>Proveedor</th>
@@ -36,14 +34,12 @@
             </thead>
             <tbody id="comprasTableBody">
               {% for compra in compras %}
-              <tr
-                data-id="{{ compra.idCompra }}"
-                data-proveedor="{{ compra.idProveedor }}"
-                data-insumo="{{ compra.idMateriaPrima }}"
-                data-cantidad="{{ compra.cantidad }}"
-                data-fecha="{{ compra.fecha }}"
-                data-total="{{ compra.totalCompra }}"
-              >
+              <tr data-id="{{ compra.idCompra }}" 
+                  data-proveedor="{{ compra.idProveedor }}" 
+                  data-insumo="{{ compra.idMateriaPrima }}"
+                  data-cantidad="{{ compra.cantidad }}" 
+                  data-fecha="{{ compra.fecha }}"
+                  data-total="{{ compra.totalCompra }}">
                 <td>{{ compra.nombreProveedor }}</td>
                 <td>{{ compra.materiaPrima }}</td>
                 <td>{{ compra.cantidad }}</td>
@@ -53,7 +49,7 @@
               {% endfor %}
             </tbody>
           </table>
-        </div>
+        </div>        
       </div>
     </div>
 
