@@ -13,8 +13,9 @@
         </div>
         {% endfor %}
     </div>
-    {% endif %} {% endwith %}
-    <div class="col-6">
+    {% endif %}
+    {% endwith %}
+    <div class="col-4">
         <div class="card border-0 shadow-sm rounded-3 bg-white">
             <div class="card-header border-0 rounded-top-3 text-center bg-white">
                 <b class="text-center font-Spartan">Registro de Empleados</b>
@@ -53,7 +54,7 @@
         </div>
     </div>
 
-    <div class="col-6">
+    <div class="col-8">
         <div class="card border-0 shadow-sm rounded-3 bg-white">
             <div class="card-header border-0 rounded-top-3 text-center bg-white">
                 <b class="text-center font-Spartan">Lista de Usuarios</b>
@@ -63,8 +64,8 @@
                     <thead class="text-dark">
                         <tr>
                             <th>Nombre</th>
-                            <th>Apellido Paterno</th>
-                            <th>Apellido Materno</th>
+                            <th>A. Paterno</th>
+                            <th>A. Materno</th>
                             <th>Correo</th>
                             <th>Rol</th>
                             <th></th>
@@ -82,7 +83,7 @@
                             <td>
                                 <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
                                     data-bs-target="#editarUsuarioModal{{ usuario.idUsuario }}">
-                                    Editar
+                                    <i class="fa fa-edit text-white"></i>
                                 </button>
                             </td>
                             <td>
@@ -132,6 +133,9 @@
                                                 <input type="email" class="form-control" id="correo" name="correo"
                                                     value="{{ usuario.correo }}" required>
                                             </div>
+
+                                            <!-- Solo mostrar Rol y Estado si NO es Admin -->
+                                            {% if usuario.rol != 'Admin' %}
                                             <div class="mb-3">
                                                 <label for="rol" class="form-label">Rol</label>
                                                 <select class="form-select" id="rol" name="rol" required>
@@ -143,15 +147,8 @@
                                                         %}selected{% endif %}>Produccion</option>
                                                 </select>
                                             </div>
-                                            <div class="mb-3">
-                                                <label for="activo" class="form-label">Estado</label>
-                                                <select class="form-select" id="activo" name="activo" required>
-                                                    <option value="1" {% if usuario.activo==1 %}selected{% endif %}>
-                                                        Activo</option>
-                                                    <option value="0" {% if usuario.activo==0 %}selected{% endif %}>
-                                                        Inactivo</option>
-                                                </select>
-                                            </div>
+                                            {% endif %}
+
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary"
                                                     data-bs-dismiss="modal">Cerrar</button>

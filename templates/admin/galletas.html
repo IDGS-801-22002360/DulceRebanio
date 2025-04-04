@@ -3,7 +3,6 @@
 {% import "admin/_macros.html" as macro %}
 
 <!--* Main -->
-
 <div class="row">
     <div class="card border-0 gb mb-3" style="height: 58px; background-color: #f1f1f1">
         {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %}
@@ -17,34 +16,35 @@
         </div>
         {% endif %} {% endwith %}
     </div>
-    
+
     <div class="col-6">
         <div class="card border-0 shadow-sm rounded-3 bg-white">
             <div class="card-header border-0 rounded-top-3 text-center bg-white">
                 <b class="text-center font-Spartan">Productos</b>
             </div>
-            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                <table class="table table-hover text-center mb-0 table-borderless">
+            <div class="table-responsive" style="max-height: 700px;">
+                <table class="table table-hover text-center mb-0 table-borderless" id="tablaProductos">
                     <thead class="text-dark">
                         <tr>
                             <th>N°Lote</th>
-                            <th>Sabor</th>
+                            <th>Receta</th>
                             <th>Tipo</th>
-                            <th>Fecha</th>
                             <th>Cantidad</th>
+                            <th>Fecha</th>
                             <th></th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="productosTableBody">
                         {% for p in productos %}
-                        <tr>
+                        <tr data-id="{{ p.id_producto }}" data-estatus="{{ p.bajo_stock | int }}"
+                            class="{% if p.bajo_stock %}table-danger{% endif %}">
                             <td>{{ p.id_producto }}</td>
                             <td>{{ p.nombre_receta }}</td>
                             <td>{{ p.tipo_producto }}</td>
                             <td>{{ p.cantidad }}</td>
                             <td>{{ p.fecha_caducidad }}</td>
                             <td>
-                                <button class="btn btn-warning btn-sm" style="width: 31px;">
+                                <button class="btn btn-warning btn-sm btn-select" style="width: 31px;">
                                     <i class="fa fa-info text-white"></i>
                                 </button>
                             </td>
@@ -62,7 +62,7 @@
         <form id="formLote" method="POST" action="{{ url_for('guardarLote') }}" novalidate>
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             {{ form.hidden_tag() }}
-            <div class="row">
+            <div class="row mt-3" hidden>
                 <div class="col-md-6">
                     {{ macro.datos('txtIdGalleta', '', 'text', disabled=true) }}
                 </div>
@@ -73,7 +73,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="form-floating">
-                        {{ form.sabor(class="form-select border-0", id="txtSabor") }}
+                        {{ form.sabor(class="form-select border-0 shadow-sm", id="txtSabor") }}
                         <label for="txtSabor">Sabor</label>
                     </div>
                 </div>
@@ -83,7 +83,7 @@
             <div class="row mt-2">
                 <div class="col-6">
                     <div class="form-floating text-end">
-                        <button class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan"
+                        <button class="text-center col-12 btn btn-warning border-0 text-white font-Spartan shadow-sm"
                             type="button" data-bs-toggle="modal" data-bs-target="#modalNuevoPaquete">
                             <b>Nuevo Paquete</b><i class="fa fa-plus ms-1"></i>
                         </button>
@@ -91,7 +91,7 @@
                 </div>
                 <div class="col-6">
                     <div class="form-floating text-end">
-                        <button class="text-center col-12 btn buyButtons btn-warning border-0 text-white font-Spartan"
+                        <button class="text-center col-12 btn btn-warning border-0 text-white font-Spartan shadow-sm"
                             type="button" onclick="guardarLote()">
                             <b>Guardar</b>
                         </button>
@@ -126,9 +126,10 @@
             </div>
             <div class="modal-body" style="background-color: #fff">
                 <form id="formMerma" method="POST" action="{{ url_for('mermar') }}">
-                    {{ form.hidden_tag() }} {{ macro.merma('mdlCantidad', 'Cantidad a
-                    mermar:', 'flexCheckIndeterminate', 'Mermar Todo') }}
-                    <input type="hidden" id="mdlIdProducto" name="idProducto" />
+                    {{ form.hidden_tag() }}
+                    <input type="hidden" id="idProducto" name="idProducto" value="">
+
+                    {{ macro.merma('mdlCantidad', 'Cantidad a mermar:', 'flexCheckIndeterminate', 'Mermar Todo') }}
                 </form>
             </div>
             <div class="modal-footer border-0" style="background-color: #fff">

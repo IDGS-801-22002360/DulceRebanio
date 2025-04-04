@@ -20,7 +20,7 @@ from sqlalchemy import text
 from fpdf import FPDF
 
 from config import DevelopmentConfig
-from logger import action_logger
+from logger import action_logger, error_logger
 
 # Modelos
 from models import (
@@ -94,6 +94,7 @@ def role_required(roles):
             return f(*args, **kwargs)
         return decorated_function
     return decorator
+
 
 #!============================== Clientes Index ==============================#
 
@@ -368,11 +369,11 @@ def dashboard():
 @role_required(['Admin', 'Ventas', 'Produccion'])
 def galletas():
     form = LoteForm()
-    # Cargar opciones de recetas en el select
+    paquete_form = PaqueteForm()
+
     form.sabor.choices = [(receta.idReceta, receta.nombreReceta) 
                         for receta in Receta.query.filter_by(estatus=1).all()]
-    
-    # Resto de tu lógica actual...
+
     productos = db.session.query(
         ProductosTerminados,
         Receta
@@ -383,88 +384,41 @@ def galletas():
         ProductosTerminados.estatus == 1
     ).all()
 
-    productos_data = [{
-        'id_producto': pt.idProducto,
-        'nombre_receta': receta.nombreReceta,
-        'tipo_producto': pt.tipoProducto,
-        'cantidad': pt.cantidadDisponible,
-        'fecha_caducidad': pt.fechaCaducidad.strftime('%Y-%m-%d') if pt.fechaCaducidad else 'N/A',
-        'precio': float(receta.precio)
-    } for pt, receta in productos]
+    today = date.today()
+    is_christmas_season = today.month == 12
+    min_galletas = 60 if is_christmas_season else 30
+    min_paquetes = 6 if is_christmas_season else 3
 
-    return render_template('admin/galletas.html', 
-                        productos=productos_data,
-                        form=form,
-                        paquete_form=PaqueteForm(),
-                        ultimo_login=current_user.ultimo_login)
+    productos_data = []
+    for pt, receta in productos:
+        bajo_stock = (
+            (pt.tipoProducto == "Granel" and pt.cantidadDisponible < min_galletas) or
+            (pt.tipoProducto in ["Kilo", "Med. Kilo"] and pt.cantidadDisponible < min_paquetes)
+        )
+        productos_data.append({
+            'id_producto': pt.idProducto,
+            'nombre_receta': receta.nombreReceta,
+            'tipo_producto': pt.tipoProducto,
+            'cantidad': pt.cantidadDisponible,
+            'fecha_caducidad': pt.fechaCaducidad.strftime('%Y-%m-%d') if pt.fechaCaducidad else 'N/A',
+            'precio': float(receta.precio),
+            'bajo_stock': bajo_stock
+        })
 
+    for producto in productos_data:
+        if producto['bajo_stock']:
+            flash(f"¡Alerta! Bajo stock: {producto['nombre_receta']} ({producto['tipo_producto']}) - Cantidad: {producto['cantidad']}", "warning")
 
-#    form = LoteForm()
-#    paquete_form = PaqueteForm()
-#
-#    # Definir los umbrales de stock mínimo
-#    today = date.today()
-#    is_christmas_season = today.month == 12
-#    min_galletas = 60 if is_christmas_season else 30
-#    min_paquetes = 6 if is_christmas_season else 3
-#
-#    # Obtener los productos a granel
-#    productos_granel = db.session.query(
-#        ProductosTerminados.idProducto,
-#        Receta.nombreReceta,
-#        ProductosTerminados.cantidadDisponible
-#    ).join(Receta, ProductosTerminados.idReceta == Receta.idReceta)\
-#    .filter(ProductosTerminados.idReceta == 1, ProductosTerminados.estatus == 1).all()
-#
-#    # Obtener todos los productos y marcar los de bajo stock
-#    productos = db.session.query(
-#        ProductosTerminados.idProducto,
-#        Receta.nombreReceta,
-#        ProductosTerminados.fechaCaducidad,
-#        ProductosTerminados.cantidadDisponible,
-#        ProductosTerminados.estatus
-#    ).join(Receta, ProductosTerminados.idReceta == Receta.idReceta)\
-#    .filter(ProductosTerminados.estatus == 1)\
-#    .order_by(ProductosTerminados.idReceta.asc()).all()
-#
-#    # Verificar productos con bajo stock
-#    productos_bajo_stock = db.session.query(
-#        ProductosTerminados.idProducto,
-#        Receta.nombreReceta,
-#        ProductosTerminados.cantidadDisponible
-#    ).join(Receta, ProductosTerminados.idReceta == Receta.idReceta)\
-#    .filter(
-#        ProductosTerminados.estatus == 1,
-#        (ProductosTerminados.idReceta == 1) & (ProductosTerminados.cantidadDisponible < min_galletas) |
-#        (ProductosTerminados.idReceta.in_([2, 3]) & (ProductosTerminados.cantidadDisponible < min_paquetes))
-#    ).all()
-#
-#    for producto in productos_bajo_stock:
-#        flash(f"¡Alerta! Bajo stock: {producto.nombreReceta} - Cantidad: {producto.cantidadDisponible}", "warning")
-#
-#    productos_marcados = []
-#    for producto in productos:
-#        bajo_stock = (
-#            (producto.idReceta == 1 and producto.cantidadDisponible < min_galletas) or
-#            (producto.idReceta in [2, 3] and producto.cantidadDisponible < min_paquetes)
-#        )
-#        productos_marcados.append({
-#            "idProducto": producto.idProducto,
-#            "nombreReceta": producto.nombreReceta,
-#            "fechaCaducidad": producto.fechaCaducidad,
-#            "cantidadDisponible": producto.cantidadDisponible,
-#            "estatus": producto.estatus,
-#            "bajo_stock": bajo_stock
-#        })
-#
-#    return render_template(
-#        "admin/galletas.html",
-#        productos=productos_marcados,
-#        productos_granel=productos_granel,
-#        form=form,
-#        paquete_form=paquete_form,
-#        ultimo_login=current_user.ultimo_login
-#    )
+    productos_granel = [p for p in productos_data if p['tipo_producto'] == "Granel"]
+
+    return render_template(
+        'admin/galletas.html',
+        productos=productos_data,
+        productos_granel=productos_granel,
+        form=form,
+        paquete_form=paquete_form,
+        ultimo_login=current_user.ultimo_login
+    )
 
 
 @app.route("/guardarLote", methods=["POST"])
@@ -510,46 +464,79 @@ def guardarLote():
 @app.route("/mermar", methods=["POST"])
 def mermar():
     form = MermaForm()
+    app.logger.info("Iniciando proceso de merma...")  # Registro inicial
+
     if form.validate_on_submit():
-        id_producto = form.idProducto.data
-        cantidad = form.cantidad.data
-        mermar_todo = form.mermar_todo.data
-        
-        if mermar_todo:
-            cantidad = None
-        elif cantidad is None or cantidad == '':
-            flash('Debe ingresar una cantidad válida', 'danger')
-            return redirect(url_for('galletas'))
-        
-        if cantidad is not None:
-            cantidad = int(cantidad)
-            if cantidad <= 0:
-                flash('La cantidad debe ser mayor a 0', 'danger')
+        try:
+            # Obtener datos del formulario
+            id_producto = form.idProducto.data
+            cantidad = form.cantidad.data
+            mermar_todo = form.mermar_todo.data
+
+            app.logger.info(f"Datos recibidos - ID Producto: {id_producto}, Cantidad: {cantidad}, Mermar Todo: {mermar_todo}")
+
+            # Validar si se seleccionó "mermar todo"
+            if mermar_todo:
+                cantidad = None
+                app.logger.info("Se seleccionó 'mermar todo'")
+            elif not cantidad or cantidad == '':
+                app.logger.warning("Cantidad no válida ingresada")
+                flash('Debe ingresar una cantidad válida', 'danger')
                 return redirect(url_for('galletas'))
-        
-        producto = ProductosTerminados.query.get(id_producto)
-        if not producto:
-            flash('Producto no encontrado', 'danger')
+
+            # Validar cantidad
+            if cantidad is not None:
+                cantidad = int(cantidad)
+                if cantidad <= 0:
+                    app.logger.warning("Cantidad ingresada menor o igual a 0")
+                    flash('La cantidad debe ser mayor a 0', 'danger')
+                    return redirect(url_for('galletas'))
+
+            # Buscar el producto
+            producto = ProductosTerminados.query.get(id_producto)
+            if not producto:
+                app.logger.warning(f"Producto con ID {id_producto} no encontrado")
+                flash('Producto no encontrado', 'danger')
+                return redirect(url_for('galletas'))
+
+            app.logger.info(f"Producto encontrado - ID: {producto.idProducto}, Cantidad Disponible: {producto.cantidadDisponible}")
+
+            # Aplicar la merma
+            if cantidad is None or cantidad >= producto.cantidadDisponible:
+                cantidad_mermada = producto.cantidadDisponible
+                producto.cantidadDisponible = 0
+                producto.estatus = 0
+                app.logger.info(f"Merma total aplicada - Cantidad Mermada: {cantidad_mermada}")
+            else:
+                cantidad_mermada = cantidad
+                producto.cantidadDisponible -= cantidad
+                app.logger.info(f"Merma parcial aplicada - Cantidad Mermada: {cantidad_mermada}, Cantidad Restante: {producto.cantidadDisponible}")
+
+            # Guardar cambios en la base de datos
+            db.session.commit()
+            app.logger.info(f"Merma completada exitosamente para el producto ID {producto.idProducto}")
+
+            # Log de la acción
+            action_logger.info(f"Usuario: {current_user.correo} - Acción: Mermar producto - Producto ID: {producto.idProducto} - Cantidad mermada: {cantidad_mermada} - Fecha: {datetime.now()}")
+
+            flash('Producto mermado correctamente', 'success')
             return redirect(url_for('galletas'))
-        
-        if cantidad is None or cantidad >= producto.cantidadDisponible:
-            cantidad_mermada = producto.cantidadDisponible
-            producto.cantidadDisponible = 0
-            producto.estatus = 0
-        else:
-            cantidad_mermada = cantidad
-            producto.cantidadDisponible -= cantidad
 
-        db.session.commit()
+        except Exception as e:
+            app.logger.error(f"Error al mermar producto: {str(e)}")
+            flash('Ocurrió un error al procesar la merma', 'danger')
+            return redirect(url_for('galletas'))
 
-        #! Log de la acción para mermar cualquier producto
-        action_logger.info(f"Usuario: {current_user.correo} - Acción: Mermar producto - Producto ID: {producto.idProducto} - Cantidad mermada: {cantidad_mermada} - Fecha: {datetime.now()}")
+    # Depurar errores del formulario
+    app.logger.warning("El formulario no pasó la validación")
+    for field, errors in form.errors.items():
+        for error in errors:
+            app.logger.error(f"Error en el campo {field}: {error}")
 
-        flash('Producto mermado correctamente', 'success')
-        return redirect(url_for('galletas'))
-
-    flash('Error al mermar el producto', 'danger')
+    flash('Error al mermar el producto. Verifica los datos ingresados.', 'danger')
     return redirect(url_for('galletas'))
+
+
 
 @app.route("/guardar_paquete", methods=["POST"])
 def guardar_paquete():
@@ -600,6 +587,7 @@ def guardar_paquete():
 
 @app.route('/recetas', methods=['GET', 'POST'])
 @login_required
+@role_required(['Admin', 'Produccion'])
 def recetas():
     if request.method == 'POST':
         # Manejar renombrado
@@ -696,8 +684,6 @@ def actualizar_receta():
     return redirect(url_for('recetas'))
 
 
-
-
 @app.route('/eliminar_detalle/<int:id>', methods=['POST'])
 @login_required
 def eliminar_detalle(id):
@@ -776,6 +762,7 @@ def editar_receta():
 
     return redirect(url_for('recetas'))
 
+
 @app.route('/seleccionar_receta', methods=['POST'])
 @login_required
 @role_required(['Admin', 'Produccion'])
@@ -835,16 +822,20 @@ def asignar_imagen():
 
 
 
-
-
-
-
 #!============================== Modulo Errores ==============================#
 
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
 
+@app.errorhandler(Exception)
+def handle_general_error(e):
+    
+    status_code = getattr(e, 'code', 500)
+    
+    error_logger.info(f"Usuario: {current_user.correo} - Fecha: {datetime.now()}")
+    
+    return render_template('codeError.html', error_message=str(e), status_code=status_code), status_code
 
 
 #!============================== Modulo de Insumos ==============================#
@@ -1574,13 +1565,15 @@ def eliminar_usuario(id_usuario):
 @role_required(['Admin'])
 def editar_usuario(id_usuario):
     usuario = Usuarios.query.get_or_404(id_usuario)
-
+    
     usuario.nombre = request.form.get('nombre')
     usuario.apaterno = request.form.get('apaterno')
     usuario.amaterno = request.form.get('amaterno')
     usuario.correo = request.form.get('correo')
-    usuario.rol = request.form.get('rol')
-    usuario.activo = int(request.form.get('activo'))  # Convertir a entero
+
+    if usuario.rol != 'Admin':
+        usuario.rol = request.form.get('rol')
+        usuario.activo = int(request.form.get('activo', 1))  # Default: Activo
     
     db.session.commit()
     flash('Usuario actualizado correctamente.', 'success')
