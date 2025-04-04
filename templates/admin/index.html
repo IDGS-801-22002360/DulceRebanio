@@ -107,8 +107,14 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ url_for('galletas') }}" class="nav-link">
+                        <a href="{{ url_for('galletas') }}" class="nav-link position-relative">
                             <i class="fa fa-box-open me-2"></i> Inventario
+                            {% if productos_bajo_stock > 0 %}
+                            <span class="position-absolute top-50 ms-4 translate-middle badge rounded-pill bg-danger text-white">
+                                {{ productos_bajo_stock }}
+                                <span class="visually-hidden">Productos con bajo stock</span>
+                            </span>
+                            {% endif %}
                         </a>
                     </li>
                     <li>

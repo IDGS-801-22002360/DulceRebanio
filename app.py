@@ -111,6 +111,17 @@ def index():
                         recuperar_contrasena_form=recuperar_contrasena_form,
                         show_recuperar_modal=show_recuperar_modal)
 
+@app.context_processor
+def inject_notifications():
+    # Obtener productos con bajo stock
+    min_galletas = 30  # Define el mínimo para considerar bajo stock
+    productos_bajo_stock = ProductosTerminados.query.filter(
+        ProductosTerminados.cantidadDisponible < min_galletas,
+        ProductosTerminados.estatus == 1
+    ).count()
+
+    return dict(productos_bajo_stock=productos_bajo_stock)
+
 #!============================== Modulo Carrito que no es carrito ==============================#
 
 @app.route("/clientes", methods=["GET", "POST"])
@@ -425,7 +436,7 @@ def galletas():
 def guardarLote():
     form = LoteForm()
     form.sabor.choices = [(receta.idReceta, receta.nombreReceta) 
-                        for receta in Receta.query.filter_by(estatus=1).all()]
+                          for receta in Receta.query.filter_by(estatus=1).all()]
     
     if form.validate_on_submit():
         try:
@@ -434,6 +445,7 @@ def guardarLote():
             id_detalle = "Granel"
             print(f"Receta seleccionada: {idReceta}")
 
+            # Crear el nuevo producto terminado
             nuevo_producto = ProductosTerminados(
                 idReceta=idReceta,
                 cantidadDisponible=300,
@@ -443,12 +455,33 @@ def guardarLote():
             )
             db.session.add(nuevo_producto)
             print("Producto terminado agregado a la sesión")
-            
+
+            # Obtener los detalles de la receta (insumos necesarios)
+            detalles_receta = RecetaDetalle.query.filter_by(idReceta=idReceta).all()
+            if not detalles_receta:
+                raise Exception("La receta seleccionada no tiene insumos asignados.")
+
+            # Restar los insumos necesarios de la tabla MateriasPrimas
+            for detalle in detalles_receta:
+                materia_prima = MateriasPrimas.query.get(detalle.idMateriaPrima)
+                if not materia_prima:
+                    raise Exception(f"La materia prima con ID {detalle.idMateriaPrima} no existe.")
+
+                # Verificar si hay suficiente cantidad disponible
+                if materia_prima.cantidadDisponible < detalle.cantidad:
+                    raise Exception(f"No hay suficiente {materia_prima.materiaPrima} para producir el lote.")
+
+                # Restar la cantidad necesaria
+                materia_prima.cantidadDisponible -= detalle.cantidad
+                print(f"Se descontaron {detalle.cantidad} de {materia_prima.materiaPrima}. Cantidad restante: {materia_prima.cantidadDisponible}")
+
+            # Confirmar la transacción
             db.session.commit()
             print("Transacción confirmada y datos guardados correctamente")
 
-            action_logger.info(f"Usuario: {current_user.correo} - Acción: Guardar lote - Sabor: {nuevo_producto.idSabor} - Cantidad: {nuevo_producto.cantidadDisponible} - Fecha: {datetime.now()}")
-            
+            # Log de la acción
+            action_logger.info(f"Usuario: {current_user.correo} - Acción: Guardar lote - Receta: {nuevo_producto.idReceta} - Cantidad: {nuevo_producto.cantidadDisponible} - Fecha: {datetime.now()}")
+
             flash('Lote guardado y materias primas descontadas correctamente', 'success')
         except Exception as e:
             db.session.rollback()
@@ -537,46 +570,61 @@ def mermar():
     return redirect(url_for('galletas'))
 
 
-
 @app.route("/guardar_paquete", methods=["POST"])
 def guardar_paquete():
     paquete_form = PaqueteForm()
+    app.logger.info(f"Datos enviados: {request.form}")  # Depuración de datos enviados
+
     if paquete_form.validate_on_submit():
-        tipo_producto = paquete_form.tipo_producto.data  # 2 = Kilo, 3 = Medio Kilo
+        # Obtener datos del formulario
+        tipo_producto = paquete_form.tipo_producto.data  # 2 = Kilo, 3 = 700 gr
         cantidad_paquetes = paquete_form.cantidad.data
         id_producto = request.form.get("txtIdGalletaGranel")  # ID del lote seleccionado
 
+        app.logger.info(f"ID Producto: {id_producto}, Tipo Producto: {tipo_producto}, Cantidad: {cantidad_paquetes}")
+
+        # Buscar el producto seleccionado
         producto = ProductosTerminados.query.get(id_producto)
         if not producto:
             flash("El lote seleccionado no existe.", "danger")
             return redirect(url_for("galletas"))
 
+        # Determinar la cantidad de galletas necesarias por paquete
         galletas_por_paquete = 24 if tipo_producto == 2 else 12
         galletas_necesarias = galletas_por_paquete * cantidad_paquetes
 
+        # Validar si hay suficientes galletas disponibles
         if producto.cantidadDisponible < galletas_necesarias:
             flash("No hay suficientes galletas en el lote seleccionado.", "danger")
             return redirect(url_for("galletas"))
 
+        # Reducir la cantidad disponible en el lote original
         producto.cantidadDisponible -= galletas_necesarias
         if producto.cantidadDisponible == 0:
             producto.estatus = 0
 
+        # Crear el nuevo paquete
         nuevo_paquete = ProductosTerminados(
-            idSabor=producto.idSabor,
+            idReceta=producto.idReceta,  # Mantener la receta del producto original
+            tipoProducto="Kilo" if tipo_producto == 2 else "700 gr",  # Guardar el tipo de producto como texto
             cantidadDisponible=cantidad_paquetes,
-            fechaCaducidad=producto.fechaCaducidad,
-            idDetalle=tipo_producto,
-            estatus=1
+            fechaCaducidad=producto.fechaCaducidad,  # Mantener la fecha de caducidad del lote original
+            estatus=1  # El nuevo paquete estará activo
         )
         db.session.add(nuevo_paquete)
         db.session.commit()
 
-        #! Log de la acción para crear paquetes 
-        action_logger.info(f"Usuario: {current_user.correo} - Acción: Guardar paquete - Sabor: {nuevo_paquete.idSabor} - Tipo: {tipo_producto} - Cantidad: {cantidad_paquetes} - Fecha: {datetime.now()}")
+        # Log de la acción
+        action_logger.info(f"Usuario: {current_user.correo} - Acción: Guardar paquete - Receta: {nuevo_paquete.idReceta} - Tipo: {nuevo_paquete.tipoProducto} - Cantidad: {cantidad_paquetes} - Fecha: {datetime.now()}")
 
-        flash(f"Paquete creado correctamente: {cantidad_paquetes} paquetes de tipo {tipo_producto}.", "success")
+        flash(f"Paquete creado correctamente: {cantidad_paquetes} paquetes de tipo {nuevo_paquete.tipoProducto}.", "success")
         return redirect(url_for("galletas"))
+
+    # Si el formulario no es válido
+    app.logger.warning("El formulario no pasó la validación")
+    for field, errors in paquete_form.errors.items():
+        for error in errors:
+            app.logger.error(f"Error en el campo {field}: {error}")
 
     flash("Error al guardar el paquete. Verifica los datos ingresados.", "danger")
     return redirect(url_for("galletas"))

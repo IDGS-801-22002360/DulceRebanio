@@ -58,8 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-
-
 //!  Funcion guardarLote
 function guardarLote() {
     var sabor = $('#txtSabor').val();

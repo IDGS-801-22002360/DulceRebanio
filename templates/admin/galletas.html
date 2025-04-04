@@ -156,7 +156,7 @@
                 <form id="formNuevoPaquete" method="POST" action="{{ url_for('guardar_paquete') }}">
                     {{ paquete_form.hidden_tag() }}
                     <div class="card border-0 rounded-3 shadow-sm">
-                        <input type="hidden" id="txtIdGalletaGranel" name="txtIdGalletaGranel" value="" />
+                        <input id="txtIdGalletaGranel" name="txtIdGalletaGranel" value="">
                         <div class="card-header border-0 rounded-top-3 text-center bg-white">
                             <b class="text-center font-Spartan">Galletas</b>
                         </div>
@@ -164,16 +164,16 @@
                             <table class="scroll table-borderless table table-hover table-sm rounded-3 text-center">
                                 <thead>
                                     <tr>
-                                        <th>Sabor</th>
+                                        <th>Receta</th>
                                         <th>Cantidad</th>
                                         <th></th>
                                     </tr>
                                 </thead>
                                 <tbody id="tBodyGalletas">
                                     {% for producto in productos_granel %}
-                                    <tr onclick="selectProductForPaquete('{{ producto.idProducto }}')">
-                                        <td>{{ producto.nombreSabor }}</td>
-                                        <td>{{ producto.cantidadDisponible }}</td>
+                                    <tr onclick="selectProductForPaquete('{{ producto.id_producto }}')">
+                                        <td>{{ producto.nombre_receta }}</td>
+                                        <td>{{ producto.cantidad }}</td>
                                         <td class="">
                                             <a class="fs-5 fa fa-info-circle text-decoration-none text-warning"></a>
                                         </td>
@@ -187,19 +187,18 @@
                         <div class="row">
                             <div class="col-6 form-floating">
                                 {{ paquete_form.tipo_producto(class="form-select border-0 shadow") }}
-                                <label class="ms-2" for="paquete_form.tipo_producto">Tipo de Producto</label>
+                                <label class="ms-3" for="paquete_form.tipo_producto">Tipo de Producto</label>
                             </div>
                             <div class="col-6 form-floating">
                                 {{ paquete_form.cantidad(class="form-control border-0 shadow") }}
-                                <label class="ms-2" for="paquete_form.cantidad">Cantidad</label>
+                                <label class="ms-3" for="paquete_form.cantidad">Cantidad</label>
                             </div>
                         </div>
                     </div>
+                    <div class="modal-footer border-0" style="background-color: #fff">
+                        {{ paquete_form.submit(class="btn btn-warning font-Spartan text-white") }}
+                    </div>
                 </form>
-            </div>
-            <div class="modal-footer border-0" style="background-color: #fff">
-                {{ paquete_form.submit(class="btn btn-warning font-Spartan
-                text-white") }}
             </div>
         </div>
     </div>
