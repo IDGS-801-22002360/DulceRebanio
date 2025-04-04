@@ -7,16 +7,56 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Recorrer las filas y resaltar las que tengan bajo stock
     filas.forEach(fila => {
-        const idProducto = fila.querySelector("td:first-child").textContent.trim(); // Obtener el ID del producto (primer <td>)
+        const idProducto = fila.getAttribute("data-id"); // Obtener el ID del producto
         
         if (productosBajoStock.includes(parseInt(idProducto))) {
-            fila.classList.add("low-stock"); // Agregar la clase CSS para resaltar
+            fila.classList.add("table-danger"); // Agregar la clase de Bootstrap para resaltar
         }
     });
 });
 
 
+document.addEventListener("DOMContentLoaded", function () {
+    const idProductoInput = document.getElementById("idProducto");
 
+    // Asignar el ID del producto seleccionado al campo oculto
+    document.querySelectorAll(".btn-select").forEach(button => {
+        button.addEventListener("click", function () {
+            const row = this.closest("tr");
+            const idProducto = row.getAttribute("data-id");
+            idProductoInput.value = idProducto; // Asignar el ID al campo oculto
+        });
+    });
+
+    // Validar antes de enviar el formulario
+    const formMerma = document.getElementById("formMerma");
+    formMerma.addEventListener("submit", function (event) {
+        if (!idProductoInput.value) {
+            alert("Debe seleccionar un producto antes de mermar.");
+            event.preventDefault();
+        }
+    });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const table = document.getElementById('tablaProductos');
+    const txtIdGalleta = document.getElementById('txtIdGalleta');
+    const txtEstatus = document.getElementById('txtEstatus');
+
+    // Agregar evento a los botones de selección
+    table.addEventListener('click', (event) => {
+        const button = event.target.closest('.btn-select');
+        if (button) {
+            const row = button.closest('tr');
+            const id = row.getAttribute('data-id');
+            const estatus = row.getAttribute('data-estatus');
+
+            // Cargar los valores en los inputs
+            txtIdGalleta.value = id;
+            txtEstatus.value = estatus; // Carga directamente el valor (1 o 0)
+        }
+    });
+});
 
 //!  Funcion guardarLote
 function guardarLote() {
