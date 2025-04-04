@@ -33,19 +33,57 @@
 2025-03-27 19:33:35,445 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Sabor: 15 - Cantidad: 150 - Fecha: 2025-03-27 19:33:35.445446
 2025-03-27 19:34:21,757 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Sabor: 11 - Cantidad: 150 - Fecha: 2025-03-27 19:34:21.757213
 2025-03-27 19:34:39,965 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar paquete - Sabor: 11 - Tipo: 3 - Cantidad: 5 - Fecha: 2025-03-27 19:34:39.965326
-2025-03-28 20:34:22,288 - action_logger - INFO - Usuario: ad@gmail.com - Acci髇: Mermar producto - Producto ID: 2 - Cantidad mermada: 12 - Fecha: 2025-03-28 20:34:22.288797
-2025-03-28 20:34:45,537 - action_logger - INFO - Usuario: ad@gmail.com - Acci髇: Mermar producto - Producto ID: 8 - Cantidad mermada: 50 - Fecha: 2025-03-28 20:34:45.537339
-2025-03-30 21:39:44,822 - action_logger - INFO - Usuario: ad@gmail.com - Acci髇: Guardar paquete - Sabor: 1 - Tipo: 3 - Cantidad: 4 - Fecha: 2025-03-30 22:02:19.814786
-2025-03-31 15:35:21,058 - action_logger - INFO - Usuario: ad@gmail.com - Acci髇: Guardar paquete - Sabor: 1 - Tipo: 2 - Cantidad: 1 - Fecha: 2025-03-31 15:35:21.058621
-2025-03-31 15:35:52,653 - action_logger - INFO - Usuario: ad@gmail.com - Acci髇: Guardar paquete - Sabor: 1 - Tipo: 2 - Cantidad: 4 - Fecha: 2025-03-31 15:35:52.653763
-2025-03-31 15:37:03,857 - action_logger - INFO - Usuario: ad@gmail.com - Acci髇: Guardar paquete - Sabor: 2 - Tipo: 3 - Cantidad: 10 - Fecha: 2025-03-31 15:37:03.857242
-2025-03-31 15:37:19,353 - action_logger - INFO - Usuario: ad@gmail.com - Acci髇: Mermar producto - Producto ID: 3 - Cantidad mermada: 1 - Fecha: 2025-03-31 15:37:19.353695
-2025-03-31 15:38:54,224 - action_logger - INFO - Usuario: ad@gmail.com - Acci髇: Guardar paquete - Sabor: 1 - Tipo: 2 - Cantidad: 1 - Fecha: 2025-03-31 15:38:54.224657
-2025-03-31 15:39:32,470 - action_logger - INFO - Usuario: ad@gmail.com - Acci髇: Guardar paquete - Sabor: 2 - Tipo: 3 - Cantidad: 2 - Fecha: 2025-03-31 15:39:32.470824
-2025-03-31 15:39:48,954 - action_logger - INFO - Usuario: ad@gmail.com - Acci髇: Mermar producto - Producto ID: 5 - Cantidad mermada: 10 - Fecha: 2025-03-31 15:39:48.954306
-2025-03-31 15:39:52,987 - action_logger - INFO - Usuario: ad@gmail.com - Acci髇: Mermar producto - Producto ID: 1 - Cantidad mermada: 6 - Fecha: 2025-03-31 15:39:52.987349
-2025-03-31 15:39:56,006 - action_logger - INFO - Usuario: ad@gmail.com - Acci髇: Mermar producto - Producto ID: 2 - Cantidad mermada: 6 - Fecha: 2025-03-31 15:39:56.006005
-2025-03-31 15:40:04,505 - action_logger - INFO - Usuario: ad@gmail.com - Acci髇: Mermar producto - Producto ID: 4 - Cantidad mermada: 3 - Fecha: 2025-03-31 15:40:04.505566
-2025-03-31 15:40:11,603 - action_logger - INFO - Usuario: ad@gmail.com - Acci髇: Mermar producto - Producto ID: 4 - Cantidad mermada: 1 - Fecha: 2025-03-31 15:40:11.603888
-2025-03-31 15:40:14,736 - action_logger - INFO - Usuario: ad@gmail.com - Acci髇: Mermar producto - Producto ID: 6 - Cantidad mermada: 1 - Fecha: 2025-03-31 15:40:14.735782
-2025-03-31 15:40:17,669 - action_logger - INFO - Usuario: ad@gmail.com - Acci髇: Mermar producto - Producto ID: 7 - Cantidad mermada: 2 - Fecha: 2025-03-31 15:40:17.669792
+2025-03-28 12:32:51,291 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 49 - Cantidad mermada: 150 - Fecha: 2025-03-28 12:32:51.291611
+2025-03-28 12:33:05,542 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 63 - Cantidad mermada: 150 - Fecha: 2025-03-28 12:33:05.542711
+2025-03-28 12:33:25,095 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 64 - Cantidad mermada: 150 - Fecha: 2025-03-28 12:33:25.095793
+2025-03-28 12:33:28,896 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 65 - Cantidad mermada: 150 - Fecha: 2025-03-28 12:33:28.896410
+2025-03-28 12:33:32,031 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 66 - Cantidad mermada: 150 - Fecha: 2025-03-28 12:33:32.031748
+2025-03-28 20:29:42,259 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Sabor: 9 - Cantidad: 150 - Fecha: 2025-03-28 20:29:42.259474
+2025-03-29 22:53:58,173 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Sabor: 9 - Cantidad: 150 - Fecha: 2025-03-29 22:53:58.173613
+2025-03-29 22:54:02,516 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 74 - Cantidad mermada: 150 - Fecha: 2025-03-29 22:54:02.516458
+2025-03-29 22:54:08,183 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 67 - Cantidad mermada: 150 - Fecha: 2025-03-29 22:54:08.183726
+2025-03-31 16:09:24,242 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 72 - Cantidad mermada: 5 - Fecha: 2025-03-31 16:09:24.242295
+2025-03-31 16:20:26,601 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 70 - Cantidad mermada: 0 - Fecha: 2025-03-31 16:20:26.601433
+2025-03-31 17:52:10,492 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Sabor: 4 - Cantidad: 150 - Fecha: 2025-03-31 17:52:10.492293
+2025-03-31 17:53:15,229 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar paquete - Sabor: 4 - Tipo: 3 - Cantidad: 4 - Fecha: 2025-03-31 17:53:15.229495
+2025-03-31 17:53:55,493 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 77 - Cantidad mermada: 5 - Fecha: 2025-03-31 17:53:55.493743
+2025-03-31 17:54:01,732 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 77 - Cantidad mermada: 25 - Fecha: 2025-03-31 17:54:01.732553
+2025-03-31 17:54:40,726 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Sabor: 9 - Cantidad: 150 - Fecha: 2025-03-31 17:54:40.726482
+2025-04-03 23:51:09,565 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 23 - Cantidad mermada: 1 - Fecha: 2025-04-03 23:52:59.070716
+2025-04-03 23:51:09,565 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 23 - Cantidad mermada: 29 - Fecha: 2025-04-03 23:53:10.738871
+2025-04-04 01:04:26,940 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar paquete - Receta: 5 - Tipo: Kilo - Cantidad: 2 - Fecha: 2025-04-04 01:10:50.005299
+2025-04-04 01:04:26,940 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar paquete - Receta: 5 - Tipo: 700 gr - Cantidad: 4 - Fecha: 2025-04-04 01:13:28.064751
+2025-04-04 01:04:26,940 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 88 - Cantidad mermada: 1 - Fecha: 2025-04-04 01:13:46.991353
+2025-04-04 01:04:26,940 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 88 - Cantidad mermada: 1 - Fecha: 2025-04-04 01:13:51.020088
+2025-04-04 01:20:40,445 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 89 - Cantidad mermada: 4 - Fecha: 2025-04-04 01:24:37.643866
+2025-04-04 01:35:24,163 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Receta: 17 - Cantidad: 300 - Fecha: 2025-04-04 01:35:45.716919
+2025-04-04 01:35:24,163 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Receta: 17 - Cantidad: 300 - Fecha: 2025-04-04 01:36:14.731980
+2025-04-04 01:35:24,163 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Receta: 1 - Cantidad: 300 - Fecha: 2025-04-04 01:49:02.294263
+2025-04-04 01:50:53,655 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Receta: 1 - Cantidad: 0 - Fecha: 2025-04-04 01:51:00.254865
+2025-04-04 01:50:53,655 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 93 - Cantidad mermada: 0 - Fecha: 2025-04-04 01:51:17.908026
+2025-04-04 01:55:47,172 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Receta: 1 - Cantidad: 150 - Fecha: 2025-04-04 01:55:49.564505
+2025-04-04 01:55:47,172 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Receta: 1 - Cantidad: 150 - Fecha: 2025-04-04 01:56:20.631985
+2025-04-04 01:55:47,172 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Receta: 2 - Cantidad: 150 - Fecha: 2025-04-04 01:57:05.807093
+2025-04-04 01:57:24,207 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 94 - Cantidad mermada: 150 - Fecha: 2025-04-04 01:57:48.823587
+2025-04-04 01:57:24,207 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 92 - Cantidad mermada: 300 - Fecha: 2025-04-04 01:57:52.767416
+2025-04-04 01:57:24,207 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 90 - Cantidad mermada: 300 - Fecha: 2025-04-04 01:57:56.385649
+2025-04-04 01:57:24,207 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 91 - Cantidad mermada: 300 - Fecha: 2025-04-04 01:58:00.482712
+2025-04-04 01:57:24,207 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 95 - Cantidad mermada: 150 - Fecha: 2025-04-04 01:58:04.417389
+2025-04-04 01:57:24,207 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Receta: 2 - Cantidad: 150 - Fecha: 2025-04-04 01:58:41.942212
+2025-04-04 01:57:24,207 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Receta: 3 - Cantidad: 150 - Fecha: 2025-04-04 01:59:19.547704
+2025-04-04 01:57:24,207 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Receta: 3 - Cantidad: 150 - Fecha: 2025-04-04 01:59:50.701732
+2025-04-04 02:00:12,740 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Receta: 3 - Cantidad: 150 - Fecha: 2025-04-04 02:00:17.634347
+2025-04-04 02:00:33,083 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Receta: 1 - Cantidad: 50 - Fecha: 2025-04-04 02:00:33.633650
+2025-04-04 02:00:33,083 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Receta: 3 - Cantidad: 50 - Fecha: 2025-04-04 02:00:36.425432
+2025-04-04 02:02:19,995 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Receta: 2 - Cantidad: 150 - Fecha: 2025-04-04 02:02:37.078789
+2025-04-04 02:04:27,163 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Receta: 2 - Cantidad: 150 - Fecha: 2025-04-04 02:04:30.557737
+2025-04-04 02:04:27,163 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Receta: 2 - Cantidad: 150 - Fecha: 2025-04-04 02:04:44.079788
+2025-04-04 02:05:08,801 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 98 - Cantidad mermada: 150 - Fecha: 2025-04-04 02:05:15.349155
+2025-04-04 02:05:08,801 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 99 - Cantidad mermada: 150 - Fecha: 2025-04-04 02:05:19.449519
+2025-04-04 02:05:08,801 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 97 - Cantidad mermada: 150 - Fecha: 2025-04-04 02:05:23.416729
+2025-04-04 02:05:08,801 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 101 - Cantidad mermada: 50 - Fecha: 2025-04-04 02:05:27.735854
+2025-04-04 02:05:08,801 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 102 - Cantidad mermada: 50 - Fecha: 2025-04-04 02:05:32.603113
+2025-04-04 02:05:08,801 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Mermar producto - Producto ID: 103 - Cantidad mermada: 150 - Fecha: 2025-04-04 02:05:36.771111
+2025-04-04 02:05:08,801 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Receta: 3 - Cantidad: 300 - Fecha: 2025-04-04 02:06:32.935539
+2025-04-04 02:05:08,801 - action_logger - INFO - Usuario: markolfin@gmail.com - Acci贸n: Guardar lote - Receta: 1 - Cantidad: 300 - Fecha: 2025-04-04 02:07:19.135692
+2025-04-04 10:40:35,989 - action_logger - INFO - Usuario: ad@gmail.com - Acci髇: Guardar paquete - Receta: 1 - Tipo: Kilo - Cantidad: 4 - Fecha: 2025-04-04 10:41:58.688616

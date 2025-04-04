@@ -3,7 +3,7 @@
 <style>
   #productosTable {
       width: 90%;
-      height: 90%;
+      height: 100%;
       background-color: white;
       /* Fondo blanco */
       border-collapse: collapse;
@@ -19,7 +19,7 @@
 
 .left-side {
 flex: 1;
-width: 80%;
+width: 60%;
 }
 
 .right-side {
@@ -27,7 +27,7 @@ display: flex;
 flex-direction: column;
 gap: 20px;
 min-width: 100px;
-width: 50%;
+width: 60%;
 }
 
 /* Tablas */
@@ -69,7 +69,7 @@ box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 
 /* Inventario: tabla interna */
 #inventarioTable {
-width: 100%;
+width: 80%;
 border-collapse: collapse;
 }
 
@@ -92,7 +92,7 @@ gap: 15px;
 }
 
 .options form, .options button {
-width: 90%;
+width: 80%;
 padding: 10px;
 border: none;
 border-radius: 30px;
@@ -189,26 +189,28 @@ color: #fff;
 </style>
 
 <div class="card border-0 gb mb-3" style="height: 58px; background-color: #e1e1e1">
-  {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %}
-  <div class="container col-12">
-      {% for category, message in messages %}
-      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="container col-12">
+          {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          {% endfor %}
       </div>
-      {% endfor %}
-  </div>
-  {% endif %} {% endwith %}
+    {% endif %}
+  {% endwith %}
 </div>
 
 <!-- Content -->
 <div class="content" style="flex: 1; display: flex;">
   <div class="left-side">
     <!-- Tabla de productos de la venta actual -->
-    <table id="productosTable">
+    <table id="productosTable" class="table">
       <thead>
         <tr>
-          <th>Producto</th>
+          <th>Receta</th>
           <th>Tipo</th>
           <th>Cantidad</th>
           <th>Precio</th>
@@ -218,18 +220,17 @@ color: #fff;
       <tbody>
         {% for prod in venta %}
         <tr>
-          <td>{{ prod.sabor }}</td>
-          <td>{{ prod.tipo }}</td>
+          <td>{{ prod.nombreReceta }}</td>
+          <td>{{ prod.tipoProducto }}</td>
           <td>{{ prod.cantidad }}</td>
-          <td>${{ prod.precio_total }}</td>
+          <td>${{ "%.2f"|format(prod.precio_total) }}</td>
           <td>
             <div class="d-flex justify-content-center">
               <!-- Botón para subir cantidad -->
               <form method="POST" action="{{ url_for('puntoVenta') }}" class="me-1" style="display: inline;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="accion" value="actualizar">
-                <input type="hidden" name="idSabor" value="{{ prod.idSabor }}">
-                <input type="hidden" name="idTipoVenta" value="{{ prod.idTipoVenta }}">
+                <input type="hidden" name="idProducto" value="{{ prod.idProducto }}">
                 <input type="hidden" name="operacion" value="subir">
                 <button type="submit" class="btn btn-success btn-sm" style="border-radius: 30px; font-size: 1.2rem;">+</button>
               </form>
@@ -237,8 +238,7 @@ color: #fff;
               <form method="POST" action="{{ url_for('puntoVenta') }}" style="display: inline;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="accion" value="actualizar">
-                <input type="hidden" name="idSabor" value="{{ prod.idSabor }}">
-                <input type="hidden" name="idTipoVenta" value="{{ prod.idTipoVenta }}">
+                <input type="hidden" name="idProducto" value="{{ prod.idProducto }}">
                 <input type="hidden" name="operacion" value="bajar">
                 <button type="submit" class="btn btn-danger btn-sm" style="border-radius: 30px; font-size: 1.2rem;">-</button>
               </form>
@@ -254,23 +254,21 @@ color: #fff;
     <!-- Contenedor scrollable para la tabla de inventario -->
     <div class="scroll-container" style="margin-top: 10px; overflow: auto; max-height: 300px;">
       <h3 style="font-size: 16px; margin-bottom: 5px;">Inventario</h3>
-      <table id="inventarioTable" style="font-size: 14px; width: 100%;">
+      <table id="inventarioTable" class="table" style="font-size: 14px; width: 100%;">
         <thead>
           <tr>
-            <th>Sabor</th>
+            <th>Receta</th>
             <th>Tipo</th>
-            <th>Cant.</th>
+            <th>Disponibles</th>
           </tr>
         </thead>
         <tbody>
-          {% for sabor in sabores %} 
-          {% for tipo in tiposVenta %}
+          {% for prod in productos_disponibles %}
           <tr>
-            <td>{{ sabor.nombreSabor }}</td>
-            <td>{{ tipo.tipoProducto }}</td>
-            <td>{{ inventario.get((sabor.idSabor, tipo.idDetalle), '---') }}</td>
+            <td>{{ prod[1] }}</td>
+            <td>{{ prod[2] }}</td>
+            <td>{{ prod[3] }}</td>
           </tr>
-          {% endfor %}
           {% endfor %}
         </tbody>
       </table>
@@ -281,16 +279,12 @@ color: #fff;
       <form method="POST" action="{{ url_for('puntoVenta') }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="accion" value="agregar">
-        <select id="flavor" name="idSabor" required>
-          <option value="">Selecciona un sabor</option>
-          {% for sabor in sabores %}
-          <option value="{{ sabor.idSabor }}">{{ sabor.nombreSabor }}</option>
-          {% endfor %}
-        </select>
-        <select id="type" name="idTipoVenta" required>
-          <option value="">Selecciona tipo de venta</option>
-          {% for tipo in tiposVenta %}
-          <option value="{{ tipo.idDetalle }}">{{ tipo.tipoProducto }} - ${{ tipo.precio }}</option>
+        <select id="product" name="idProducto" required>
+          <option value="">Selecciona producto</option>
+          {% for prod in productos_disponibles %}
+          <option value="{{ prod[0] }}">
+            {{ prod[1] }} - {{ prod[2] }} (Disponibles: {{ prod[3] }})
+          </option>
           {% endfor %}
         </select>
         <input type="number" id="quantity" name="cantidad" placeholder="Cantidad" min="1" required />
