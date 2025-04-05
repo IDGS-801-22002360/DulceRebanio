@@ -1183,15 +1183,25 @@ def puntoVenta():
                     flash("El producto ya está en la venta.", "warning")
                     return redirect(url_for("puntoVenta"))
             
-            precio_total = float(receta.precio) * cantidad
+            if productoTerminado.tipoProducto.lower() == "medio kilo":
+                factor = 12
+            elif productoTerminado.tipoProducto.lower() == "kilo":
+                factor = 24
+            else:
+                factor = 1 
+
+            precio_unitario = float(receta.precio) * factor
+            precio_total = precio_unitario * cantidad
+
             producto = {
                 "idProducto": idProducto,
                 "nombreReceta": receta.nombreReceta,
                 "tipoProducto": productoTerminado.tipoProducto,
                 "cantidad": cantidad,
-                "precio_unitario": float(receta.precio),
+                "precio_unitario": precio_unitario,
                 "precio_total": precio_total
             }
+            
             venta_actual.append(producto)
             flash("Producto agregado correctamente.", "success")
             return redirect(url_for("puntoVenta"))
