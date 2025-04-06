@@ -109,6 +109,14 @@
         .table td .text-success {
             font-weight: bold;
         }
+        .last-login {
+            position: fixed; 
+            top: 5px; 
+            right: 20px; 
+            color: #000; 
+            font-size: 14px; 
+            z-index: 1000; 
+        }
     </style>
 </head>
 
@@ -139,37 +147,109 @@
                 </div>
             </nav>
             <div class="col-md-11 col-lg-11 content">
+                <div class="last-login">
+                    <p class="mb-0">
+                      <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d %H:%M:%S') if ultimo_login else 'Nunca' }}
+                    </p>
+                  </div>
                 <div class="d-flex justify-content-between align-items-center">
                     <h2 class="titulo-productos">
                         Historial <span>de compras</span>
                     </h2>
                     <img src="../../static/img/donGalleto2.png" alt="Logo" class="img-fluid ms-3" style="max-width: 100px; height: auto;">
                 </div>
-                {% if ventas %}
+                {% if venta %}
                 <h5 class="subtitulo-productos">Hola {{ ventas[0].nombreCliente }}, tus compras fueron:</h5>
                 {% endif %}
-                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                    <table class="table table-hover text-center mb-0 table-borderless">
+                {% if pedidos_hoy %}
+                <h5 class="subtitulo-productos">Pedidos por recojer</h5>
+                <div class="table-responsive mb-5">
+                    <table class="table table-hover table-bordered">
                         <thead>
                             <tr>
+                                <th>Fecha</th>
                                 <th>Sabor</th>
                                 <th>Cantidad</th>
                                 <th>Tipo</th>
                                 <th>Total</th>
+                                <th>Estatus</th>
+                                <th>Acción</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for venta in ventas %}
+                            {% for venta in pedidos_hoy %}
                             <tr>
+                                <td>{{ venta.fechaEntrega }}</td>
                                 <td>{{ venta.nombreSabor }}</td>
                                 <td>{{ venta.cantidad }}</td>
                                 <td>{{ venta.tipoProducto }}</td>
-                                <td class="text-success"><b>${{ venta.total }}</b></td>
+                                <td><b>${{ venta.total }}</b></td>
+                                <td>
+                                    {% if venta.estatus == 1 %}
+                                        <span class="text-warning">Pendiente</span>
+                                    {% elif venta.estatus == 0 %}
+                                        <span class="text-danger">Cancelado</span>
+                                    {% elif venta.estatus == 2 %}
+                                        <span class="text-success">Realizado</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if venta.estatus == 1 %}
+                                        <form method="POST" action="{{ url_for('cancelar_pedido', idVentasCliente=venta.idVentasCliente) }}">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button class="btn btn-danger btn-sm">Cancelar</button>
+                                        </form>
+                                    {% else %}
+                                        <span class="text-muted">Sin acción</span>
+                                    {% endif %}
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
+                {% endif %}
+
+                {% if pedidos_anteriores %}
+                <h5 class="subtitulo-productos">Pedidos anteriores</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Sabor</th>
+                                <th>Cantidad</th>
+                                <th>Tipo</th>
+                                <th>Total</th>
+                                <th>Estatus</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for venta in pedidos_anteriores %}
+                            <tr>
+                                <td>{{ venta.fechaEntrega }}</td>
+                                <td>{{ venta.nombreSabor }}</td>
+                                <td>{{ venta.cantidad }}</td>
+                                <td>{{ venta.tipoProducto }}</td>
+                                <td><b>${{ venta.total }}</b></td>
+                                <td>
+                                    {% if venta.estatus == 1 %}
+                                        <span class="text-warning">Pendiente</span>
+                                    {% elif venta.estatus == 0 %}
+                                        <span class="text-danger">Cancelado</span>
+                                    {% elif venta.estatus == 2 %}
+                                        <span class="text-success">Realizado</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+
+
             </div>
         </div>
     </div>

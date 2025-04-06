@@ -1,13 +1,12 @@
 {% extends "admin/index.html" %}
 {% block container %}
-{% import "admin/_macros.html" as macro %}
 <style>
     .sidebar {
-        position: fixed; /* Fijo en la pantalla */
+        position: fixed;
         top: 0;
         left: 0;
-        height: 100vh; /* 100% de la altura de la ventana */
-        width: 100px; /* Ajusta según tu diseño */
+        height: 100%; /* Cambio aquí, se adapta a la altura de la ventana */
+        width: 100%;
         background-color: #532d02;
         opacity: 50%;
         display: flex;
@@ -15,6 +14,7 @@
         justify-content: space-between;
         padding-top: 10px;
     }
+    
 
     /* Ajustar el contenido para que no quede detrás del Navbar */
     .content {
@@ -22,12 +22,10 @@
         padding: 15px;
     }
 </style>
+<div class="d-flex vh-100">
+    
+    
 <div class="container-fluid p-4 bg-light" style="margin-left: 50px;">
-    <div class="last-login">
-        <p class="mb-0">
-            <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d%H:%M:%S') if ultimo_login else 'Nunca' }}
-        </p>
-    </div>
     <div class="d-flex justify-content-between align-items-center">
         <h2 class="text-center titulo-productos">
             Dashboard <span>dulce rebaño</span>

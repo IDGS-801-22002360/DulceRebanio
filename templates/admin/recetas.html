@@ -2,117 +2,276 @@
 {% block container %}
 {% import "admin/_macros.html" as macro %}
 
-    <div class="row">
-        <div class="col-md-6 mb-2">
-            <div class="card mb-2 rounded-3 border-0" style="height: 400px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="static/img/avena2.jpg" class="img-fluid rounded-start-3" alt="Avena" style="width: 135px; height: 267px; object-fit: cover; object-position: 90%; zoom: 1.5;">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <h5 class="card-title">Galletas de Avena</h5>
-                            <p class="card-text">
-                                Ingredientes: <br>
-                                - 1 taza de avena <br>
-                                - 1/2 taza de harina <br>
-                                - 1/2 taza de azúcar morena <br>
-                                - 1/2 taza de mantequilla <br>
-                                - 1 huevo <br>
-                                - 1/2 cucharadita de canela <br>
-                                - 1/2 cucharadita de vainilla <br>
-                            </p>
-                            <p class="card-text">
-                                Procedimiento: Mezcla los ingredientes secos. Agrega la mantequilla derretida, el huevo y la vainilla. Forma bolitas y hornea a 180°C por 12-15 minutos.
-                            </p>
+<div class="row">
+    <div class="card border-0 gb mb-3" style="height: 58px; background-color: #f1f1f1">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="container col-12">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <!--!  Tabla de Recetas  -->
+    <div class="col-5">
+        <div class="card border-0 shadow-sm rounded-3 bg-white" style="height: 400px;">
+            <div class="card-header border-0 rounded-top-3 text-center bg-white">
+                <b class="text-center font-Spartan">Recetas</b>
+            </div>
+            <div class="table-responsive">
+                <!-- Formulario para editar receta -->
+                <form method="POST" action="{{ url_for('editar_receta') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <div class="row px-4">
+                        <div class="col-6 form-floating mb-3">
+                            <input type="text" class="form-control border-0 shadow-sm" id="txtNombreReceta" name="nombre_receta" placeholder="Receta" value="{{ receta_actual.nombreReceta if receta_actual else '' }}">
+                            <label class="ms-3" for="txtNombreReceta">Receta</label>
+                        </div>
+                        <div class="col-3 form-floating mb-3">
+                            <input type="text" class="form-control border-0 shadow-sm" id="txtPrecioReceta" name="precio_receta" placeholder="precio" value="{{ receta_actual.precio if receta_actual else '' }}">
+                            <label class="ms-3" for="txtPrecioReceta">Precio</label>
+                        </div>
+                        <div class="col-3 form-floating mb-3">
+                            <button type="submit" class="btn btn-lg btn-warning rounded-2 text-white shadow-sm border-0" style="height: 58px; width: 100%;">
+                                Editar
+                            </button>
                         </div>
                     </div>
-                </div>
+                    <div class="row px-4">
+                        <div class="form-floating" hidden>
+                            <input type="text" class="form-control" id="txtIdReceta" name="receta_id" placeholder="ID" value="{{ receta_actual.idReceta if receta_actual else '' }}" readonly>
+                            <label for="txtIdReceta">ID Receta</label>
+                        </div>
+                    </div>
+                </form>
+                <!-- Formulario para seleccionar receta -->
+                <form method="POST" action="{{ url_for('seleccionar_receta') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <table class="table table-hover text-center mb-0 table-borderless" style="width: 100%; height: 100%; overflow: auto; padding: 0 10px;;">
+                        <thead class="text-dark">
+                            <tr>
+                                <th>Nº</th>
+                                <th>Sabor Receta</th>
+                                <th>$ / Pieza</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for receta in recetas %}
+                            <tr>
+                                <td class="col-1">{{ receta.idReceta }}</td>
+                                <td class="col-7">{{ receta.nombreReceta }}</td>
+                                <td class="col-2">${{ receta.precio }}</td>
+                                <td class="col-2">
+                                    <button type="submit" name="receta_id" value="{{ receta.idReceta }}" class="btn-sm btn btn-warning" style="width: 31px;">
+                                        <i class="fa fa-info text-white"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </form>
             </div>
+            <div class="card-footer border-0 rounded-bottom-3 bg-white pt-0"></div>
         </div>
 
-        <div class="col-md-6 mb-2">
-            <div class="card mb-2 rounded-3 border-0" style="height: 400px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="static/img/brownies.jpg" class="img-fluid rounded-start-3" alt="Brownies" style="width: 200px; height: 400px; object-fit: cover;">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body rounded-3">
-                            <h5 class="card-title">Brownies</h5>
-                            <p class="card-text">
-                                Ingredientes: <br>
-                                - 1 taza de harina <br>
-                                - 1 taza de azúcar <br>
-                                - 1/2 taza de cacao en polvo <br>
-                                - 1/2 taza de mantequilla <br>
-                                - 2 huevos <br>
-                                - 1/2 cucharadita de vainilla <br>
-                            </p>
-                            <p class="card-text">
-                                Procedimiento: Mezcla los ingredientes secos. Agrega la mantequilla derretida, los huevos y la vainilla. Vierte en un molde y hornea a 180°C por 20-25 minutos.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Card: Galletas con Chispas de Chocolate -->
-        <div class="col-md-6 mb-4">
-            <div class="card mb-3 rounded-3 border-0" style="height: 400px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="static/img/C. Chispas.jpg" class="img-fluid rounded-start-3" alt="C. chispas" style="width: 200px; height: 400px; object-fit: cover; object-position: 10%;">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <h5 class="card-title">Galletas con Chispas de Chocolate</h5>
-                            <p class="card-text">
-                                Ingredientes: <br>
-                                - 1 taza de harina <br>
-                                - 1/2 taza de azúcar <br>
-                                - 1/2 taza de mantequilla <br>
-                                - 1 huevo <br>
-                                - 1/2 taza de chispas de chocolate <br>
-                                - 1/2 cucharadita de vainilla <br>
-                            </p>
-                            <p class="card-text">
-                                Procedimiento: Mezcla los ingredientes secos. Agrega la mantequilla derretida, el huevo y la vainilla. Incorpora las chispas de chocolate. Forma bolitas y hornea a 180°C por 12-15 minutos.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Card: Galletas con Pasas -->
-        <div class="col-md-6 mb-4">
-            <div class="card mb-3 rounded-3 border-0" style="height: 400px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="static/img/C. Pasas.jpg" class="img-fluid rounded-start-3" alt="C. Pasas" style="width: 200px; height: 400px; object-fit: cover; object-position: 40%;">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <h5 class="card-title">Galletas con Pasas</h5>
-                            <p class="card-text">
-                                Ingredientes: <br>
-                                - 1 taza de harina <br>
-                                - 1/2 taza de azúcar <br>
-                                - 1/2 taza de mantequilla <br>
-                                - 1 huevo <br>
-                                - 1/2 taza de pasas <br>
-                                - 1/2 cucharadita de vainilla <br>
-                            </p>
-                            <p class="card-text">
-                                Procedimiento: Mezcla los ingredientes secos. Agrega la mantequilla derretida, el huevo y la vainilla. Incorpora las pasas. Forma bolitas y hornea a 180°C por 12-15 minutos.
-                            </p>
-                        </div>
-                    </div>
-                </div>
+        <div class="row mt-4">
+            <div class="col-12">
+                <button class="btn btn-warning text-white col-12 rounded-3 font-Spartan" data-bs-toggle="modal" data-bs-target="#modalAgregarReceta">
+                    Nueva Receta
+                </button>
+                <form method="POST" action="{{ url_for('asignar_imagen') }}" enctype="multipart/form-data" id="formAsignarImagen">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <input type="hidden" name="receta_id" value="{{ receta_actual.idReceta if receta_actual else '' }}">
+                    <input type="file" name="imagen_receta" id="inputImagenReceta" accept="image/*" style="display: none;" onchange="document.getElementById('formAsignarImagen').submit();">
+                    <button type="button" class="btn btn-warning text-white col-12 rounded-3 font-Spartan mt-2" onclick="document.getElementById('inputImagenReceta').click();">
+                        Asignar Imagen
+                    </button>
+                </form>                
             </div>
         </div>
     </div>
+
+
+    <!--! Insumos agregados -->
+    <div class="col-7">
+        <div class="card border-0 shadow-sm rounded-3 bg-white" style="height: 400px;">
+            <div class="card-header border-0 rounded-top-3 text-center bg-white">
+                <b class="text-center font-Spartan">
+                    {% if receta_seleccionada %}
+                    Insumos para: {{ receta_seleccionada.nombreReceta }}
+                    {% else %}
+                    Insumos Agregados
+                    {% endif %}
+                </b>
+            </div>
+            <div class="table-responsive">
+                {% if receta_seleccionada %}
+                <form method="POST" action="{{ url_for('actualizar_receta') }}" id="form-receta">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <input type="hidden" name="receta_id" value="{{ receta_seleccionada.idReceta }}">
+                    
+                    <!-- Botón arriba de la tabla -->
+                    <div class="px-3 pt-3 pb-2">
+                        <button type="submit" class="btn btn-warning col-12 text-white shadow-sm">
+                            <i class="fa fa-save me-2"></i>Guardar Cambios
+                        </button>
+                    </div>
+                    
+                    <table class="table table-hover text-center table-borderless">
+                        <thead>
+                            <tr>
+                                <th>N°</th>
+                                <th>Insumos</th>
+                                <th>Consumo</th>
+                                <th>Unidad</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for detalle, materia in detalles %}
+                            <tr class="col-12">
+                                <td class="col-1">{{ materia.idMateriaPrima }}</td>
+                                <td class="col-4">{{ materia.materiaPrima }}</td>
+                                <td class="col-4">
+                                    <input type="number" name="cantidad_{{ detalle.idRecetaDetalle }}"
+                                        value="{{ detalle.cantidad }}"
+                                        class="form-control form-control-sm border-0 shadow-sm mx-auto" step="0.01"
+                                        min="0" style="width: 200px;">
+                                </td>
+                                <td class="col-1">{{ materia.unidadMedida }}</td>
+                                <td class="col-2">
+                                    <button type="submit"
+                                        formaction="{{ url_for('eliminar_detalle', id=detalle.idRecetaDetalle) }}"
+                                        class="btn btn-sm btn-danger">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </form>
+                {% else %}
+                <div class="text-center p-5">
+                    <p>Selecciona una receta para ver sus insumos</p>
+                </div>
+                {% endif %}
+            </div>
+            <div class=" card-footer border-0 rounded-bottom-3 text-center bg-white pt-1">
+            </div>
+        </div>
+
+        <!--! Sección de Insumos en Inventario -->
+        <div class="card border-0 shadow-sm rounded-3 bg-white mt-4" style="height: 400px;">
+            <div class="card-header border-0 rounded-top-3 text-center bg-white">
+                <b class="text-center font-Spartan">Insumos en inventario</b>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover text-center mb-0 table-borderless">
+                    <thead class="text-dark">
+                        <tr>
+                            <th>N°</th>
+                            <th>Insumos</th>
+                            <th>Unidad</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for materia in materias_primas %}
+                        <tr class="col-12">
+                            <td class="col-1">{{ materia.idMateriaPrima }}</td>
+                            <td class="col-8">{{ materia.materiaPrima }}</td>
+                            <td class="col-1">{{ materia.unidadMedida }}</td>
+                            <td class="col-2">
+                                <form method="POST" action="{{ url_for('agregar_insumo_receta') }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                    <input type="hidden" name="receta_id" value="{{ receta_seleccionada.idReceta }}">
+                                    <input type="hidden" name="insumo_id" value="{{ materia.idMateriaPrima }}">
+                                    <input type="hidden" name="unidad_medida" value="{{ materia.unidadMedida }}">
+                                    <input type="hidden" name="cantidad" value="0.00">
+                                    <button type="submit" class="btn-sm btn btn-warning text-white">
+                                        <i class="fa fa-plus"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer border-0 bg-white text-center rounded-3"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para agregar recetas -->
+<div class="modal fade border-0" id="modalAgregarReceta" tabindex="-1" aria-labelledby="modalAgregarRecetaLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('agregar_receta') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="modalAgregarRecetaLabel">Agregar Receta</h5>
+                </div>
+                <div class="modal-body">
+                    <label for="nombreReceta" class="form-label">Nombre de la Receta</label>
+                    <input type="text" class="form-control" id="nombreReceta" name="nombreReceta"
+                        placeholder="Ingrese el nombre" required>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalSeleccionarInsumos" tabindex="-1" aria-labelledby="modalSeleccionarInsumosLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="modalSeleccionarInsumosLabel">Seleccionar Insumos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
+                    <table class="table table-hover text-center">
+                        <thead>
+                            <tr>
+                                <th><i class="fa fa-check"></i></th>
+                                <th>Nombre del Insumo</th>
+                                <th>Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for materia in materias_primas %}
+                            <tr>
+                                <td><input type="checkbox" class="form-check-input"
+                                        name="insumo_{{ materia.idMateriaPrima }}"></td>
+                                <td>{{ materia.materiaPrima }}</td>
+                                <td><input type="number" class="form-control" min="1" value="1"
+                                        name="cantidad_{{ materia.idMateriaPrima }}"></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-success" id="btnGuardarReceta">Guardar Receta</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

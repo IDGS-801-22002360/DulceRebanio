@@ -160,8 +160,7 @@
             <div class="col-md-11 col-lg-11 content md-5">
                 <div class="last-login">
                     <p class="mb-0">
-                      <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d
-                      %H:%M:%S') if ultimo_login else 'Nunca' }}
+                      <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d %H:%M:%S') if ultimo_login else 'Nunca' }}
                     </p>
                   </div>
                 <div class="d-flex justify-content-between align-items-center md-5">
@@ -176,9 +175,8 @@
                     <label for="filtroProducto" class="fw-bold"></label>
                     <div class="dropdown-custom" style="max-width: 200px;">
                         <select id="filtroProducto" class="form-select border-0 fw-bold w-auto">
-                            <option value="todos">Seleccione el tipo de producto:</option>
                             {% for tipo in tipos_productos %}
-                                <option value="{{ tipo }}" {% if tipo == request.args.get("tipo", "todos") %}selected{% endif %}>
+                                <option value="{{ tipo }}" {% if tipo == request.args.get("tipo", "Granel") %}selected{% endif %}>
                                     {{ tipo }}
                                 </option>
                             {% endfor %}
@@ -186,45 +184,43 @@
                     </div>
                 </div>                     
                 <div class="row mt-5">
-                    {% for sabor in sabores %}
-                    <div class="col-md-3 mb-4">
-                        <div class="card shadow-sm" style="border-radius: 22px;">
-                            <div class="card-body text-center">
-                                <img src="../../static/img/{{ sabor.nombreSabor | lower }}.jpg" alt="{{ sabor.nombreSabor }}" class="w-100 img-fluid" style="height: 200px; object-fit: cover; border-radius: 10px;">
-                                <h5 class="card-title fw-bold">{{ sabor.nombreSabor }}</h5>
-                                
-                                <form action="{{ url_for('agregar_carrito') }}" method="POST">
-                                    <input type="hidden" name="sabor_id" value="{{ sabor.idSabor }}">
-                                
-                                    <h5 class="fw-bold mt-2" style="color: #532d02;">
-                                        <span class="precio">${{ detalles_productos[0].precio }}</span>
-                                    </h5>
-                                    <div class="mt-2">
-                                        <label for="tipo_producto" class="fw-bold d-block">Tipo de producto:</label>
-                                        <label>{{ detalles_productos.0.tipoProducto }}</label>
-                                        <select name="tipo_producto" class="form-control" hidden>
-                                            {% for detalle in detalles_productos %}
-                                                <option value="{{ detalle.idDetalle }}" data-precio="{{ detalle.precio }}">
-                                                    {{ detalle.tipoProducto }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="mt-3">
-                                        <label for="cantidad" style="text-align: center;" class="fw-bold d-block">Cantidad:</label>
-                                        <input type="number" name="cantidad" class="form-control" min="1" value="1" required>
-                                    </div>
-                                
-                                    <br>
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <button type="submit" class="btn btn-warning font-Spartan text-white">
-                                        <i class="fas fa-receipt"></i> Agregar producto
-                                    </button>
-                                </form>
-                                
+                    {% for receta in recetas %}
+                        <div class="col-md-3 mb-4">
+                            <div class="card shadow-sm" style="border-radius: 22px;">
+                                <div class="card-body text-center">
+                                    {% if receta.imagen %}
+                                        <img src="{{ receta.imagen }}" alt="{{ receta.nombreReceta }}" class="receta-imagen">
+                                    {% else %}
+                                        <p>No hay imagen disponible</p>
+                                    {% endif %}
+                                    <h5 class="card-title fw-bold">{{ receta.nombreReceta }}</h5>
+                                    
+                                    <form action="{{ url_for('agregar_carrito') }}" method="POST">
+                                        <input type="hidden" class="precop-hidden" name="precio" value="{{ receta.precio }}">
+                                        <input type="hidden" name="receta_id" value="{{ receta.idReceta }}">
+                                        
+                                        <h5 class="fw-bold mt-2" style="color: #532d02;">
+                                            <span class="precio" data-precio-base="{{ receta.precio }}">${{ receta.precio }}</span>
+                                        </h5>
+                                    
+                                        <div class="mt-2">
+                                            <input type="hidden" name="tipo-producto" value="{{ request.args.get('tipo', 'Granel') }}">
+                                        </div>
+                                    
+                                        <div class="mt-3">
+                                            <label for="cantidad" class="fw-bold d-block">Cantidad:</label>
+                                            <input type="number" name="cantidad" class="form-control" min="1" value="1" required>
+                                        </div>
+                                        <br>
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-warning font-Spartan text-white">
+                                            <i class="fas fa-receipt"></i> Agregar producto
+                                        </button>
+                                    </form>
+                                    
+                                </div>
                             </div>
                         </div>
-                    </div>
                     {% endfor %}
                 </div>
             </div>
@@ -241,7 +237,7 @@
                             {% set subtotal = item.cantidad * item.precio %}
                             {% set total_general = subtotal + subtotal %}
                             <li class="list-group-item d-flex align-items-center">
-                                <img src="../../static/img/{{ item.nombre | lower }}.jpg" alt="{{ item.nombre }}" class="me-3" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+                                <img src="{{ item.imagen }}" alt="{{ item.nombre }}" class="me-3" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
                                 <div class="flex-grow-1">
                                     <strong>{{ item.nombre }}</strong> - <span class="text-muted">{{ item.tipo }}</span>
                                     <div>
@@ -252,6 +248,7 @@
                                 </div>
                                 <form action="{{ url_for('eliminar_carrito', item_id=item.id) }}" method="POST">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="tipo" value="{{ item.tipo }}">
                                     <button class="btn btn-danger btn-sm">Eliminar</button>
                                 </form>
                             </li>
@@ -266,37 +263,75 @@
                             <label for="fecha_entrega" class="form-label">Fecha de entrega:</label>
                             <input type="date" id="fecha_entrega" name="fecha_entrega" class="form-control" required>
                         </div>
+                    
+                        <!-- Mostrar las alertas flash aquí -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                <div class="alert-container">
+                                    {% for category, message in messages %}
+                                        <div class="alert alert-{{ category }} mt-2" role="alert">
+                                            {{ message }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+                    
                         <div class="text-center mt-3">
                             <button class="btn btn-warning font-Spartan text-white" type="submit">
                                 <i class="fas fa-check-circle"></i> Generar pedido
                             </button>                            
                         </div>
                     </form>
+                    
                 </div>
             </div>              
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="static/sweetalert2/sweetalert2.all.min.js"></script>
     <script src="static/fontawesome-free-6.4.0-web/js/all.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            document.querySelectorAll("select[name='tipo_producto']").forEach(select => {
-                select.addEventListener("change", function () {
-                    let precioSeleccionado = this.options[this.selectedIndex].getAttribute("data-precio");
-                    let precioElemento = this.closest(".card-body").querySelector(".precio");
+        const multiplicadores = {
+            "Granel": 1,
+            "700 gr": 14,
+            "Kilo": 20
+        };
     
-                    if (precioElemento) {
-                        precioElemento.textContent = `$${precioSeleccionado}`;
-                    }
-                });
+        // Al cargar la página o al cambiar el filtro global
+        document.addEventListener('DOMContentLoaded', function () {
+            const filtro = document.getElementById("filtroProducto");
+            actualizarPrecios(filtro.value);
+    
+            filtro.addEventListener("change", function () {
+                actualizarPrecios(this.value);
             });
         });
-
-        document.getElementById("filtroProducto").addEventListener("change", function() {
-            const tipoSeleccionado = this.value;
-            window.location.href = "/clientes?tipo=" + tipoSeleccionado;
-        });
-        </script> 
-
+    
+        function actualizarPrecios(tipoSeleccionado) {
+            const cards = document.querySelectorAll(".card");
+    
+            cards.forEach(card => {
+                const precioBaseEl = card.querySelector(".precio");
+                const precioBase = parseFloat(precioBaseEl.dataset.precioBase);
+                const nuevoPrecio = (precioBase * multiplicadores[tipoSeleccionado]).toFixed(2);
+                precioBaseEl.textContent = `$${nuevoPrecio}`;
+    
+                // Actualizar input hidden del tipo-producto
+                const inputTipo = card.querySelector('input[name="tipo-producto"]');
+                if (inputTipo) {
+                    inputTipo.value = tipoSeleccionado;
+                }
+    
+                // Actualizar input hidden del precio
+                const inputPrecio = card.querySelector('input[name="precio"]');
+                if (inputPrecio) {
+                    inputPrecio.value = nuevoPrecio;
+                }
+            });
+        }
+    </script>
+    
+    
 </body>
 </html>

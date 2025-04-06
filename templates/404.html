@@ -1,49 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <title>Dulce Rebaño</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css" />
-    <link
-      rel="stylesheet"
-      href="static/bootstrap/css/bootstrap-utilities.min.css"
-    />
+    <link rel="stylesheet" href="static/bootstrap/css/bootstrap-utilities.min.css" />
     <link rel="stylesheet" href="static/bootstrap/css/bootstrap-grid.min.css" />
     <link rel="stylesheet" href="static/sweetalert2/sweetalert2.min.css" />
-    <link
-      rel="stylesheet"
-      href="static/fontawesome-free-6.4.0-web/css/all.css"
-    />
-    <link
-      rel="stylesheet"
-      href="static/fontawesome-free-6.4.0-web/css/all.min.css"
-    />
+    <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.css" />
+    <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.min.css" />
     <link rel="stylesheet" href="static/css/ventas.css" />
 
-    <link
-      href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body style="background-color: #e1e1e1">
-    <main class="d-flex align-items-center justify-content-center vh-100">
-      <div class="text-center">
-        <h1 class="display-1 font-Spartan text-primary-custom"><b>404</b></h1>
-        <h2 class="font-Spartan text-primary-custom">
-          <b>Página no encontrada</b>
-        </h2>
-        <p class="lead text-primary-custom">
-          Lo sentimos, la página que estás buscando no existe.
-        </p>
-        <a href="/" class="btn btn-color btn-hover text-white font-Spartan"
-          >Volver al inicio</a
-        >
-      </div>
-    </main>
-  </body>
-  <script src="static/bootstrap/js/bootstrap.esm.min.js"></script>
-  <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="static/sweetalert2/sweetalert2.all.min.js"></script>
-  <script src="static/fontawesome-free-6.4.0-web/js/all.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700&display=swap" rel="stylesheet" />
+</head>
+
+<body style="background-color: #fff">
+    <div class="container text-center mt-5">
+        <h1 class="display-4 text-warning fw-medium"><b>Error 404!</b></h1>
+        <p class="lead">La pagina que buscas no existe.</p>
+        <img src="{{ url_for('static', filename='img/gato.gif') }}" class="img-fluid mt-3" alt=""><br>
+        <a href="{{ url_for('index') }}" class="btn btn-warning mt-3 rounded-3 text-white mt-5 btn-lg col-3">Volver al inicio</a>
+    </div>
+
+</body>
+<script src="static/bootstrap/js/bootstrap.esm.min.js"></script>
+<script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="static/sweetalert2/sweetalert2.all.min.js"></script>
+<script src="static/fontawesome-free-6.4.0-web/js/all.js"></script>
+
 </html>

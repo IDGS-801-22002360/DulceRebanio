@@ -1,18 +1,49 @@
-{% extends "admin/index.html" %} 
+{% extends "admin/index.html" %}
 {% block container %}
     <h1>Pedidos</h1>
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>ID</th>
                 <th>Cliente</th>
-                <th>Fecha</th>
                 <th>Total</th>
+                <th>Fecha Entrega</th>
+                <th>Cantidad</th>
+                <th>Tipo Producto</th>
+                <th>Nombre Sabor</th>
                 <th>Estado</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
+            {% for cliente, detalles_cliente in clientes.items() %}
+                {% for pedido in detalles_cliente.productos %}
+                    <tr>
+                        {% if loop.first %}
+                            <td rowspan="{{ detalles_cliente.productos|length }}" class="align-middle">{{ cliente }}</td>
+                            <td rowspan="{{ detalles_cliente.productos|length }}" class="align-middle">${{ detalles_cliente.total_cliente }}</td>
+                        {% endif %}
+                        <td>{{ pedido.fechaEntrega }}</td>
+                        <td>{{ pedido.cantidad }}</td>
+                        <td>{{ pedido.tipoProducto }}</td>
+                        <td>{{ pedido.nombreSabor }}</td>
+                        <td>
+                            {% if pedido.estatus == 1 %}
+                                <span class="badge bg-warning">Pendiente</span>
+                            {% elif pedido.estatus == 2 %}
+                                <span class="badge bg-success">Realizado</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if pedido.estatus == 1 %}
+                                <form action="{{ url_for('realizar_pedido', pedido_id=pedido.idVentasCliente) }}" method="POST">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-success">Confirmar Venta</button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
         </tbody>
     </table>
 {% endblock %}
