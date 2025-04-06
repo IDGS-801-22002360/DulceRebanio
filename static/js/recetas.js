@@ -1,13 +1,4 @@
-document.getElementById("btnSiguiente").addEventListener("click", function () {
-    var modalAgregar = bootstrap.Modal.getInstance(document.getElementById("modalAgregarReceta"));
-    var modalInsumos = new bootstrap.Modal(document.getElementById("modalSeleccionarInsumos"));
 
-    if (modalAgregar) {
-        modalAgregar.hide();
-    }
-
-    setTimeout(() => modalInsumos.show(), 500);
-});
 
 document.addEventListener('DOMContentLoaded', function() {
     const btnRenombrar = document.querySelector('button[value="renombrar"]');

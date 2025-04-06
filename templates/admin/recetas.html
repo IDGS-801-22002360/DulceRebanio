@@ -20,32 +20,43 @@
 
     <!--!  Tabla de Recetas  -->
     <div class="col-5">
-        <div class="card border-0 shadow-sm rounded-3 bg-white" style="height: 400px;">
+        <button class="btn btn-warning text-white col-12 rounded-3 font-Spartan" data-bs-toggle="modal"
+            data-bs-target="#modalAgregarReceta">
+            Nueva Receta
+        </button>
+        <div class="card border-0 shadow-sm rounded-3 bg-white mt-2" style="height: 355px;">
             <div class="card-header border-0 rounded-top-3 text-center bg-white">
                 <b class="text-center font-Spartan">Recetas</b>
             </div>
+
             <div class="table-responsive">
                 <!-- Formulario para editar receta -->
                 <form method="POST" action="{{ url_for('editar_receta') }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                     <div class="row px-4">
                         <div class="col-6 form-floating mb-3">
-                            <input type="text" class="form-control border-0 shadow-sm" id="txtNombreReceta" name="nombre_receta" placeholder="Receta" value="{{ receta_actual.nombreReceta if receta_actual else '' }}">
+                            <input type="text" class="form-control border-0 shadow-sm" id="txtNombreReceta"
+                                name="nombre_receta" placeholder="Receta"
+                                value="{{ receta_actual.nombreReceta if receta_actual else '' }}">
                             <label class="ms-3" for="txtNombreReceta">Receta</label>
                         </div>
                         <div class="col-3 form-floating mb-3">
-                            <input type="text" class="form-control border-0 shadow-sm" id="txtPrecioReceta" name="precio_receta" placeholder="precio" value="{{ receta_actual.precio if receta_actual else '' }}">
+                            <input type="text" class="form-control border-0 shadow-sm" id="txtPrecioReceta"
+                                name="precio_receta" placeholder="precio"
+                                value="{{ receta_actual.precio if receta_actual else '' }}">
                             <label class="ms-3" for="txtPrecioReceta">Precio</label>
                         </div>
                         <div class="col-3 form-floating mb-3">
-                            <button type="submit" class="btn btn-lg btn-warning rounded-2 text-white shadow-sm border-0" style="height: 58px; width: 100%;">
+                            <button type="submit" class="btn btn-lg btn-warning rounded-2 text-white shadow-sm border-0"
+                                style="height: 58px; width: 100%;">
                                 Editar
                             </button>
                         </div>
                     </div>
                     <div class="row px-4">
                         <div class="form-floating" hidden>
-                            <input type="text" class="form-control" id="txtIdReceta" name="receta_id" placeholder="ID" value="{{ receta_actual.idReceta if receta_actual else '' }}" readonly>
+                            <input type="text" class="form-control" id="txtIdReceta" name="receta_id" placeholder="ID"
+                                value="{{ receta_actual.idReceta if receta_actual else '' }}" readonly>
                             <label for="txtIdReceta">ID Receta</label>
                         </div>
                     </div>
@@ -53,7 +64,8 @@
                 <!-- Formulario para seleccionar receta -->
                 <form method="POST" action="{{ url_for('seleccionar_receta') }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                    <table class="table table-hover text-center mb-0 table-borderless" style="width: 100%; height: 100%; overflow: auto; padding: 0 10px;;">
+                    <table class="table table-hover text-center mb-0 table-borderless"
+                        style="width: 100%; height: 100%; overflow: auto; padding: 0 10px;;">
                         <thead class="text-dark">
                             <tr>
                                 <th>Nº</th>
@@ -69,7 +81,8 @@
                                 <td class="col-7">{{ receta.nombreReceta }}</td>
                                 <td class="col-2">${{ receta.precio }}</td>
                                 <td class="col-2">
-                                    <button type="submit" name="receta_id" value="{{ receta.idReceta }}" class="btn-sm btn btn-warning" style="width: 31px;">
+                                    <button type="submit" name="receta_id" value="{{ receta.idReceta }}"
+                                        class="btn-sm btn btn-warning" style="width: 31px;">
                                         <i class="fa fa-info text-white"></i>
                                     </button>
                                 </td>
@@ -84,17 +97,28 @@
 
         <div class="row mt-4">
             <div class="col-12">
-                <button class="btn btn-warning text-white col-12 rounded-3 font-Spartan" data-bs-toggle="modal" data-bs-target="#modalAgregarReceta">
-                    Nueva Receta
-                </button>
-                <form method="POST" action="{{ url_for('asignar_imagen') }}" enctype="multipart/form-data" id="formAsignarImagen">
+                <div class="card border-0 rounded-3 shadow-sm p-2" style="height: 355px;">
+                    <div class="card border-0 rounded-1 text-center" style="height: 100%; background-color: #f1f1f1;">
+                        {% if receta_actual and receta_actual.imagen %}
+                        <img src="data:image/png;base64,{{ receta_actual.imagen }}" alt="Imagen de la receta"
+                            class="img-fluid rounded-3" style="max-height: 100%; max-width: 100%; object-fit: cover;">
+                        {% else %}
+                        <p class="text-muted pt-5">No hay imagen asignada para esta receta</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <form method="POST" action="{{ url_for('asignar_imagen') }}" enctype="multipart/form-data"
+                    id="formAsignarImagen">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                     <input type="hidden" name="receta_id" value="{{ receta_actual.idReceta if receta_actual else '' }}">
-                    <input type="file" name="imagen_receta" id="inputImagenReceta" accept="image/*" style="display: none;" onchange="document.getElementById('formAsignarImagen').submit();">
-                    <button type="button" class="btn btn-warning text-white col-12 rounded-3 font-Spartan mt-2" onclick="document.getElementById('inputImagenReceta').click();">
+                    <input type="file" name="imagen_receta" id="inputImagenReceta" accept="image/*"
+                        style="display: none;" onchange="document.getElementById('formAsignarImagen').submit();">
+                    <button type="button"
+                        class="shadow-sm btn btn-warning text-white col-12 rounded-3 font-Spartan mt-2"
+                        onclick="document.getElementById('inputImagenReceta').click();">
                         Asignar Imagen
                     </button>
-                </form>                
+                </form>
             </div>
         </div>
     </div>
@@ -117,14 +141,14 @@
                 <form method="POST" action="{{ url_for('actualizar_receta') }}" id="form-receta">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                     <input type="hidden" name="receta_id" value="{{ receta_seleccionada.idReceta }}">
-                    
+
                     <!-- Botón arriba de la tabla -->
                     <div class="px-3 pt-3 pb-2">
                         <button type="submit" class="btn btn-warning col-12 text-white shadow-sm">
                             <i class="fa fa-save me-2"></i>Guardar Cambios
                         </button>
                     </div>
-                    
+
                     <table class="table table-hover text-center table-borderless">
                         <thead>
                             <tr>
@@ -228,7 +252,7 @@
                         placeholder="Ingrese el nombre" required>
                 </div>
                 <div class="modal-footer border-0">
-                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="submit" class="btn btn-warning text-white">Guardar</button>
                 </div>
             </form>
         </div>

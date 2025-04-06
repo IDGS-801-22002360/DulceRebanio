@@ -1,389 +1,411 @@
 {% extends "admin/index.html" %} {% block container %}
-
+<!-- 
 <style>
-  #productosTable {
-      width: 90%;
-      /* Ajusta el ancho */
-      height: 80%;
-      background-color: white;
-      /* Fondo blanco */
-      border-collapse: collapse;
-      margin: auto;
-  }
+    #productosTable {
+        width: 90%;
+        height: 100%;
+        background-color: white;
+        /* Fondo blanco */
+        border-collapse: collapse;
+        margin: auto;
+    }
 
-  #productosTable th,
-  #productosTable td {
-      padding: 5px;
-      text-align: left;
-      border: 1px solid #ddd;
-  }
+    #productosTable th,
+    #productosTable td {
+        padding: 5px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
 
-.left-side {
-flex: 1;
-width: 50%;
-}
+    .left-side {
+        flex: 1;
+        width: 60%;
+    }
 
-.right-side {
-display: flex;
-flex-direction: column;
-gap: 20px;
-min-width: 100px;
-width: 320px;
-}
+    .right-side {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        min-width: 100px;
+        width: 60%;
+    }
 
-/* Tablas */
-table {
-width: 100%;
-border-collapse: collapse;
-background-color: #FFF;
-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-margin-bottom: 20px;
-height: 60%;
-}
+    /* Tablas */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #FFF;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        height: 60%;
+    }
 
-th, td {
-border: 1px solid #ccc;
-padding: 12px 20px;
-text-align: center;
-}
+    th,
+    td {
+        border: 1px solid #ccc;
+        padding: 12px 20px;
+        text-align: center;
+    }
 
-th {
-background-color: #F0E68C;
-color: #5B331E;
-font-size: 1.1rem;
-}
+    th {
+        background-color: #F0E68C;
+        color: #5B331E;
+        font-size: 1.1rem;
+    }
 
-td {
-background-color: #fff;
-}
+    td {
+        background-color: #fff;
+    }
 
-/* Scrollable para inventario */
-.scroll-container {
-overflow: auto;
-max-height: 300px;
-border: 1px solid #ddd;
-border-radius: 8px;
-background-color: #fff;
-padding: 5px;
-box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
+    /* Scrollable para inventario */
+    .scroll-container {
+        overflow: auto;
+        max-height: 300px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #fff;
+        padding: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
 
-/* Inventario: tabla interna */
-#inventarioTable {
-width: 100%;
-border-collapse: collapse;
-}
+    /* Inventario: tabla interna */
+    #inventarioTable {
+        width: 80%;
+        border-collapse: collapse;
+    }
 
-#inventarioTable th, #inventarioTable td {
-border: 1px solid #ddd;
-padding: 6px;
-font-size: 14px;
-text-align: center;
-}
+    #inventarioTable th,
+    #inventarioTable td {
+        border: 1px solid #ddd;
+        padding: 6px;
+        font-size: 14px;
+        text-align: center;
+    }
 
-#inventarioTable th {
-background-color: #f0f0f0;
-}
+    #inventarioTable th {
+        background-color: #f0f0f0;
+    }
 
-/* Opciones: formulario para agregar productos */
-.options {
-display: flex;
-flex-direction: column;
-gap: 15px;
-}
+    /* Opciones: formulario para agregar productos */
+    .options {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
 
-.options form, .options button {
-width: 90%;
-padding: 10px;
-border: none;
-border-radius: 30px;
-color: #fff;
-cursor: pointer;
-font-size: 1.2rem;
-font-family: 'League Spartan', sans-serif;
-transition: background-color 0.3s, transform 0.3s ease;
-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
-}
+    .options form,
+    .options button {
+        width: 80%;
+        padding: 10px;
+        border: none;
+        border-radius: 30px;
+        color: #fff;
+        cursor: pointer;
+        font-size: 1.2rem;
+        font-family: 'League Spartan', sans-serif;
+        transition: background-color 0.3s, transform 0.3s ease;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+    }
 
-.options form:hover, .options button:hover {
-transform: scale(1.03);
-}
+    .options form:hover,
+    .options button:hover {
+        transform: scale(1.03);
+    }
 
-.options form select, .options form input {
-width: 100%;
-padding: 15px;
-border: 2px solid #ccc;
-border-radius: 14px;
-font-size: 1.1rem;
-margin: 5px 0;
-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
-transition: border-color 0.3s ease;
-}
+    .options form select,
+    .options form input {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #ccc;
+        border-radius: 14px;
+        font-size: 1.1rem;
+        margin: 5px 0;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+        transition: border-color 0.3s ease;
+    }
 
-.options form select:focus, .options form input:focus {
-border-color: #FFD700;
-outline: none;
-}
+    .options form select:focus,
+    .options form input:focus {
+        border-color: #FFD700;
+        outline: none;
+    }
 
-/* Quitar spin a number */
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
--webkit-appearance: none;
-margin: 0;
-}
+    /* Quitar spin a number */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
 
-input[type="number"] {
--moz-appearance: textfield;
-width: 50px;
-text-align: center;
-border: 1px solid #ccc;
-border-radius: 5px;
-padding: 5px;
-font-size: 1rem;
-font-family: 'League Spartan', sans-serif;
-}
+    input[type="number"] {
+        -moz-appearance: textfield;
+        width: 50px;
+        text-align: center;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 5px;
+        font-size: 1rem;
+        font-family: 'League Spartan', sans-serif;
+    }
 
-/* Botón de compra */
-#buy-button {
-margin-top: 30px;
-background-color: #FFD700;
-color: #fff;
-}
+    /* Botón de compra */
+    #buy-button {
+        margin-top: 30px;
+        background-color: #FFD700;
+        color: #fff;
+    }
 
-.row-container {
-display: flex;
-justify-content: space-between;
-gap: 20px;
-align-items: center;
-}
+    .row-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        align-items: center;
+    }
 
-.row-container p {
-margin-bottom: 10px;
-font-size: 1.2rem;
-}
+    .row-container p {
+        margin-bottom: 10px;
+        font-size: 1.2rem;
+    }
 
-.row-container span, .row-container input {
-display: block;
-margin-top: 5px;
-font-size: 1.2rem;
-width: 150px;
-}
+    .row-container span,
+    .row-container input {
+        display: block;
+        margin-top: 5px;
+        font-size: 1.2rem;
+        width: 150px;
+    }
 
-#dineroRecibido {
-padding: 10px;
-border: 1px solid #ccc;
-border-radius: 5px;
-width: 150px;
-}
+    #dineroRecibido {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        width: 150px;
+    }
 
-#totalVenta, #cambio {
-background-color: #fff;
-padding: 5px 10px;
-border-radius: 5px;
-}
+    #totalVenta,
+    #cambio {
+        background-color: #fff;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
 
-#add-button{
-margin-top: 30px;
-background-color: #FFD700;
-color: #fff;
-}
+    #add-button {
+        margin-top: 30px;
+        background-color: #FFD700;
+        color: #fff;
+    }
 </style>
+-->
 
-<div class="card border-0 gb mb-3" style="height: 58px; background-color: #e1e1e1">
-  {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %}
-  <div class="container col-12">
-      {% for category, message in messages %}
-      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-      {% endfor %}
-  </div>
-  {% endif %} {% endwith %}
+<div class="card border-0 gb mb-3" style="height: 58px; background-color: #f1f1f1">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="container col-12">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
 </div>
 
-<!-- Content -->
-<div class="content" style="flex: 1; display: flex;">
-  <div class="left-side">
+<div class="row">
     <!-- Tabla de productos de la venta actual -->
-    <table id="productosTable">
-      <thead>
-        <tr>
-          <th>Producto</th>
-          <th>Tipo</th>
-          <th>Cantidad</th>
-          <th>Precio</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for prod in venta %}
-        <tr>
-          <td>{{ prod.sabor }}</td>
-          <td>{{ prod.tipo }}</td>
-          <td>{{ prod.cantidad }}</td>
-          <td>${{ prod.precio_total }}</td>
-          <td>
-            <div class="d-flex justify-content-center">
-              <!-- Botón para subir cantidad -->
-              <form method="POST" action="{{ url_for('puntoVenta') }}" class="me-1" style="display: inline;">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="accion" value="actualizar">
-                <input type="hidden" name="idSabor" value="{{ prod.idSabor }}">
-                <input type="hidden" name="idTipoVenta" value="{{ prod.idTipoVenta }}">
-                <input type="hidden" name="operacion" value="subir">
-                <button type="submit" class="btn btn-success btn-sm" style="border-radius: 30px; font-size: 1.2rem;">+</button>
-              </form>
-              <!-- Botón para bajar cantidad -->
-              <form method="POST" action="{{ url_for('puntoVenta') }}" style="display: inline;">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="accion" value="actualizar">
-                <input type="hidden" name="idSabor" value="{{ prod.idSabor }}">
-                <input type="hidden" name="idTipoVenta" value="{{ prod.idTipoVenta }}">
-                <input type="hidden" name="operacion" value="bajar">
-                <button type="submit" class="btn btn-danger btn-sm" style="border-radius: 30px; font-size: 1.2rem;">-</button>
-              </form>
+    <div class="col-6">
+        <div class="card border-0 shadow-sm rounded-3 bg-white">
+            <div class="card-header border-0 rounded-top-3 text-center bg-white">
+                <b class="text-center font-Spartan">Productos de la Venta</b>
             </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-  <div class="right-side" style="min-width: 320px;">
-    <!-- Contenedor scrollable para la tabla de inventario -->
-    <div class="scroll-container" style="margin-top: 10px; overflow: auto; max-height: 300px;">
-      <h3 style="font-size: 16px; margin-bottom: 5px;">Inventario</h3>
-      <table id="inventarioTable" style="font-size: 14px; width: 100%;">
-        <thead>
-          <tr>
-            <th>Sabor</th>
-            <th>Tipo</th>
-            <th>Cant.</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for sabor in sabores %} 
-          {% for tipo in tiposVenta %}
-          <tr>
-            <td>{{ sabor.nombreSabor }}</td>
-            <td>{{ tipo.tipoProducto }}</td>
-            <td>{{ inventario.get((sabor.idSabor, tipo.idDetalle), '---') }}</td>
-          </tr>
-          {% endfor %}
-          {% endfor %}
-        </tbody>
-      </table>
+            <div class="table-responsive" style="max-height: 600px;">
+                <table id="productosTable" class="table table-hover text-center mb-0 table-borderless">
+                    <thead class="text-dark">
+                        <tr>
+                            <th>Receta</th>
+                            <th>Tipo</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prod in venta %}
+                        <tr>
+                            <td>{{ prod.nombreReceta }}</td>
+                            <td>{{ prod.tipoProducto }}</td>
+                            <td>{{ prod.cantidad }}</td>
+                            <td>${{ "%.2f"|format(prod.precio_total) }}</td>
+                            <td>
+                                <div class="d-flex justify-content-center">
+                                    <!-- Botón para subir cantidad -->
+                                    <form method="POST" action="{{ url_for('puntoVenta') }}" class="me-1">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="accion" value="actualizar">
+                                        <input type="hidden" name="idProducto" value="{{ prod.idProducto }}">
+                                        <input type="hidden" name="operacion" value="subir">
+                                        <button type="submit" class="btn btn-success btn-sm rounded-circle">
+                                            <i class="fa fa-plus"></i>
+                                        </button>
+                                    </form>
+                                    <!-- Botón para bajar cantidad -->
+                                    <form method="POST" action="{{ url_for('puntoVenta') }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="accion" value="actualizar">
+                                        <input type="hidden" name="idProducto" value="{{ prod.idProducto }}">
+                                        <input type="hidden" name="operacion" value="bajar">
+                                        <button type="submit" class="btn btn-danger btn-sm rounded-circle">
+                                            <i class="fa fa-minus"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer border-0 rounded-bottom-3 bg-white pt-0">
+                <button id="buy-button" class="btn btn-warning text-white w-100 mt-2" onclick="mostrarModal()">
+                    Comprar
+                </button>
+            </div>
+        </div>
     </div>
 
-    <div class="options" style="margin-top: 15px;">
-      <!-- Formulario para agregar un producto a la venta -->
-      <form method="POST" action="{{ url_for('puntoVenta') }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" name="accion" value="agregar">
-        <select id="flavor" name="idSabor" required>
-          <option value="">Selecciona un sabor</option>
-          {% for sabor in sabores %}
-          <option value="{{ sabor.idSabor }}">{{ sabor.nombreSabor }}</option>
-          {% endfor %}
-        </select>
-        <select id="type" name="idTipoVenta" required>
-          <option value="">Selecciona tipo de venta</option>
-          {% for tipo in tiposVenta %}
-          <option value="{{ tipo.idDetalle }}">{{ tipo.tipoProducto }} - ${{ tipo.precio }}</option>
-          {% endfor %}
-        </select>
-        <input type="number" id="quantity" name="cantidad" placeholder="Cantidad" min="1" required />
-        <button type="submit" id="add-button">Agregar</button>
-      </form>
-      <!-- Botón para mostrar el modal de confirmación -->
-      <button id="buy-button" onclick="mostrarModal()">Comprar</button>
+    <!-- Tabla de inventario -->
+    <div class="col-6">
+        <div class="card border-0 shadow-sm rounded-3 bg-white">
+            <div class="card-header border-0 rounded-top-3 text-center bg-white">
+                <b class="text-center font-Spartan">Inventario</b>
+            </div>
+            <div class="table-responsive" style="max-height: 600px;">
+                <table id="inventarioTable" class="table table-hover text-center mb-0 table-borderless">
+                    <thead class="text-dark">
+                        <tr>
+                            <th>Receta</th>
+                            <th>Tipo</th>
+                            <th>Disponibles</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prod in productos_disponibles %}
+                        <tr>
+                            <td>{{ prod[1] }}</td>
+                            <td>{{ prod[2] }}</td>
+                            <td>{{ prod[3] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer border-0 rounded-bottom-3 bg-white pt-0">
+                <form method="POST" action="{{ url_for('puntoVenta') }}" class="d-flex align-items-center gap-2">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="accion" value="agregar">
+                    <div class="form-floating flex-grow-1">
+                        <select id="product" name="idProducto" class="form-select" required>
+                            <option value="">Selecciona producto</option>
+                            {% for prod in productos_disponibles %}
+                            <option value="{{ prod[0] }}">
+                                {{ prod[1] }} - {{ prod[2] }} (Disponibles: {{ prod[3] }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <label for="product">Producto</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="number" id="quantity" name="cantidad" class="form-control" placeholder="Cantidad" min="1" required />
+                        <label for="quantity">Cantidad</label>
+                    </div>
+                    <button type="submit" class="btn btn-warning text-white rounded-3" style="height: 58px;">Agregar</button>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <!-- Modal de confirmación de compra -->
-<div id="modal" class="modal fade" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered" style="max-width: 320px;">
-    <div class="modal-content" style="background-color: #e1e1e1; box-shadow: 0 0 10px rgba(0,0,0,0.2); border-radius: 10px;">
-      <div class="modal-header" style="background-color: #a78e6f; color: #000; font-size: 30px; border-radius: 10px 10px 0 0; padding: 15px; position: relative;">
-        <h5 class="modal-title">Confirmar Compra</h5>
-        <button type="button" class="btn-close" aria-label="Close" onclick="cerrarModal()" style="font-size: 50px; color: #391f01;"></button>
-      </div>
-      <form method="POST" action="{{ url_for('puntoVenta') }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" name="accion" value="confirmar">
-        <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 20px;">
-          <div class="text-center">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <p class="fw-bold mb-0">
-                Cobro: <span id="totalVenta">${{ total if total else '0.00' }}</span>
-              </p>
+<div id="modal" class="modal fade border-0" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
+        <div class="modal-content border-0 rounded-3 bg-white borderless">
+            <div class="modal-header border-0 rounded-top-3">
+                <h5 class="modal-title">Confirmar Compra</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <p class="fw-bold mb-0">Total con descuento:</p>
-              <p class="fw-bold mb-0" id="totalDescuento">$0.00</p>
-            </div>
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <p class="fw-bold mb-0">Recibido:</p>
-              <input type="number" name="dinero_recibido" id="dineroRecibido" placeholder="Ingresa el dinero recibido" step="0.01" required style="padding: 10px; font-size: 20px; border-radius: 5px; border: 1px solid #ccc; width: 150px;">
-            </div>
-            <div class="d-flex justify-content-between align-items-center">
-              <p class="fw-bold mb-0">Cambio: <span id="cambio">$0.00</span></p>
-            </div>
-          </div>
-          <div class="text-center">
-            <div class="form-check mb-3">
-              <input class="form-check-input" type="checkbox" id="imprimirTicket" name="imprimirTicket" value="1">
-              <label class="form-check-label" for="imprimirTicket">Imprimir ticket</label>
-            </div>
-            <select id="descuento" name="descuento" class="form-select" style="background-color: #b77918; color: black;">
-              <option value="0">Sin descuento</option>
-              <option value="5">5%</option>
-              <option value="10">10%</option>
-              <option value="15">15%</option>
-              <option value="20">20%</option>
-            </select>
-          </div>
+            <form method="POST" action="{{ url_for('puntoVenta') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="accion" value="confirmar">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <p class="">Cobro: <span class="fw-bold" id="totalVenta">${{ total if total else '0.00' }}</span></p>
+                    </div>
+                    <div class="mb-3">
+                        <p class="fw-bold">Total con descuento:</p>
+                        <p class="fw-bold" id="totalDescuento">$0.00</p>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-floating">
+                            <input type="number" name="dinero_recibido" id="dineroRecibido" class="form-control" placeholder="Ingresa el dinero recibido" step="0.01" required />
+                            <label for="dineroRecibido" class="form-label">Recibido:</label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <p class="fw-bold">Cambio: <span id="cambio">$0.00</span></p>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="imprimirTicket" name="imprimirTicket" value="1">
+                        <label class="form-check-label" for="imprimirTicket">Imprimir ticket</label>
+                    </div>
+                    <div class="form-floating mt-3">
+                        <select id="descuento" name="descuento" class="form-select">
+                            <option value="0">Sin descuento</option>
+                            <option value="5">5%</option>
+                            <option value="10">10%</option>
+                            <option value="15">15%</option>
+                            <option value="20">20%</option>
+                        </select>
+                        <label for="descuento">Descuento</label>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning text-white">Confirmar Compra</button>
+                </div>
+            </form>
         </div>
-        <div class="modal-footer" style="padding: 10px 0; display: flex; justify-content: space-between; align-items: center;">
-          <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
-          <button type="submit" id="confirmarCompra" class="btn text-white" style="background-color: #b36f04; border-radius: 30px; font-size: 1.2rem; padding: 10px;">Confirmar Compra</button>
-        </div>
-      </form>
     </div>
-  </div>
 </div>
 
 <script>
-  function updateTotals() {
-      var totalStr = document.getElementById('totalVenta').innerText;
-      var total = parseFloat(totalStr.replace('$', ''));
-      var descuento = parseFloat(document.getElementById('descuento').value);
-      var totalConDescuento = total - (total * (descuento / 100));
-      document.getElementById('totalDescuento').innerText = '$' + totalConDescuento.toFixed(2);
-      var recibido = parseFloat(document.getElementById('dineroRecibido').value);
-      if(!isNaN(recibido)){
-          var cambio = recibido - totalConDescuento;
-          document.getElementById('cambio').innerText = '$' + cambio.toFixed(2);
-      } else {
-          document.getElementById('cambio').innerText = '$0.00';
-      }
-  }
-  document.getElementById('dineroRecibido').addEventListener('input', updateTotals);
-  document.getElementById('descuento').addEventListener('change', updateTotals);
+    function updateTotals() {
+        var totalStr = document.getElementById('totalVenta').innerText;
+        var total = parseFloat(totalStr.replace('$', ''));
+        var descuento = parseFloat(document.getElementById('descuento').value);
+        var totalConDescuento = total - (total * (descuento / 100));
+        document.getElementById('totalDescuento').innerText = '$' + totalConDescuento.toFixed(2);
+        var recibido = parseFloat(document.getElementById('dineroRecibido').value);
+        if (!isNaN(recibido)) {
+            var cambio = recibido - totalConDescuento;
+            document.getElementById('cambio').innerText = '$' + cambio.toFixed(2);
+        } else {
+            document.getElementById('cambio').innerText = '$0.00';
+        }
+    }
+    document.getElementById('dineroRecibido').addEventListener('input', updateTotals);
+    document.getElementById('descuento').addEventListener('change', updateTotals);
 
-  function mostrarModal() {
-    var modal = new bootstrap.Modal(document.getElementById('modal'));
-    modal.show();
-  }
-  function cerrarModal() {
-    var modalEl = document.getElementById('modal');
-    var modal = bootstrap.Modal.getInstance(modalEl);
-    modal.hide();
-  }
-  updateTotals();
+    function mostrarModal() {
+        var modal = new bootstrap.Modal(document.getElementById('modal'));
+        modal.show();
+    }
+    function cerrarModal() {
+        var modalEl = document.getElementById('modal');
+        var modal = bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
+    }
+    updateTotals();
 </script>
 
 {% endblock %}

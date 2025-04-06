@@ -108,3 +108,23 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 5000); // 5 segundos
     });
 });
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const alerts = document.querySelectorAll(".alert");
+    let currentAlertIndex = 0;
+
+    // Mostrar la primera alerta
+    if (alerts.length > 0) {
+        alerts[currentAlertIndex].classList.remove("d-none");
+    }
+
+    // Manejar el cierre de las alertas
+    alerts.forEach((alert, index) => {
+        alert.addEventListener("closed.bs.alert", function () {
+            if (index + 1 < alerts.length) {
+                alerts[index + 1].classList.remove("d-none");
+            }
+        });
+    });
+});
