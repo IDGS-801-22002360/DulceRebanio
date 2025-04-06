@@ -1239,14 +1239,14 @@ def puntoVenta():
             except (ValueError, TypeError):
                 flash("Datos de confirmación inválidos.", "danger")
                 return redirect(url_for("puntoVenta"))
-            
+
             total = sum(prod["precio_total"] for prod in venta_actual)
             total_con_descuento = total - (total * (descuento / 100))
-            
+
             if dinero_recibido < total_con_descuento:
                 flash("El dinero recibido no es suficiente.", "danger")
                 return redirect(url_for("puntoVenta"))
-            
+
             # Verifica y descuenta del inventario
             for prod in venta_actual:
                 productoTerminado = ProductosTerminados.query.filter_by(
@@ -1258,11 +1258,11 @@ def puntoVenta():
                     return redirect(url_for("puntoVenta"))
                 productoTerminado.cantidadDisponible -= prod["cantidad"]
             db.session.commit()
-            
+
             nueva_venta = Ventas(total=total_con_descuento)
             db.session.add(nueva_venta)
             db.session.flush()
-            
+
             for prod in venta_actual:
                 detalle = DetallesVenta(
                     idVenta=nueva_venta.idVenta,
@@ -1271,14 +1271,25 @@ def puntoVenta():
                     subtotal=prod["precio_total"]
                 )
                 db.session.add(detalle)
+
+                # === Aquí guardamos en la tabla VentasCliente ===
+                venta_cliente = VentasCliente(
+                    nombreCliente="Público en general", 
+                    nombreSabor=prod["nombreReceta"],
+                    cantidad=prod["cantidad"],
+                    tipoProducto=prod["tipoProducto"],
+                    total=prod["precio_total"],
+                    estatus=1
+                )
+                db.session.add(venta_cliente)
+
             db.session.commit()
-            
+
             pdf_path = generar_pdf(venta_actual, descuento, dinero_recibido, total_con_descuento)
             flash("Venta confirmada. Ticket generado en: " + pdf_path, "success")
             venta_actual.clear()
             return redirect(url_for("puntoVenta"))
     
-    # Para la vista, se consulta el inventario actualizado de los productos disponibles
     productos = ProductosTerminados.query.filter(
         ProductosTerminados.estatus == 1,
         ProductosTerminados.cantidadDisponible > 0
