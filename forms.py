@@ -43,7 +43,10 @@ class InsumoForm(Form):
     unidadMedida = StringField("Unidad de Medida", validators=[
         DataRequired(message="El campo es requerido")
     ])
-    fechaCaducidad = DateField("Fecha de Caducidad", format="%Y-%m-%d", validators=[
+    idProveedor = SelectField("Proveedor", coerce=int, validators=[
+        DataRequired(message="El campo es requerido")
+    ])
+    precioUnitario = DecimalField("Precio Unitario", validators=[
         DataRequired(message="El campo es requerido")
     ])
     
@@ -59,12 +62,10 @@ class ProveedorForm(Form):
     ])
 
 class CompraInsumoForm(Form):
-    idProveedor = SelectField("Proveedor", coerce=int, validators=[DataRequired(message="El campo es requerido")])
     idMateriaPrima = SelectField("Insumo", coerce=int, validators=[DataRequired(message="El campo es requerido")])
     cantidad = IntegerField("Cantidad", validators=[DataRequired(message="El campo es requerido")])
     fecha = DateField("Fecha de Compra", format="%Y-%m-%d", validators=[DataRequired(message="El campo es requerido")])
-    totalCompra = DecimalField("Total Compra", validators=[DataRequired(message="El campo es requerido")])
-    sabor = SelectField('Sabor', validators=[DataRequired()])
+    fechaCaducidad = DateField("Fecha de Caducidad", format="%Y-%m-%d", validators=[DataRequired(message="El campo es requerido")])
     submit = SubmitField('Guardar')
 
 

@@ -29,26 +29,31 @@
           <table class="table table-hover table-striped text-center" id="comprasTable">
             <thead>
               <tr>
+                <th>Fecha Compra</th>
                 <th>Proveedor</th>
                 <th>Insumo</th>
                 <th>Cantidad</th>
-                <th>Fecha</th>
+                <th>Unidad Medida</th>
+                <th>Precio Unitario</th>
                 <th>Total Compra</th>
               </tr>
             </thead>
             <tbody id="comprasTableBody">
               {% for compra in compras %}
               <tr data-id="{{ compra.idCompra }}" 
-                  data-proveedor="{{ compra.idProveedor }}" 
                   data-insumo="{{ compra.idMateriaPrima }}"
                   data-cantidad="{{ compra.cantidad }}" 
                   data-fecha="{{ compra.fecha }}"
+                  data-fechacaducidad="{{ compra.fechaCaducidad }}"
                   data-total="{{ compra.totalCompra }}">
-                <td>{{ compra.nombreProveedor }}</td>
-                <td>{{ compra.materiaPrima }}</td>
-                <td>{{ compra.cantidad }}</td>
                 <td>{{ compra.fecha }}</td>
+                <td>{{ compra.nombreProveedor }}</td>
+                <td>{{ compra.nombreMateria }}</td>
+                <td>{{ compra.cantidad }}</td>
+                <td>{{ compra.unidadMedida }}</td>
+                <td>{{ compra.precioUnitario }}</td>
                 <td>{{ compra.totalCompra }}</td>
+                <td>{{ compra.fechaCaducidad }}</td>
               </tr>
               {% endfor %}
             </tbody>
@@ -59,50 +64,40 @@
 
     <!-- Formulario de Compras de Insumos -->
     <div class="col-6">
-        <form id="formCompras" method="POST" action="{{ url_for('comprasInsumos') }}">
-            {{ form.csrf_token }}
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <!-- Campo oculto para el ID de la compra -->
-            <input type="hidden" id="idCompra" name="idCompra" value="">
-          
-            <div class="mb-3">
-              <label for="idProveedor" class="form-label">Proveedor</label>
-              <select class="form-select" id="idProveedor" name="idProveedor">
-                <option value="" selected disabled>Seleccione un proveedor</option>
-                {% for id, nombre in form.idProveedor.choices %}
-                  <option value="{{ id }}">{{ nombre }}</option>
-                {% endfor %}
-              </select>
-            </div>
-          
-            <div class="mb-3">
-              <label for="idMateriaPrima" class="form-label">Insumo</label>
-              <select class="form-select" id="idMateriaPrima" name="idMateriaPrima">
-                <option value="" selected disabled>Seleccione un insumo</option>
-                {% for id, nombre in form.idMateriaPrima.choices %}
-                  <option value="{{ id }}">{{ nombre }}</option>
-                {% endfor %}
-              </select>
-            </div>
-          
-            <div class="mb-3">
-              <label for="cantidad" class="form-label">Cantidad</label>
-              {{ form.cantidad(class="form-control", id="cantidad") }}
-            </div>
-            <div class="mb-3">
-              <label for="fecha" class="form-label">Fecha</label>
-              {{ form.fecha(class="form-control", id="fecha") }}
-            </div>
-            <div class="mb-3">
-              <label for="totalCompra" class="form-label">Total Compra</label>
-              {{ form.totalCompra(class="form-control", id="totalCompra") }}
-            </div>
-          
-            <div class="d-flex">
-              <button type="submit" id="btnGuardar" class="btn btn-warning text-white font-Spartan me-2">Guardar Compra</button>
-              <button type="button" class="btn btn-primary text-white font-Spartan" id="btnEditar" onclick="editarCompra()">Editar Compra</button>
-            </div>
-          </form>
+      <form id="formCompras" method="POST" action="{{ url_for('comprasInsumos') }}">
+        {{ form.csrf_token }}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <!-- Campo oculto para el ID de la compra -->
+        <input type="hidden" id="idCompra" name="idCompra" value="">
+      
+        <div class="mb-3">
+          <label for="idMateriaPrima" class="form-label">Insumo</label>
+          <select class="form-select" id="idMateriaPrima" name="idMateriaPrima">
+            <option value="" selected disabled>Seleccione un insumo</option>
+            {% for id, nombre in form.idMateriaPrima.choices %}
+              <option value="{{ id }}">{{ nombre }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      
+        <div class="mb-3">
+          <label for="cantidad" class="form-label">Cantidad (<i>Ingrese en Kg, Ltr o Pzs</i>)</label>
+          {{ form.cantidad(class="form-control", id="cantidad", placeholder="Cantidad") }}
+        </div>
+        <div class="mb-3">
+          <label for="fecha" class="form-label">Fecha</label>
+          {{ form.fecha(class="form-control", id="fecha") }}
+        </div>
+        <div class="mb-3">
+          <label for="fechaCaducidad" class="form-label">Fecha de Caducidad</label>
+          {{ form.fechaCaducidad(class="form-control", id="fechaCaducidad") }}
+        </div>
+      
+        <div class="d-flex">
+          <button type="submit" id="btnGuardar" class="btn btn-warning text-white font-Spartan me-2">Guardar Compra</button>
+          <button type="button" class="btn btn-primary text-white font-Spartan" id="btnEditar" onclick="editarCompra()">Editar Compra</button>
+        </div>
+    </form>
           
     </div>
   </div>
