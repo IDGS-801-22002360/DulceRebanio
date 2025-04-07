@@ -1,3 +1,5 @@
+from PIL import Image
+from io import BytesIO
 import base64
 import os
 import json
@@ -125,7 +127,10 @@ def inject_notifications():
         ((ProductosTerminados.tipoProducto.in_(["Kilo", "700 gr"])) & (ProductosTerminados.cantidadDisponible < min_paquetes))
     ).count()
 
-    return dict(productos_bajo_stock=productos_bajo_stock)
+    # Contar pedidos pendientes
+    pedidos_pendientes = VentasCliente.query.filter_by(estatus=1).count()
+
+    return dict(productos_bajo_stock=productos_bajo_stock, pedidos_pendientes=pedidos_pendientes)
 
 #!============================== Modulo Carrito que no es carrito ==============================#
 
@@ -133,69 +138,97 @@ def inject_notifications():
 @login_required
 @role_required(["Cliente", "Admin"])
 def clientes():
-    tipo_seleccionado = request.args.get("tipo", "todos")  
-    
-    #sabores = Sabores.query.join(ProductosTerminados).filter(ProductosTerminados.cantidadDisponible > 0).distinct().all()
+    recetas = Receta.query.distinct().all()
+    tipos_productos = ["Granel", "700 gr", "Kilo"]
 
-    tipos_productos = [producto.tipoProducto for producto in DetallesProducto.query.distinct(DetallesProducto.tipoProducto)]
-    if tipo_seleccionado == "todos":
-        detalles_productos = DetallesProducto.query.join(ProductosTerminados).filter(ProductosTerminados.cantidadDisponible > 0).distinct().all()
-    else:
-        detalles_productos = DetallesProducto.query.join(ProductosTerminados).filter(DetallesProducto.tipoProducto == tipo_seleccionado, ProductosTerminados.cantidadDisponible > 0).distinct().all()
-
+    detalles_recetas = RecetaDetalle.query.distinct().all()
     if "carrito" not in session:
         session["carrito"] = []
 
-    return render_template("client/clientes.html", detalles_productos=detalles_productos, tipos_productos=tipos_productos, carrito=session["carrito"], ultimo_login=current_user.ultimo_login)
+    return render_template(
+        "client/clientes.html",
+        recetas=recetas,
+        detalles_recetas=detalles_recetas,
+        tipos_productos=tipos_productos,
+        carrito=session["carrito"],
+        ultimo_login=current_user.ultimo_login
+    )
+
 
 @app.route("/agregar_carrito", methods=["POST"])
+@login_required
+@role_required(["Cliente", "Admin"])
 def agregar_carrito():
-    sabor_id = request.form.get("sabor_id")
-    tipo_producto = request.form.get("tipo_producto")
-    cantidad = int(request.form.get("cantidad", 1))
+    receta_id = request.form.get("receta_id")
+    tipo = request.form.get("tipo-producto")
+    cantidad = int(request.form.get("cantidad"))
+    precio = float(request.form.get("precio"))
 
-    #sabor = Sabores.query.get(sabor_id)
-    tipo = DetallesProducto.query.get(tipo_producto)
+    receta = Receta.query.get(receta_id)
+    if not receta:
+        flash("Receta no encontrada", "error")
+        return redirect(url_for("clientes"))
+    
+    # Redimensionar y recodificar la imagen si existe
+    imagen_url = None
+    if receta.imagen:
+        try:
+            # Decodificar la imagen Base64
+            imagen_bytes = base64.b64decode(receta.imagen)
+            imagen = Image.open(BytesIO(imagen_bytes))
 
-    if sabor and tipo:
-        precio = Decimal(tipo.precio)  
-        subtotal = precio * cantidad 
+            # Redimensionar la imagen (por ejemplo, 200x200 píxeles)
+            imagen = imagen.resize((200, 200), Image.ANTIALIAS)
 
-        if "carrito" not in session:
-            session["carrito"] = []
+            # Recodificar la imagen a JPEG con calidad reducida
+            buffer = BytesIO()
+            imagen.save(buffer, format="JPEG", quality=50)  # Calidad reducida al 50%
+            buffer.seek(0)
 
-        carrito = session["carrito"]
-        producto_existente = next((item for item in carrito if item["id"] == sabor.idSabor and item["tipo"] == tipo.tipoProducto), None)
+            # Codificar nuevamente en Base64
+            imagen_url = f"data:image/jpeg;base64,{base64.b64encode(buffer.getvalue()).decode('utf-8')}"
+        except Exception as e:
+            app.logger.error(f"Error al procesar la imagen: {str(e)}")
+            imagen_url = None
 
-        if producto_existente:
-            producto_existente["cantidad"] += cantidad
-            producto_existente["subtotal"] = float(Decimal(producto_existente["precio"]) * producto_existente["cantidad"])
-        else:
-            item = {
-                "id": sabor.idSabor,
-                "nombre": sabor.nombreSabor,
-                "tipo": tipo.tipoProducto,
-                "cantidad": cantidad,
-                "precio": float(precio),
-                "subtotal": float(subtotal)
-            }
-            carrito.append(item)
+    subtotal = round(precio * cantidad, 2)
+    nuevo_item = {
+        "id": int(receta_id),
+        "nombre": receta.nombreReceta,
+        "tipo": tipo,
+        "cantidad": cantidad,
+        "precio": precio,
+        "subtotal": subtotal,
+        "imagen": imagen_url  # Usar la imagen redimensionada y recodificada
+    }
+    if "carrito" not in session:
+        session["carrito"] = []
+    session["carrito"].append(nuevo_item)
+    total_general = sum(item["subtotal"] for item in session["carrito"])
+    session["total_general"] = round(total_general, 2)
 
-        total_general = sum(item["subtotal"] for item in carrito)
-        session["total_general"] = float(total_general)  
-
-        session["carrito"] = carrito  
-        session.modified = True  
+    session.modified = True
+    flash(f"{receta.nombreReceta} ({tipo}) agregado al carrito.", "success")
+    
     return redirect(url_for("clientes"))
+
 
 @app.route("/eliminar_carrito/<int:item_id>", methods=["POST"])
 def eliminar_carrito(item_id):
-    session["carrito"] = [item for item in session["carrito"] if item["id"] != item_id]
-    total_general = sum(item["subtotal"] for item in session["carrito"])
-    session["total_general"] = float(total_general)  
+    tipo = request.form.get("tipo")  
+    session["carrito"] = [
+        item for item in session["carrito"]
+        if not (int(item["id"]) == item_id and item["tipo"] == tipo)
+    ]
+    total_general = sum(
+        item.get("subtotal", item.get("precio", 0) * item.get("cantidad", 1))
+        for item in session["carrito"]
+    )
+    session["total_general"] = round(total_general, 2)
 
-    session.modified = True  
+    session.modified = True
     return redirect(url_for("clientes"))
+
 
 @app.route("/procesar_compra", methods=["POST"])
 def procesar_compra():
@@ -208,67 +241,145 @@ def procesar_compra():
     if not current_user.is_authenticated:
         flash("Debes iniciar sesión para realizar la compra", "warning")
         return redirect(url_for("login"))
+    
+    fecha_entrega = request.form.get("fecha_entrega")
+    fecha_entrega = datetime.strptime(fecha_entrega, '%Y-%m-%d')
 
     for item in carrito:
-        venta_existente = VentasCliente.query.filter_by(
+        cantidad = item["cantidad"]
+
+        # Crear un nuevo pedido para cada elemento del carrito
+        nueva_venta = VentasCliente(
             nombreCliente=current_user.nombre,
             nombreSabor=item["nombre"],
-            tipoProducto=item["tipo"]
-        ).first()
-
-        if venta_existente:
-            venta_existente.cantidad += item["cantidad"]
-            venta_existente.total = venta_existente.cantidad * item["precio"]
-            venta_existente.estatus = 1  
-        else:
-            nueva_venta = VentasCliente(
-                nombreCliente=current_user.nombre,
-                nombreSabor=item["nombre"],
-                cantidad=item["cantidad"],
-                tipoProducto=item["tipo"],
-                total=item["cantidad"] * item["precio"],
-                estatus=1  
-            )
-            db.session.add(nueva_venta)
-
-        # Obtener los lotes disponibles en orden de inserción
-        lotes = ProductosTerminados.query.filter_by(idSabor=item["id"]).order_by("idSabor").all()
-
-        cantidad_restante = item["cantidad"]
-        for lote in lotes:
-            if cantidad_restante <= 0:
-                break  # Ya se descontó toda la cantidad necesaria
-
-            if lote.cantidadDisponible >= cantidad_restante:
-                lote.cantidadDisponible -= cantidad_restante
-                cantidad_restante = 0
-            else:
-                cantidad_restante -= lote.cantidadDisponible
-                lote.cantidadDisponible = 0
-
-            db.session.commit()
-
-        if cantidad_restante > 0:
-            flash(f"No hay suficiente stock para {item['nombre']} ({item['tipo']})", "danger")
-            return redirect(url_for("clientes"))
+            cantidad=cantidad,
+            tipoProducto=item["tipo"],
+            total=cantidad * item["precio"],
+            estatus=1,
+            fechaEntrega=fecha_entrega.strftime('%Y-%m-%d')
+        )
+        db.session.add(nueva_venta)
 
     db.session.commit()
-    print("Compra procesada correctamente con estatus 1")  
-
     session["carrito"] = []
-    flash("¡Compra realizada con éxito!", "success")
+    flash("¡Pedido realizado con éxito!", "success")
     return redirect(url_for("clientes"))
 
 
+@app.route("/pedidos", methods=["GET"])
+@login_required
+@role_required(["Admin", "Ventas"])
+def pedidos():
+    # Obtener todos los pedidos pendientes (estatus 1)
+    pedidos = db.session.query(VentasCliente).filter_by(estatus=1).all()
+
+    # Agrupar pedidos por cliente y calcular el total
+    clientes = {}
+    for pedido in pedidos:
+        if pedido.nombreCliente not in clientes:
+            clientes[pedido.nombreCliente] = {
+                "productos": [],
+                "total_cliente": 0,
+            }
+        # Agregar el pedido al cliente
+        clientes[pedido.nombreCliente]["productos"].append(pedido)
+        clientes[pedido.nombreCliente]["total_cliente"] += pedido.total
+
+    return render_template("admin/pedidos.html", ultimo_login=current_user.ultimo_login, clientes=clientes)
+
+
+
+@app.route("/realizar_pedido/<int:pedido_id>", methods=["POST"])
+@login_required
+@role_required(["Admin"])
+def realizar_pedido(pedido_id):
+    # Obtener el pedido de la base de datos
+    pedido = VentasCliente.query.get_or_404(pedido_id)
+    
+    # Verificar que el pedido esté pendiente
+    if pedido.estatus != 1:
+        flash('Este pedido no está pendiente o ya ha sido realizado.', 'danger')
+        return redirect(url_for('pedidos'))
+    
+    # Buscar todos los lotes disponibles para la receta, tipo de producto y con estatus 1
+    lotes = ProductosTerminados.query.join(Receta).filter(
+        Receta.nombreReceta == pedido.nombreSabor,  # Relacionar con el nombre del sabor
+        ProductosTerminados.tipoProducto == pedido.tipoProducto,  # Verificar que coincida el tipo de producto
+        ProductosTerminados.estatus == 1  # Solo lotes activos
+    ).order_by(ProductosTerminados.fechaCaducidad.asc()).all()
+
+    cantidad_pendiente = pedido.cantidad  # Cantidad que falta surtir
+
+    for lote in lotes:
+        if cantidad_pendiente <= 0:
+            break  # Si ya se surtió todo el pedido, salir del bucle
+
+        if lote.cantidadDisponible >= cantidad_pendiente:
+            # Si el lote actual puede surtir todo lo pendiente
+            lote.cantidadDisponible -= cantidad_pendiente
+            cantidad_pendiente = 0
+        else:
+            # Si el lote actual no es suficiente, usar todo lo disponible y continuar con el siguiente lote
+            cantidad_pendiente -= lote.cantidadDisponible
+            lote.cantidadDisponible = 0
+            lote.estatus = 0  # Marcar el lote como inactivo si se agotó
+
+    if cantidad_pendiente > 0:
+        # Si no se pudo surtir todo el pedido, mostrar un mensaje de error
+        flash('No hay suficiente inventario para completar el pedido.', 'danger')
+        db.session.rollback()  # Revertir cualquier cambio en los lotes
+        return redirect(url_for('pedidos'))
+
+    # Si se surtió todo el pedido, actualizar el estado del pedido
+    pedido.estatus = 2
+    db.session.commit()
+    flash('El pedido ha sido marcado como realizado y el inventario ha sido actualizado.', 'success')
+
+    return redirect(url_for('pedidos'))
+
+
 @app.route("/historial", methods=["GET"])
+@login_required
+@role_required(["Cliente", "Admin"])
 def historialCompras():
     if not current_user.is_authenticated:
         flash("Debes iniciar sesión para ver tu historial de compras", "warning")
-        return redirect(url_for("login"))  
+        return redirect(url_for("login"))
+    
+    ventas = VentasCliente.query.filter_by(nombreCliente=current_user.nombre).all()
+    hoy = date.today()
+    
+    # Convertir fechaEntrega a date antes de comparar
+    pedidos_hoy = [v for v in ventas if v.fechaEntrega and v.fechaEntrega.date() == hoy]
+    pedidos_anteriores = [v for v in ventas if v.fechaEntrega and v.fechaEntrega.date() < hoy]
+    
+    return render_template(
+        "client/historial.html", 
+        pedidos_hoy=pedidos_hoy, 
+        pedidos_anteriores=pedidos_anteriores,
+        ultimo_login=current_user.ultimo_login
+    )
+    
 
-    ventas = VentasCliente.query.filter_by(nombreCliente=current_user.nombre).all()  
+@app.route("/cancelar_pedido/<int:idVentasCliente>", methods=["POST"])
+def cancelar_pedido(idVentasCliente):
+    pedido = VentasCliente.query.get_or_404(idVentasCliente)
+    hoy = date.today()
 
-    return render_template("client/historial.html", ventas=ventas)
+    # Convertir fechaEntrega a date antes de comparar
+    if pedido.fechaEntrega.date() < hoy:
+        flash("No se puede cancelar este pedido, ya ha sido entregado", "warning")
+        return redirect(url_for("historialCompras"))
+
+    if pedido.estatus == 1:
+        pedido.estatus = 0
+        db.session.commit()
+        flash("Pedido cancelado correctamente", "success")
+    else:
+        flash("No se puede cancelar este pedido", "warning")
+
+    return redirect(url_for("historialCompras"))
+
 
 @app.route("/ventasClientes", methods=["GET", "POST"])
 @login_required
@@ -316,7 +427,7 @@ def ventasClientes():
 
 @app.route("/dashboard", methods=["GET"])
 @login_required
-@role_required(['Admin', 'Ventas'])
+@role_required(['Admin'])
 def dashboard():
     carrito = session.get("carrito", [])
     ventas_clientes = db.session.query(
@@ -325,10 +436,9 @@ def dashboard():
         VentasCliente.tipoProducto,
         VentasCliente.cantidad,
         VentasCliente.total
-    ).filter(VentasCliente.estatus == 1).all()
+    ).filter(VentasCliente.estatus == 2).all()
 
     todas_las_ventas = []
-
     for item in carrito:
         todas_las_ventas.append({
             "nombreCliente": current_user.nombre,
@@ -338,7 +448,6 @@ def dashboard():
             "total": item["cantidad"] * item["precio"],
             "metodo": "Carrito"
         })
-
     for venta in ventas_clientes:
         todas_las_ventas.append({
             "nombreCliente": venta.nombreCliente,
@@ -347,19 +456,19 @@ def dashboard():
             "cantidad": venta.cantidad,
             "total": venta.total,
         })
+
     productos_vendidos = {}
     presentaciones_vendidas = {}
-
     for venta in todas_las_ventas:
         if venta["nombreSabor"] in productos_vendidos:
             productos_vendidos[venta["nombreSabor"]] += venta["cantidad"]
         else:
             productos_vendidos[venta["nombreSabor"]] = venta["cantidad"]
+        
         if venta["tipoProducto"] in presentaciones_vendidas:
             presentaciones_vendidas[venta["tipoProducto"]] += venta["cantidad"]
         else:
             presentaciones_vendidas[venta["tipoProducto"]] = venta["cantidad"]
-
     productos_vendidos = sorted(productos_vendidos.items(), key=lambda x: x[1], reverse=True)
     presentaciones_vendidas = sorted(presentaciones_vendidas.items(), key=lambda x: x[1], reverse=True)
 
@@ -369,20 +478,55 @@ def dashboard():
     presentaciones_labels = [presentacion[0] for presentacion in presentaciones_vendidas]
     presentaciones_data = [presentacion[1] for presentacion in presentaciones_vendidas]
 
-    return render_template("admin/dashboard.html", 
-                        ventas_combinadas=todas_las_ventas,
-                        productos_labels=productos_labels, 
-                        productos_data=productos_data,
-                        presentaciones_labels=presentaciones_labels, 
-                        presentaciones_data=presentaciones_data,
-                        ultimo_login=current_user.ultimo_login)
+    pedidos_totales = {}
+    punto_venta_totales = {}
+
+    for venta in todas_las_ventas:
+        if venta["nombreSabor"] in punto_venta_totales:
+            punto_venta_totales[venta["nombreSabor"]] += venta["cantidad"]
+        else:
+            punto_venta_totales[venta["nombreSabor"]] = venta["cantidad"]
+
+    for producto in productos_vendidos:
+        if producto[0] in pedidos_totales:
+            pedidos_totales[producto[0]] += producto[1]
+        else:
+            pedidos_totales[producto[0]] = producto[1]
+
+    pedidos_labels = [item[0] for item in productos_vendidos]
+    pedidos_data = [item[1] for item in productos_vendidos]
+
+    punto_venta_labels = [item[0] for item in punto_venta_totales.items()]
+    punto_venta_data = [item[1] for item in punto_venta_totales.items()]
+
+    total_ventas_realizadas = len(todas_las_ventas)  
+    ganancias_estimadas = sum(venta["total"] for venta in todas_las_ventas) * 0.3  
+
+    clv = (sum(venta["total"] for venta in todas_las_ventas) / 
+    (len(set(venta["nombreCliente"] for venta in todas_las_ventas)) or 1))
+
+    return render_template(
+        "admin/dashboard.html",
+        ventas_combinadas=todas_las_ventas,
+        productos_labels=productos_labels,
+        productos_data=productos_data,
+        presentaciones_labels=presentaciones_labels,
+        presentaciones_data=presentaciones_data,
+        ultimo_login=current_user.ultimo_login,
+        pedidos_labels=pedidos_labels,
+        pedidos_data=pedidos_data,
+        punto_venta_labels=punto_venta_labels,
+        punto_venta_data=punto_venta_data,
+        roi=total_ventas_realizadas,  # Ahora muestra solo el número de ventas
+        clv=clv
+    )
 
 
 #!============================== Modulo de Productos ==============================#  
 
 @app.route("/galletas", methods=["GET", "POST"])
 @login_required  
-@role_required(['Admin', 'Ventas', 'Produccion'])
+@role_required(['Admin', 'Produccion', "Ventas"])
 def galletas():
     form = LoteForm()
     paquete_form = PaqueteForm()
@@ -885,20 +1029,20 @@ def asignar_imagen():
 def page_not_found(e):
     return render_template('404.html'), 404
 
-@app.errorhandler(Exception)
-def handle_general_error(e):
-    status_code = getattr(e, 'code', 500)
-    
-    error_logger.info(f"Usuario: {current_user.correo} - Fecha: {datetime.now()}")
-    
-    return render_template('codeError.html', error_message=str(e), status_code=status_code), status_code
+#@app.errorhandler(Exception)
+#def handle_general_error(e):
+#    status_code = getattr(e, 'code', 500)
+#    
+#    error_logger.info(f"Usuario: {current_user.correo} - Fecha: {datetime.now()}")
+#    
+#    return render_template('codeError.html', error_message=str(e), status_code=status_code), status_code
 
 
 #!============================== Modulo de Insumos ==============================#
 #INSERCIÓN INSUMOS
 @app.route("/insumos", methods=["GET", "POST"])
 @login_required
-@role_required(['Admin', 'Produccion'])
+@role_required(['Admin'])
 def insumos():
     form = InsumoForm(request.form)
     # Cargar lista de proveedores para el formulario
@@ -929,7 +1073,7 @@ def insumos():
 # EDITAR INSUMO
 @app.route("/editar_insumo", methods=["POST"])
 @login_required
-@role_required(['Admin', 'Produccion'])
+@role_required(['Admin'])
 def editar_insumo():
     form = InsumoForm(request.form)
     # Cargar lista de proveedores para el formulario
@@ -987,7 +1131,7 @@ from decimal import Decimal
 # INSERCIÓN DE COMPRAS DE INSUMOS
 @app.route("/comprasInsumos", methods=["GET", "POST"])
 @login_required
-@role_required(['Admin', 'Produccion'])
+@role_required(['Admin'])
 def comprasInsumos():
     form = CompraInsumoForm(request.form)
     # Cargar lista de insumos para el select
@@ -1006,9 +1150,9 @@ def comprasInsumos():
             cantidad_ingresada = Decimal(form.cantidad.data)
 
             # Ajustar la cantidad según la unidad
-            if unidad in ["gramos", "mililitros"]:
+            if unidad in ["gr", "ml"]:
                 cantidad_ajustada = cantidad_ingresada * Decimal(1000)
-            elif unidad == "piezas":
+            elif unidad == "pzs":
                 cantidad_ajustada = cantidad_ingresada
             else:
                 flash("Unidad de medida no válida para este insumo", "danger")
@@ -1162,6 +1306,7 @@ def eliminar_proveedor(id):
         flash("Proveedor no encontrado", "danger")
     return redirect(url_for("proveedores"))
 
+
 #!============================== Modulo de Ventas ==============================#
 # Venta actual (lista de productos en la venta)
 venta_actual = []
@@ -1170,7 +1315,6 @@ venta_actual = []
 @login_required
 @role_required(['Admin', 'Ventas'])
 def puntoVenta():
-    
     # Consulta de productos disponibles: obtenemos el id, nombre de receta, tipo, cantidad y precio.
     productos_disponibles = db.session.query(
         ProductosTerminados.idProducto,
@@ -1187,10 +1331,10 @@ def puntoVenta():
     # Se pueden usar los mismos productos para el select, pues contienen nombre y tipo
     # Si lo prefieres, también puedes pasar la lista completa de recetas:
     # recetas = Receta.query.all()
-
+    
     if request.method == "POST":
         accion = request.form.get("accion")
-
+        
         if accion == "agregar":
             try:
                 idProducto = int(request.form.get("idProducto"))
@@ -1198,36 +1342,35 @@ def puntoVenta():
             except (ValueError, TypeError):
                 flash("Datos inválidos para agregar producto.", "danger")
                 return redirect(url_for("puntoVenta"))
-
+            
             if cantidad <= 0:
                 flash("La cantidad debe ser mayor a cero.", "danger")
                 return redirect(url_for("puntoVenta"))
-
+            
             productoTerminado = ProductosTerminados.query.filter_by(
                 idProducto=idProducto,
                 estatus=1
             ).filter(ProductosTerminados.cantidadDisponible > 0).first()
-
+            
             if not productoTerminado:
                 flash("Producto terminado no encontrado o no disponible.", "danger")
                 return redirect(url_for("puntoVenta"))
-
+            
             receta = Receta.query.get(productoTerminado.idReceta)
             if not receta:
                 flash("Receta asociada no encontrada.", "danger")
                 return redirect(url_for("puntoVenta"))
-
+            
             # Evitar duplicados en la venta
             for prod in venta_actual:
                 if prod["idProducto"] == idProducto:
                     flash("El producto ya está en la venta.", "warning")
                     return redirect(url_for("puntoVenta"))
-
-            precio_total = float(receta.precio) * cantidad
+            
             if productoTerminado.tipoProducto.lower() == "medio kilo":
-                factor = 14
+                factor = 12
             elif productoTerminado.tipoProducto.lower() == "kilo":
-                factor = 20
+                factor = 24
             else:
                 factor = 1 
 
@@ -1239,7 +1382,6 @@ def puntoVenta():
                 "nombreReceta": receta.nombreReceta,
                 "tipoProducto": productoTerminado.tipoProducto,
                 "cantidad": cantidad,
-                "precio_unitario": float(receta.precio),
                 "precio_unitario": precio_unitario,
                 "precio_total": precio_total
             }
@@ -1247,14 +1389,14 @@ def puntoVenta():
             venta_actual.append(producto)
             flash("Producto agregado correctamente.", "success")
             return redirect(url_for("puntoVenta"))
-
+        
         elif accion == "actualizar":
             try:
                 idProducto = int(request.form.get("idProducto"))
             except (ValueError, TypeError):
                 flash("Datos inválidos para actualizar producto.", "danger")
                 return redirect(url_for("puntoVenta"))
-
+            
             operacion = request.form.get("operacion")
             for prod in venta_actual:
                 if prod["idProducto"] == idProducto:
@@ -1273,7 +1415,7 @@ def puntoVenta():
             else:
                 flash("Producto no encontrado.", "danger")
             return redirect(url_for("puntoVenta"))
-
+        
         elif accion == "confirmar":
             try:
                 descuento = float(request.form.get("descuento", 0))
@@ -1313,14 +1455,25 @@ def puntoVenta():
                     subtotal=prod["precio_total"]
                 )
                 db.session.add(detalle)
+
+                # === Aquí guardamos en la tabla VentasCliente ===
+                venta_cliente = VentasCliente(
+                    nombreCliente="Público en general", 
+                    nombreSabor=prod["nombreReceta"],
+                    cantidad=prod["cantidad"],
+                    tipoProducto=prod["tipoProducto"],
+                    total=prod["precio_total"],
+                    estatus=2
+                )
+                db.session.add(venta_cliente)
+
             db.session.commit()
 
             pdf_path = generar_pdf(venta_actual, descuento, dinero_recibido, total_con_descuento)
             flash("Venta confirmada. Ticket generado en: " + pdf_path, "success")
             venta_actual.clear()
             return redirect(url_for("puntoVenta"))
-
-    # Para la vista, se consulta el inventario actualizado de los productos disponibles
+    
     productos = ProductosTerminados.query.filter(
         ProductosTerminados.estatus == 1,
         ProductosTerminados.cantidadDisponible > 0
@@ -1330,12 +1483,13 @@ def puntoVenta():
     total = sum(prod["precio_total"] for prod in venta_actual)
 
     return render_template("admin/ventas.html",
-        productos_disponibles=productos_disponibles,
-        venta=venta_actual,
-        total=total,
-        inventario=inventario,
-        ventas_estatus_1=ventas_estatus_1,
-        ultimo_login=current_user.ultimo_login)
+                        productos_disponibles=productos_disponibles,
+                        venta=venta_actual,
+                        total=total,
+                        inventario=inventario,
+                        ventas_estatus_1=ventas_estatus_1,
+                        ultimo_login=current_user.ultimo_login)
+
 
 def generar_pdf(venta, descuento, dinero_recibido, total_con_descuento):
     pdf = FPDF()

@@ -1,114 +1,109 @@
-{% extends "admin/index.html" %} {% block container %}
-<h1>Insumos</h1>
-<div class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 mt-5 p-1">
-    <div class="row">
-        {% with messages = get_flashed_messages() %} {% if messages %} {% for
-        message in messages %}
+{% extends "admin/index.html" %}
+{% block container %}
+<div class="row">
+    <div class="card border-0 gb mb-3" style="height: 58px; background-color: #f1f1f1">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
         <div class="alert alert-success" role="alert">{{ message }}</div>
-        {% endfor %} {% endif %} {% endwith %}
-        <!-- Listado de Insumos -->
-        <div class="col-6">
-            <div class="last-login">
-                <p class="mb-0">
-                    <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d
-                    %H:%M:%S') if ultimo_login else 'Nunca' }}
-                </p>
-            </div>
-            <div class="card shadow-sm rounded-3">
-                <div class="card-header text-center">
-                    <b>Insumos - Materias Primas</b>
-                </div>
-                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                    <table class="table table-hover table-striped text-center" id="insumosTable">
-                        <thead>
-                            <tr>
-                                <th>Proveedor</th>
-                                <th>Insumo</th>
-                                <th>Cantidad</th>
-                                <th>Unidad</th>
-                                <th>Precio Unit.</th>
-                                <th>Caducidad</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="productosTableBody">
-                            {% for insumo in insumos %}
-                            <tr data-id="{{insumo.idMateriaPrima}}" data-materia="{{ insumo.materiaPrima }}"
-                                data-unidad="{{ insumo.unidadMedida }}" data-proveedor="{{ insumo.idProveedor }}"
-                                data-precio="{{ insumo.precioUnitario }}"
-                                data-fecha="{{ insumo.fechaCaducidad.strftime('%Y-%m-%d') if insumo.fechaCaducidad else '' }}">
-                                <td>{{ insumo.proveedor.nombreProveedor }}</td>
-                                <td>{{ insumo.materiaPrima }}</td>
-                                <td>{{ insumo.cantidadDisponible }}</td>
-                                <td>{{ insumo.unidadMedida }}</td>
-                                <td>{{ insumo.precioUnitario }}</td>
-                                <td>{{ insumo.fechaCaducidad.strftime('%d-%m-%Y') if insumo.fechaCaducidad else 'N/A' }}
-                                </td>
-                                <td>
-                                    {% if insumo.cantidadDisponible > 0 %}
-                                    <a href="#" class="btn btn-warning btn-sm"
-                                        onclick="mermarInsumo('{{ insumo.idMateriaPrima }}'); return false;">Mermar</a>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <!-- Formulario -->
-        <div class="col-xl-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-light py-3">
-                    <h5 class="mb-0 text-center">Crear/Editar Insumo</h5>
-                </div>
-                <div class="card-body">
-                    <form id="formInsumos" method="POST" action="{{ url_for('insumos') }}">
-                        {{ form.csrf_token }}
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                        <input type="hidden" id="idMateriaPrima" name="idMateriaPrima" value="">
-                        <!-- Proveedor -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Proveedor</label>
-                            <select class="form-select form-select-sm" id="idProveedor" name="idProveedor">
-                                <option value="" selected disabled>Seleccione un proveedor</option>
-                                {% for proveedor in proveedores %}
-                                <option value="{{ proveedor.idProveedor }}">{{ proveedor.nombreProveedor }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <!-- Materia Prima -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Materia Prima</label>
-                            {{ form.materiaPrima(class="form-control form-control-sm", id="materiaPrima",
-                            placeholder="Nombre del insumo") }}
-                        </div>
-                        <!-- Unidad de Medida -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Unidad de Medida</label>
-                            <select class="form-select form-select-sm" id="unidadMedida" name="unidadMedida">
-                                <option value="" selected disabled>Seleccione una unidad</option>
-                                <option value="Gramos">Gramos</option>
-                                <option value="Mililitros">Mililitros</option>
-                                <option value="Piezas">Piezas</option>
-                            </select>
-                        </div>
-                        <!-- Precio Unitario -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Precio Unitario</label>
-                            <input type="number" step="0.01" class="form-control form-control-sm" id="precioUnitario"
-                                name="precioUnitario" placeholder="Precio por unidad">
-                        </div>
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-warning text-white">Guardar Insumo</button>
-                            <button type="button" class="btn btn-primary" id="btnEditar" onclick="editarInsumo()">Editar
-                                Insumo</button>
-                        </div>
-                    </form>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
 
-                </div>
+    <!-- Formulario -->
+    <div class="col-4">
+        <form id="formInsumos" method="POST" action="{{ url_for('insumos') }}">
+            {{ form.csrf_token }}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" id="idMateriaPrima" name="idMateriaPrima" value="">
+    
+            <!-- Proveedor -->
+            <div class="form-floating mb-3">
+                <select class="form-select form-select-sm border-0 rounded-3 shadow-sm" id="idProveedor" name="idProveedor">
+                    <option value="" selected disabled>Seleccione un proveedor</option>
+                    {% for proveedor in proveedores %}
+                    <option value="{{ proveedor.idProveedor }}">{{ proveedor.nombreProveedor }}</option>
+                    {% endfor %}
+                </select>
+                <label for="idProveedor">Proveedor</label>
             </div>
+    
+            <!-- Materia Prima -->
+            <div class="form-floating mb-3">
+                {{ form.materiaPrima(class="form-control border-0 rounded-3 shadow-sm", id="materiaPrima",
+                placeholder="Nombre del insumo") }}
+                <label for="materiaPrima">Materia Prima</label>
+            </div>
+    
+            <!-- Unidad de Medida -->
+            <div class="form-floating mb-3">
+                <select class="form-select form-select-sm border-0 rounded-3 shadow-sm" id="unidadMedida" name="unidadMedida">
+                    <option value="" selected disabled>Seleccione una unidad</option>
+                    <option value="gr">Gramos</option>
+                    <option value="ml">Mililitros</option>
+                    <option value="pzs">Piezas</option>
+                </select>
+                <label for="unidadMedida">Unidad de Medida</label>
+            </div>
+    
+            <!-- Precio Unitario -->
+            <div class="form-floating mb-3">
+                <input type="number" step="0.01" class="form-control form-control-sm border-0 rounded-3 shadow-sm" id="precioUnitario"
+                    name="precioUnitario" placeholder="Precio por unidad">
+                <label for="precioUnitario">Precio Unitario</label>
+            </div>
+    
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-warning text-white">Guardar Insumo</button>
+                <button type="button" class="btn btn-primary" id="btnEditar" onclick="editarInsumo()">Editar Insumo</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Listado de Insumos -->
+    <div class="col-8">
+        <div class="card border-0 shadow-sm rounded-3 bg-white">
+            <div class="card-header border-0 rounded-top-3 text-center bg-white">
+                <b class="text-center font-Spartan">Insumos - Materias Primas</b>
+            </div>
+            <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                <table class="table table-hover text-center mb-0 table-borderless" id="insumosTable">
+                    <thead class="text-dark">
+                        <tr>
+                            <th>Proveedor</th>
+                            <th>Insumo</th>
+                            <th>Cantidad</th>
+                            <th>Unidad</th>
+                            <th>Precio Unit.</th>
+                            <th>Caducidad</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="productosTableBody">
+                        {% for insumo in insumos %}
+                        <tr data-id="{{insumo.idMateriaPrima}}" data-materia="{{ insumo.materiaPrima }}"
+                            data-unidad="{{ insumo.unidadMedida }}" data-proveedor="{{ insumo.idProveedor }}"
+                            data-precio="{{ insumo.precioUnitario }}"
+                            data-fecha="{{ insumo.fechaCaducidad.strftime('%Y-%m-%d') if insumo.fechaCaducidad else '' }}">
+                            <td>{{ insumo.proveedor.nombreProveedor }}</td>
+                            <td>{{ insumo.materiaPrima }}</td>
+                            <td>{{ insumo.cantidadDisponible }}</td>
+                            <td>{{ insumo.unidadMedida }}</td>
+                            <td>{{ insumo.precioUnitario }}</td>
+                            <td>{{ insumo.fechaCaducidad.strftime('%d-%m-%Y') if insumo.fechaCaducidad else 'N/A' }}</td>
+                            <td>
+                                {% if insumo.cantidadDisponible > 0 %}
+                                <a href="#" class="btn btn-warning btn-sm text-white"
+                                    onclick="mermarInsumo('{{ insumo.idMateriaPrima }}'); return false;">Mermar</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer border-0 rounded-bottom-3 bg-white pt-0"></div>
         </div>
     </div>
 </div>

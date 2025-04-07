@@ -3,56 +3,71 @@
 
 <!--* Main -->
 <div class="row">
-    {% with messages = get_flashed_messages(with_categories=true) %} {% if
-    messages %}
-    <div class="flash-messages">
-        {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="card border-0 gb mb-3" style="height: 58px; background-color: #f1f1f1">
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
+        {% endif %}
+        {% endwith %}
     </div>
-    {% endif %}
-    {% endwith %}
+
     <div class="col-4">
-        <div class="card border-0 shadow-sm rounded-3 bg-white">
-            <div class="card-header border-0 rounded-top-3 text-center bg-white">
-                <b class="text-center font-Spartan">Registro de Empleados</b>
+        <form method="POST" action="{{ url_for('miembros') }}">
+            {{ form.hidden_tag() }}
+            <div class="row">
+                <!-- Nombre -->
+                <div class="form-floating mb-2 col-md-12">
+                    {{ form.nombre(class="form-control shadow-sm border-0 rounded-3", id="nombre", placeholder="Nombre") }}
+                    <label class="ms-3" for="nombre">Nombre</label>
+                </div>
+    
+                <!-- Apellido Paterno -->
+                <div class="form-floating mb-2 col-md-12">
+                    {{ form.apaterno(class="form-control shadow-sm border-0 rounded-3", id="apaterno", placeholder="Apellido Paterno") }}
+                    <label class="ms-3" for="apaterno">Apellido Paterno</label>
+                </div>
+    
+                <!-- Apellido Materno -->
+                <div class="form-floating mb-2 col-md-12">
+                    {{ form.amaterno(class="form-control shadow-sm border-0 rounded-3", id="amaterno", placeholder="Apellido Materno") }}
+                    <label class="ms-3" for="amaterno">Apellido Materno</label>
+                </div>
+    
+                <!-- Correo -->
+                <div class="form-floating mb-2 col-md-12">
+                    {{ form.correo(class="form-control shadow-sm border-0 rounded-3", id="correo", placeholder="Correo Electrónico", type="email") }}
+                    <label class="ms-3" for="correo">Correo Electrónico</label>
+                </div>
+    
+                <!-- Contraseña -->
+                <div class="form-floating mb-2 col-md-12">
+                    {{ form.contrasena(class="form-control shadow-sm border-0 rounded-3", id="contrasena", placeholder="Contraseña", type="password") }}
+                    <label class="ms-3" for="contrasena">Contraseña</label>
+                </div>
+    
+                <!-- Rol -->
+                <div class="form-floating mb-3 col-md-12">
+                    {{ form.rol(class="form-select shadow-sm border-0 rounded-3", id="rol", placeholder="Rol") }}
+                    <label  class="ms-3" for="rol">Rol</label>
+                </div>
+    
+                <!-- Botón de registro -->
+                <div class="">
+                    <button type="submit" class="btn btn-warning btn col-12 text-white shadow-sm border-0 rounded-3">
+                        Registrar
+                    </button>
+                </div>
             </div>
-            <div class="card-body">
-                <form method="POST" action="{{ url_for('miembros') }}">
-                    {{ form.hidden_tag() }}
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            {{ macro.input_field(form.nombre, placeholder="") }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ macro.input_field(form.apaterno, placeholder="") }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ macro.input_field(form.amaterno, placeholder="") }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ macro.input_field(form.correo, placeholder="", type="email") }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ macro.input_field(form.contrasena, placeholder="",
-                            type="password") }}
-                        </div>
-                        <div class="col-md-6">
-                            {{ macro.input_field(form.rol, placeholder="Rol") }}
-                        </div>
-                        <div class="col-md-12 d-flex justify-content-center">
-                            <button type="submit" class="btn btn-warning btn-sm" style="width: auto">
-                                Registrar
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
+        </form>
     </div>
+
 
     <div class="col-8">
         <div class="card border-0 shadow-sm rounded-3 bg-white">
@@ -152,7 +167,8 @@
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary"
                                                     data-bs-dismiss="modal">Cerrar</button>
-                                                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                                                <button type="submit" class="btn btn-primary">Guardar
+                                                    cambios</button>
                                             </div>
                                         </form>
                                     </div>

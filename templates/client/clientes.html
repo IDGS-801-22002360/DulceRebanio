@@ -1,109 +1,32 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dulce Rebaño</title>
-    <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css" />
     <link rel="stylesheet" href="static/sweetalert2/sweetalert2.min.css">
-    <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.min.css"/>
+    <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700&display=swap" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
-        body {
-            background-color: #e1e1e1;
-            font-family: 'Roboto', sans-serif;
-        }
         .font-Spartan {
             font-family: 'League Spartan', sans-serif;
         }
-        .btn-color {
-            background-color: #542E02;
-        }
-        .btn-hover:hover {
-            background-color: #371E01;
-        }
-        .btn-del {
-            background-color: #FF0000;
-        }
-        .btn-del-hover:hover {
-            background-color: #D90000;
-        }
-        .buyButtons {
-            background-color: #FFD700;
-        }
 
-        /* Navbar Lateral */
-        .sidebar {
-            background-color: #532d02;
-            opacity: 50%;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 120px;
-            padding-top: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .sidebar button {
-            width: 100%;
-            height: 115px;
-            color: white;
-            border: none;
-            background: none;
-            font-family: 'League Spartan', sans-serif;
-            text-align: center;
-        }
-        .sidebar button:hover {
-            background-color: #371E01;
-        }
-        .content {
-            margin-left: 130px; 
-            padding: 20px;
-        }
-        .titulo-productos {
-            font-family: 'League Spartan', sans-serif;
-            font-style: italic;
-            font-weight: bold;
-            font-size: 50px;
-            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
-        }
-        .subtitulo-productos {
-            font-family: 'League Spartan', sans-serif;
-            font-style: italic;
-            font-weight: bold;
-            font-weight: bold;
-            font-size: 20px;
-            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
-        }
-        .last-login {
-            position: fixed; 
-            top: 5px; 
-            right: 20px; 
-            color: #000; 
-            font-size: 14px; 
-            z-index: 1000; 
-        }
-        .dropdown-custom select {
-            border: none;
-            font-size: 18px;
-            font-weight: bold;
-            color: black;
-            cursor: pointer;
-        }
         .dropdown-custom select:focus {
             outline: none;
             box-shadow: none;
         }
+
         .quantity-container {
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        
+
         .quantity-btn {
             width: 32px;
             height: 32px;
@@ -113,114 +36,211 @@
             font-size: 18px;
             cursor: pointer;
         }
-        
+
         .quantity-input {
             width: 50px;
             text-align: center;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
-        
+
+        .image-container {
+            width: 100%;
+            padding-top: 56.25%;
+            /* Aspecto 16:9 */
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            /* Opcional: bordes redondeados */
+            background-color: #f8f9fa;
+            /* Fondo claro para imágenes faltantes */
+        }
+
+        .image-container img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Asegura que la imagen se recorte para llenar el contenedor */
+            object-position: center;
+            /* Centra la imagen */
+            transform: translate(-50%, -50%);
+        }
+
+        .image-container p {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            margin: 0;
+            font-size: 1rem;
+            color: #6c757d;
+        }
+
+        .table-scroll table {
+            width: 100%;
+            height: 90%;
+        }
+
+        a.btn {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .nav-link {
+            color: #8B4513;
+        }
+
+        .nav-link:hover {
+            color: #fff;
+            background-color: #8B4513;
+        }
+
+        .nav-cs {
+            color: red;
+        }
+
+        .nav-cs:hover {
+            color: #fff;
+            text-emphasis-color: white;
+            background-color: red;
+        }
+
+        .inner-shadow {
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
     </style>
 </head>
 
-<body>
-    <div class="container-fluid">
+<body style="background-color: #f1f1f1;">
+    <div class="container-fluid vh-100">
         <div class="row vh-100">
             <!-- Navbar Lateral -->
-            <nav class="col-md-1 col-lg-1 d-md-block sidebar text-center">
-                <div class="position-sticky pt-3">
-                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px;">
-                        <i class="fa fa-2x fa-home"></i><br>
-                        <b>Inicio</b>
-                    </button>
-                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan position-relative" style="width: 100%; height: 115px" data-bs-toggle="offcanvas" href="#modalCarrito">
-                        <i class="fas fa-2x fa-shopping-cart"></i> 
-                        {% if carrito|length > 0 %}
-                            <span class="position-absolute top-0 start-100 badge rounded-pill bg-danger d-flex align-items-center justify-content-center" 
-                                style="font-size: 0.8rem; width: 22px; height: 22px; transform: translate(-20px, -50%);">
-                                {{ carrito|length }} 
-                            </span>
-                        {% endif %}
-                        <br><b>Carrito</b>
-                    </button>          
-                    <a href="{{ url_for('historialCompras') }}" class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
-                        <i class="fa fa-2x fa-history"></i><br>
-                        <b>Historial</b>
-                    </a>   
-                    <a href="{{ url_for('logout') }}" class="btn border-0 rounded-4 text-white btn-del btn-del-hover font-Spartan d-flex flex-column justify-content-center align-items-center" style="width: 100%; height: 115px">
-                        <i class="fa fa-2x fa-sign-out-alt mb-2"></i>
-                        <b>Cerrar sesión</b>
-                    </a>                                   
+            <nav class="col-auto d-flex flex-column flex-shrink-0 p-3 bg-white shadow-sm vh-100" style="width: 280px;">
+                <div class="d-flex justify-content-between align-items-center mx-auto">
+                    <img src="../../static/img/donGalleto2.png" alt="Logo" class="img-fluid ms-4"
+                        style="max-width: 100px; height: auto;">
+                    <a href="#"
+                        class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none ms-2">
+                        <span class="fs-4">Dulce Rebaño</span>
+                    </a>
                 </div>
+                <hr>
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <!-- Inicio -->
+                    <li class="nav-item">
+                        <a href="/" class="nav-link">
+                            <i class="fa fa-home me-2"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('clientes') }}" class="nav-link">
+                            <i class="fa fa-cookie me-2"></i> Productos
+                        </a>
+                    </li>
+
+                    <!-- Pedidos -->
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" data-bs-toggle="offcanvas" href="#modalCarrito">
+                            <i class="fas fa-receipt me-2"></i> Pedidos
+                            {% if carrito|length > 0 %}
+                            <span
+                                class="position-absolute top-50 ms-4 translate-middle badge rounded-pill bg-danger text-white">
+                                {{ carrito|length }}
+                                <span class="visually-hidden">Pedidos en carrito</span>
+                            </span>
+                            {% endif %}
+                        </a>
+                    </li>
+
+                    <!-- Historial -->
+                    <li class="nav-item">
+                        <a href="{{ url_for('historialCompras') }}" class="nav-link">
+                            <i class="fa fa-history me-2"></i> Historial
+                        </a>
+                    </li>
+                </ul>
+
+                <hr>
+                <a href="{{ url_for('logout') }}"
+                    class="d-flex justify-content-between align-items-center nav-link nav-cs rounded-2 border-0"
+                    style="height: 48px;">
+                    <strong class="ms-3">Cerrar Sesión</strong>
+                    <i class="fa fa-power-off me-3 text-white"></i>
+                </a>
             </nav>
 
             <!-- Contenido Principal -->
-            <div class="col-md-11 col-lg-11 content md-5">
-                <div class="last-login">
-                    <p class="mb-0">
-                      <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d
-                      %H:%M:%S') if ultimo_login else 'Nunca' }}
-                    </p>
-                  </div>
+            <div class="col p-3 scrol " style="max-height: 1112px; overflow-y: auto;">
                 <div class="d-flex justify-content-between align-items-center md-5">
-                    <h2 class="text-center titulo-productos">
+                    <h1 class="text-center titulo-productos mt-3">
                         Productos <span>dulce rebaño</span>
-                    </h2>
-                    <img src="../../static/img/donGalleto2.png" alt="Logo" class="img-fluid ms-3" style="max-width: 100px; height: auto;">
+                    </h1>
                 </div>
-                
-                <h5 class="subtitulo-productos">¿Que quieres comprar hoy?</h5> 
+
+                <h5 class="subtitulo-productos">¿Que quieres comprar hoy?</h5>
                 <div class="mb-4">
                     <label for="filtroProducto" class="fw-bold"></label>
                     <div class="dropdown-custom" style="max-width: 200px;">
                         <select id="filtroProducto" class="form-select border-0 fw-bold w-auto">
-                            <option value="todos">Seleccione el tipo de producto:</option>
                             {% for tipo in tipos_productos %}
-                                <option value="{{ tipo }}" {% if tipo == request.args.get("tipo", "todos") %}selected{% endif %}>
-                                    {{ tipo }}
-                                </option>
+                            <option value="{{ tipo }}" {% if tipo==request.args.get("tipo", "Granel" ) %}selected{%
+                                endif %}>
+                                {{ tipo }}
+                            </option>
                             {% endfor %}
                         </select>
                     </div>
-                </div>                     
+                </div>
                 <div class="row mt-5">
-                    {% for sabor in sabores %}
+                    {% for receta in recetas %}
                     <div class="col-md-3 mb-4">
-                        <div class="card shadow-sm" style="border-radius: 22px;">
-                            <div class="card-body text-center">
-                                <img src="../../static/img/{{ sabor.nombreSabor | lower }}.jpg" alt="{{ sabor.nombreSabor }}" class="w-100 img-fluid" style="height: 200px; object-fit: cover; border-radius: 10px;">
-                                <h5 class="card-title fw-bold">{{ sabor.nombreSabor }}</h5>
-                                
+                        <div class="card shadow-sm border-0 rounded-3">
+                            <div class="card-body text-center p-0">
+                                {% if receta.imagen %}
+                                <div class="image-container rounded-3 rounded-bottom-0">
+                                    <img src="data:image/png;base64,{{ receta.imagen }}" alt="{{ receta.nombreReceta }}"
+                                        class="receta-imagen">
+                                </div>
+                                {% else %}
+                                <p>No hay imagen disponible</p>
+                                {% endif %}
+                                <h5 class="card-title fw-bold mt-2">{{ receta.nombreReceta }}</h5>
+
                                 <form action="{{ url_for('agregar_carrito') }}" method="POST">
-                                    <input type="hidden" name="sabor_id" value="{{ sabor.idSabor }}">
-                                
+                                    <input type="hidden" class="precop-hidden" name="precio"
+                                        value="{{ receta.precio }}">
+                                    <input type="hidden" name="receta_id" value="{{ receta.idReceta }}">
+
                                     <h5 class="fw-bold mt-2" style="color: #532d02;">
-                                        <span class="precio">${{ detalles_productos[0].precio }}</span>
+                                        <span class="precio" data-precio-base="{{ receta.precio }}">${{
+                                            receta.precio
+                                            }}</span>
                                     </h5>
+
                                     <div class="mt-2">
-                                        <label for="tipo_producto" class="fw-bold d-block">Tipo de producto:</label>
-                                        <label>{{ detalles_productos.0.tipoProducto }}</label>
-                                        <select name="tipo_producto" class="form-control" hidden>
-                                            {% for detalle in detalles_productos %}
-                                                <option value="{{ detalle.idDetalle }}" data-precio="{{ detalle.precio }}">
-                                                    {{ detalle.tipoProducto }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
+                                        <input type="hidden" name="tipo-producto"
+                                            value="{{ request.args.get('tipo', 'Granel') }}">
                                     </div>
-                                    <div class="mt-3">
-                                        <label for="cantidad" style="text-align: center;" class="fw-bold d-block">Cantidad:</label>
-                                        <input type="number" name="cantidad" class="form-control" min="1" value="1" required>
+
+                                    <div class="mt-3 mx-3">
+                                        <label for="cantidad" class="fw-bold d-block">Cantidad:</label>
+                                        <input type="number" name="cantidad" class="form-control" min="1" value="1"
+                                            required>
                                     </div>
-                                
                                     <br>
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <button type="submit" class="btn btn-warning font-Spartan text-white">
-                                        <i class="fas fa-cart-plus fa-lg"></i> Agregar al carrito
+                                    <button type="submit" class="btn btn-warning font-Spartan text-white mb-3">
+                                        <i class="fas fa-receipt"></i> Agregar producto
                                     </button>
                                 </form>
-                                
+
                             </div>
                         </div>
                     </div>
@@ -230,30 +250,33 @@
 
             <div id="modalCarrito" class="offcanvas offcanvas-end" tabindex="-1" aria-labelledby="modalCarritoLabel">
                 <div class="offcanvas-header">
-                    <h5 id="modalCarritoLabel">Carrito de Compras</h5>
+                    <h5 id="modalCarritoLabel">Pedidos</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
                 </div>
                 <div class="offcanvas-body">
                     <ul class="list-group">
                         {% set total_general = 0 %}
                         {% for item in session["carrito"] %}
-                            {% set subtotal = item.cantidad * item.precio %}
-                            {% set total_general = subtotal + subtotal %}
-                            <li class="list-group-item d-flex align-items-center">
-                                <img src="../../static/img/{{ item.nombre | lower }}.jpg" alt="{{ item.nombre }}" class="me-3" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
-                                <div class="flex-grow-1">
-                                    <strong>{{ item.nombre }}</strong> - <span class="text-muted">{{ item.tipo }}</span>
-                                    <div>
-                                        <span>Cantidad:</span>
-                                        <span class="mx-2">{{ item.cantidad }}</span>
-                                    </div>
-                                    <div class="mt-1"><strong>Subtotal: ${{ "%.2f"|format(subtotal) }}</strong></div>
+                        {% set subtotal = item.cantidad * item.precio %}
+                        {% set total_general = subtotal + subtotal %}
+                        <li class="list-group-item d-flex align-items-center">
+                            <img src="{{ item.imagen if item.imagen else url_for('static', filename='img/default.svg') }}"
+                                alt="{{ item.nombre }}" class="me-3"
+                                style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+                            <div class="flex-grow-1">
+                                <strong>{{ item.nombre }}</strong> - <span class="text-muted">{{ item.tipo }}</span>
+                                <div>
+                                    <span>Cantidad:</span>
+                                    <span class="mx-2">{{ item.cantidad }}</span>
                                 </div>
-                                <form action="{{ url_for('eliminar_carrito', item_id=item.id) }}" method="POST">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <button class="btn btn-danger btn-sm">Eliminar</button>
-                                </form>
-                            </li>
+                                <div class="mt-1"><strong>Subtotal: ${{ "%.2f"|format(subtotal) }}</strong></div>
+                            </div>
+                            <form action="{{ url_for('eliminar_carrito', item_id=item.id) }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="tipo" value="{{ item.tipo }}">
+                                <button class="btn btn-danger btn-sm">Eliminar</button>
+                            </form>
+                        </li>
                         {% endfor %}
                     </ul>
                     <div class="mt-3 text-end">
@@ -261,36 +284,79 @@
                     </div>
                     <form method="POST" action="{{ url_for('procesar_compra') }}">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="mb-3">
+                            <label for="fecha_entrega" class="form-label">Fecha de entrega:</label>
+                            <input type="date" id="fecha_entrega" name="fecha_entrega" class="form-control" required>
+                        </div>
+
+                        <!-- Mostrar las alertas flash aquí -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                        <div class="alert-container">
+                            {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} mt-2" role="alert">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+
                         <div class="text-center mt-3">
-                            <button class="btn btn-primary w-100">Proceder al Pago</button>
+                            <button class="btn btn-warning font-Spartan text-white" type="submit">
+                                <i class="fas fa-check-circle"></i> Generar pedido
+                            </button>
                         </div>
                     </form>
                 </div>
-            </div>  
+            </div>
+
+        </div>
+    </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="static/sweetalert2/sweetalert2.all.min.js"></script>
     <script src="static/fontawesome-free-6.4.0-web/js/all.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            document.querySelectorAll("select[name='tipo_producto']").forEach(select => {
-                select.addEventListener("change", function () {
-                    let precioSeleccionado = this.options[this.selectedIndex].getAttribute("data-precio");
-                    let precioElemento = this.closest(".card-body").querySelector(".precio");
-    
-                    if (precioElemento) {
-                        precioElemento.textContent = `$${precioSeleccionado}`;
-                    }
-                });
+        const multiplicadores = {
+            "Granel": 1,
+            "700 gr": 14,
+            "Kilo": 20
+        };
+
+        // Al cargar la página o al cambiar el filtro global
+        document.addEventListener('DOMContentLoaded', function () {
+            const filtro = document.getElementById("filtroProducto");
+            actualizarPrecios(filtro.value);
+
+            filtro.addEventListener("change", function () {
+                actualizarPrecios(this.value);
             });
         });
 
-        document.getElementById("filtroProducto").addEventListener("change", function() {
-            const tipoSeleccionado = this.value;
-            window.location.href = "/clientes?tipo=" + tipoSeleccionado;
-        });
-    </script>
-    
+        function actualizarPrecios(tipoSeleccionado) {
+            const cards = document.querySelectorAll(".card");
 
+            cards.forEach(card => {
+                const precioBaseEl = card.querySelector(".precio");
+                const precioBase = parseFloat(precioBaseEl.dataset.precioBase);
+                const nuevoPrecio = (precioBase * multiplicadores[tipoSeleccionado]).toFixed(2);
+                precioBaseEl.textContent = `$${nuevoPrecio}`;
+
+                // Actualizar input hidden del tipo-producto
+                const inputTipo = card.querySelector('input[name="tipo-producto"]');
+                if (inputTipo) {
+                    inputTipo.value = tipoSeleccionado;
+                }
+
+                // Actualizar input hidden del precio
+                const inputPrecio = card.querySelector('input[name="precio"]');
+                if (inputPrecio) {
+                    inputPrecio.value = nuevoPrecio;
+                }
+            });
+        }
+    </script>
 </body>
+
 </html>

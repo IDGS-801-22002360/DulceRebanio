@@ -131,4 +131,5 @@ class VentasCliente(db.Model):
     cantidad = db.Column(db.Integer)
     tipoProducto = db.Column(db.String(100))
     total = db.Column(db.Float)
-    estatus=db.Column(db.Integer, default=1) 
+    estatus = db.Column(db.Integer, default=1)
+    fechaEntrega = db.Column(db.Date, nullable=True)
