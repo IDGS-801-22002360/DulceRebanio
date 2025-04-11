@@ -1,0 +1,26 @@
+{% extends "admin/index.html" %}
+{% block container %}
+<div class="row">
+    <div class="card border-0 gb mb-3" style="height: 58px; background-color: #f1f1f1">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="container col-12">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show d-none" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+    </div>
+    <div class="col-6">
+        tabla para pedidos
+        
+    </div>
+    <div class="col-6">
+        Tabla para ventas
+    </div>
+</div>
+{% endblock %}

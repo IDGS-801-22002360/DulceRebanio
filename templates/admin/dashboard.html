@@ -1,72 +1,106 @@
 {% extends "admin/index.html" %}
 {% block container %}
-{% import "admin/_macros.html" as macro %}
+<style>
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        /* Cambio aquí, se adapta a la altura de la ventana */
+        width: 100%;
+        background-color: #532d02;
+        opacity: 50%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding-top: 10px;
+    }
 
 
-<div class="d-flex justify-content-between align-items-center">
-    <h2 class="text-center titulo-productos">
-        Productos <span>dulce rebaño</span>
-    </h2>
-    <img src="../../static/img/donGalleto2.png" alt="Logo" class="img-fluid ms-3" style="max-width: 100px; height: auto;">
-</div>
-<div class="row">
-    <div class="col-md-6">
-        <h5 class="text-center">Productos más Vendidos</h5>
-        <canvas id="productosMasVendidos"></canvas>
+    /* Ajustar el contenido para que no quede detrás del Navbar */
+    .content {
+        margin-left: 110px;
+        /* Ajustar según el ancho del sidebar */
+        padding: 15px;
+    }
+</style>
+<div class="">
+    <div class="">
+        <div class="row mt-2">
+            <div class="col-md-3">
+                <div class="card p-3 text-center">
+                    <h6>Total de ventas</h6>
+                    <p class="fs-4">{{ roi }}</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3 text-center">
+                    <h6>Ganancias</h6>
+                    <p class="fs-4">${{ clv | round(2) }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-1">
+            <div class="col-md-6">
+                <h5 class="text-center">Productos más Vendidos</h5>
+                <canvas class="bg-white rounded-3 rounded-3 p-2 shadow" id="productosMasVendidos"></canvas>
+            </div>
+            <div class="col-6" style="height: 408px;">
+                <h5 class="text-center">Presentaciones más Vendidas</h5>
+                <canvas class="col-12 shadow bg-white rounded-3 p-2" id="presentacionesMasVendidas"></canvas>
+            </div>
+        </div>
+        <br>
+        <div class="card p-4 mt-1 shadow border-0 rounded-3">
+            <h5 class="text-center">Ventas totales</h5>
+            <canvas id="ebitdaChart" style="height: 250px !important;"></canvas>
+        </div>
     </div>
-    <div class="col-md-6">
-        <h5 class="text-center">Presentaciones más Vendidas</h5>
-        <canvas id="presentacionesMasVendidas"></canvas>
-    </div>
-</div>
-<h4 class="text-center mt-4">Ventas</h4>
-<table class="table table-bordered table-striped">
-    <thead class="table-warning">
-        <tr>
-            <th>Sabor</th>
-            <th>Presentación</th>
-            <th>Cantidad</th>
-            <th>Total</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for venta in ventas_combinadas %}
-        <tr>
-            <td>{{ venta.nombreSabor }}</td>
-            <td>{{ venta.tipoProducto }}</td>
-            <td>{{ venta.cantidad }}</td>
-            <td>{{ venta.total }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
 
-</table>
+</div>
 <script>
-        const ctx1 = document.getElementById('productosMasVendidos').getContext('2d');
-        new Chart(ctx1, {
-            type: 'bar',
-            data: {
-                labels: JSON.parse('{{ productos_labels | tojson | safe }}'), 
-                datasets: [{
-                    label: 'Cantidad Vendida',
-                    data: JSON.parse('{{ productos_data | tojson | safe }}'),
-                    backgroundColor: ['#542E02', '#542E02', '#542E02']
-                }]
-            }
-        });
-        
+    const ctx1 = document.getElementById('productosMasVendidos').getContext('2d');
+    new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: JSON.parse('{{ productos_labels | tojson | safe }}'),
+            datasets: [{
+                label: 'Cantidad Vendida',
+                data: JSON.parse('{{ productos_data | tojson | safe }}'),
+                backgroundColor: ['#FABE0D', '#FABE0D', '#FABE0D']
+            }]
+        }
+    });
 
-        const ctx2 = document.getElementById('presentacionesMasVendidas').getContext('2d');
-        new Chart(ctx2, {
-            type: 'bar',
-            data: {
-                labels: JSON.parse('{{ presentaciones_labels | tojson | safe }}'),
-                datasets: [{
-                    label: 'Cantidad Vendida',
-                    data: JSON.parse('{{ presentaciones_data | tojson | safe }}'),
-                    backgroundColor: ['#542E02', '#542E02', '#542E02']
-                }]
-            }
-        });
+
+    const ctx2 = document.getElementById('presentacionesMasVendidas').getContext('2d');
+    new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: JSON.parse('{{ presentaciones_labels | tojson | safe }}'),
+            datasets: [{
+                label: 'Cantidad Vendida',
+                data: JSON.parse('{{ presentaciones_data | tojson | safe }}'),
+                backgroundColor: ['#FABE0D', '#FABE0D', '#FABE0D']
+            }]
+        }
+    });
+
+    const ctx3 = document.getElementById('ebitdaChart').getContext('2d');
+    new Chart(ctx3, {
+        type: 'line',
+        data: {
+            labels: JSON.parse('{{ pedidos_labels | tojson | safe }}'),
+            datasets: [{
+                label: 'Ventas de Pedidos',
+                data: JSON.parse('{{ pedidos_data | tojson | safe }}'),
+                backgroundColor: '#542E02',
+                borderColor: '#542E02',
+                borderWidth: 2,
+                fill: false,
+                tension: 0.2
+            }]
+        }
+    });
 </script>
 {% endblock %}

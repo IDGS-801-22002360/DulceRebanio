@@ -1,5 +1,19 @@
 {% extends "client/index.html" %} {% from "admin/_macros.html" import
 input_field, submit_button %} {% block container %}
+<style>
+    .image-container img {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        /* Asegura que la imagen se recorte para llenar el contenedor */
+        object-position: center;
+        /* Centra la imagen */
+        transform: translate(-50%, -50%);
+    }
+</style>
 <div class="offcanvas offcanvas-end {% if show_modal %}show{% endif %}" tabindex="-1" id="offcanvasAuth" {% if
     show_modal %}style="visibility: visible;" {% endif %}>
     <div class="offcanvas-header">
@@ -146,54 +160,28 @@ input_field, submit_button %} {% block container %}
 </div>
 <div class="container mt-4">
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        {% for receta in recetas %}
         <div class="col">
             <div class="card h-100">
-                <img src="../static/img/donGalleto2.png" class="card-img-top" alt="..." />
+                {% if receta.imagen %}
+                <div class="image-container">
+                    <img src="data:image/png;base64,{{ receta.imagen }}" class="card-img-top"
+                        alt="{{ receta.nombreReceta }}" />
+                </div>
+                {% else %}
+                <img src="../static/img/donGalleto2.png" class="card-img-top" alt="Imagen no disponible" />
+                {% endif %}
                 <div class="card-body">
-                    <h5 class="card-title">Card title</h5>
-                    <p class="card-text">
-                        Some quick example text to build on the card title.
-                    </p>
-                    <a href="#" class="btn btn-primary">Go somewhere</a>
+                    <h5 class="card-title">{{ receta.nombreReceta }}</h5>
+                    <p class="card-text">Precio: ${{ receta.precio }}</p>
+                    <a href="#" class="btn btn-warning text-white" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAuth">
+                        Ver detalles
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="col">
-            <div class="card h-100">
-                <img src="../static/img/donGalleto2.png" class="card-img-top" alt="..." />
-                <div class="card-body">
-                    <h5 class="card-title">Card title</h5>
-                    <p class="card-text">
-                        Some quick example text to build on the card title.
-                    </p>
-                    <a href="#" class="btn btn-primary">Go somewhere</a>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card h-100">
-                <img src="../static/img/donGalleto2.png" class="card-img-top" alt="..." />
-                <div class="card-body">
-                    <h5 class="card-title">Card title</h5>
-                    <p class="card-text">
-                        Some quick example text to build on the card title.
-                    </p>
-                    <a href="#" class="btn btn-primary">Go somewhere</a>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card h-100">
-                <img src="../static/img/donGalleto2.png" class="card-img-top" alt="..." />
-                <div class="card-body">
-                    <h5 class="card-title">Card title</h5>
-                    <p class="card-text">
-                        Some quick example text to build on the card title.
-                    </p>
-                    <a href="#" class="btn btn-primary">Go somewhere</a>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 </div>
+
 {% endblock %}

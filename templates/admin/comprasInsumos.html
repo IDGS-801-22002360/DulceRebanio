@@ -1,111 +1,106 @@
-{% extends "admin/index.html" %} {% block container %}
-<h1>Compras de insumos</h1>
-<div
-  class="col-md-11 ms-sm-auto col-lg-11 px-md-4 container rounded-3 mt-5 p-1"
->
-  <div class="row">
-    {% with messages = get_flashed_messages() %} {% if messages %} {% for
-    message in messages %}
-    <div class="alert alert-success" role="alert">{{ message }}</div>
-    {% endfor %} {% endif %} {% endwith %}
+{% extends "admin/index.html" %}
+{% block container %}
 
-    <!-- Listado de Compras de Insumos -->
-    <div class="col-6">
-      <div class="last-login">
-        <p class="mb-0">
-          <b>Último inicio de sesión:</b> {{ ultimo_login.strftime('%Y-%m-%d
-          %H:%M:%S') if ultimo_login else 'Nunca' }}
-        </p>
-      </div>
-      <div class="card shadow-sm rounded-3">
-        <div class="card-header text-center">
-          <b>Compras de Insumos</b>
-        </div>
-        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-          <table class="table table-hover table-striped text-center" id="comprasTable">
-            <thead>
-              <tr>
-                <th>Proveedor</th>
-                <th>Insumo</th>
-                <th>Cantidad</th>
-                <th>Fecha</th>
-                <th>Total Compra</th>
-              </tr>
-            </thead>
-            <tbody id="comprasTableBody">
-              {% for compra in compras %}
-              <tr data-id="{{ compra.idCompra }}" 
-                  data-proveedor="{{ compra.idProveedor }}" 
-                  data-insumo="{{ compra.idMateriaPrima }}"
-                  data-cantidad="{{ compra.cantidad }}" 
-                  data-fecha="{{ compra.fecha }}"
-                  data-total="{{ compra.totalCompra }}">
-                <td>{{ compra.nombreProveedor }}</td>
-                <td>{{ compra.materiaPrima }}</td>
-                <td>{{ compra.cantidad }}</td>
-                <td>{{ compra.fecha }}</td>
-                <td>{{ compra.totalCompra }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>        
-      </div>
+<div class="row">
+    <div class="card border-0 gb mb-3" style="height: 58px; background-color: #f1f1f1">
+        {% with messages = get_flashed_messages() %} {% if messages %} {% for
+        message in messages %}
+        <div class="alert alert-success" role="alert">{{ message }}</div>
+        {% endfor %} {% endif %} {% endwith %}
     </div>
 
     <!-- Formulario de Compras de Insumos -->
-    <div class="col-6">
+    <div class="col-4">
         <form id="formCompras" method="POST" action="{{ url_for('comprasInsumos') }}">
             {{ form.csrf_token }}
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <!-- Campo oculto para el ID de la compra -->
             <input type="hidden" id="idCompra" name="idCompra" value="">
-          
-            <div class="mb-3">
-              <label for="idProveedor" class="form-label">Proveedor</label>
-              <select class="form-select" id="idProveedor" name="idProveedor">
-                <option value="" selected disabled>Seleccione un proveedor</option>
-                {% for id, nombre in form.idProveedor.choices %}
-                  <option value="{{ id }}">{{ nombre }}</option>
-                {% endfor %}
-              </select>
+
+            <!-- Insumo -->
+            <div class="form-floating mb-3">
+                <select class="form-select shadow-sm border-0 rounded-3" id="idMateriaPrima" name="idMateriaPrima">
+                    <option value="" selected disabled>Seleccione un insumo</option>
+                    {% for id, nombre in form.idMateriaPrima.choices %}
+                    <option value="{{ id }}">{{ nombre }}</option>
+                    {% endfor %}
+                </select>
+                <label for="idMateriaPrima">Insumo</label>
             </div>
-          
-            <div class="mb-3">
-              <label for="idMateriaPrima" class="form-label">Insumo</label>
-              <select class="form-select" id="idMateriaPrima" name="idMateriaPrima">
-                <option value="" selected disabled>Seleccione un insumo</option>
-                {% for id, nombre in form.idMateriaPrima.choices %}
-                  <option value="{{ id }}">{{ nombre }}</option>
-                {% endfor %}
-              </select>
+
+            <!-- Cantidad -->
+            <div class="form-floating mb-3">
+                {{ form.cantidad(class="form-control shadow-sm border-0 rounded-3", id="cantidad",
+                placeholder="Cantidad") }}
+                <label for="cantidad">Cantidad (<i>Ingrese en Kg, Ltr o Pzs</i>)</label>
             </div>
-          
-            <div class="mb-3">
-              <label for="cantidad" class="form-label">Cantidad</label>
-              {{ form.cantidad(class="form-control", id="cantidad") }}
+
+            <!-- Fecha Compra -->
+            <div class="form-floating mb-3">
+                {{ form.fecha(class="form-control shadow-sm border-0 rounded-3", id="fecha", placeholder="Fecha Compra")
+                }}
+                <label for="fecha">Fecha Compra</label>
             </div>
-            <div class="mb-3">
-              <label for="fecha" class="form-label">Fecha</label>
-              {{ form.fecha(class="form-control", id="fecha") }}
+
+            <!-- Fecha de Caducidad -->
+            <div class="form-floating mb-3">
+                {{ form.fechaCaducidad(class="form-control shadow-sm border-0 rounded-3", id="fechaCaducidad",
+                placeholder="Fecha de Caducidad") }}
+                <label for="fechaCaducidad">Fecha de Caducidad</label>
             </div>
-            <div class="mb-3">
-              <label for="totalCompra" class="form-label">Total Compra</label>
-              {{ form.totalCompra(class="form-control", id="totalCompra") }}
+
+            <div class="d-flex col-12">
+                <button type="submit" id="btnGuardar" class="col-6 btn btn-warning text-white font-Spartan me-2">Guardar
+                    Compra</button>
+                <button type="button" class="col-6 btn btn-primary text-white font-Spartan" id="btnEditar"
+                    onclick="editarCompra()">Editar Compra</button>
             </div>
-          
-            <div class="d-flex">
-              <button type="submit" id="btnGuardar" class="btn btn-warning text-white font-Spartan me-2">Guardar Compra</button>
-              <button type="button" class="btn btn-primary text-white font-Spartan" id="btnEditar" onclick="editarCompra()">Editar Compra</button>
-            </div>
-          </form>
-          
+        </form>
     </div>
-  </div>
+
+    <!-- Listado de Compras de Insumos -->
+    <div class="col-8">
+        <div class="card border-0 shadow-sm rounded-3 bg-white">
+            <div class="card-header border-0 rounded-top-3 text-center bg-white">
+                <b class="text-center font-Spartan">Compras de Insumos</b>
+            </div>
+            <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                <table class="table table-hover text-center mb-0 table-borderless" id="comprasTable">
+                    <thead class="text-dark">
+                        <tr>
+                            <th>Fecha Compra</th>
+                            <th>Proveedor</th>
+                            <th>Insumo</th>
+                            <th>Cantidad</th>
+                            <th>Unidad Medida</th>
+                            <th>Precio Unitario</th>
+                            <th>Total Compra</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comprasTableBody">
+                        {% for compra in compras %}
+                        <tr data-id="{{ compra.idCompra }}" data-insumo="{{ compra.idMateriaPrima }}"
+                            data-cantidad="{{ compra.cantidad }}" data-fecha="{{ compra.fecha }}"
+                            data-fechacaducidad="{{ compra.fechaCaducidad }}" data-total="{{ compra.totalCompra }}">
+                            <td>{{ compra.fecha }}</td>
+                            <td>{{ compra.nombreProveedor }}</td>
+                            <td>{{ compra.nombreMateria }}</td>
+                            <td>{{ compra.cantidad }}</td>
+                            <td>{{ compra.unidadMedida }}</td>
+                            <td>{{ compra.precioUnitario }}</td>
+                            <td>{{ compra.totalCompra }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer border-0 rounded-bottom-3 bg-white pt-0"></div>
+        </div>
+    </div>
 </div>
 
 <script>
-  var comprasEditarUrl = "{{ url_for('editar_compraInsumo') }}";
+    var comprasEditarUrl = "{{ url_for('editar_compraInsumo') }}";
 </script>
 <script src="{{ url_for('static', filename='js/compras.js') }}"></script>
 {% endblock %}

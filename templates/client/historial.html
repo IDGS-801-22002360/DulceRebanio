@@ -1,113 +1,119 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dulce Rebaño</title>
-    <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css" />
     <link rel="stylesheet" href="static/sweetalert2/sweetalert2.min.css">
-    <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.min.css"/>
+    <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700&display=swap" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
-        /* Estilos Generales */
-        body {
-            background-color: #e1e1e1;
-            font-family: 'Roboto', sans-serif;
-        }
         .font-Spartan {
             font-family: 'League Spartan', sans-serif;
         }
-        .btn-color {
-            background-color: #542E02;
-        }
-        .btn-hover:hover {
-            background-color: #371E01;
-        }
-        .btn-del {
-            background-color: #FF0000;
-        }
-        .btn-del-hover:hover {
-            background-color: #D90000;
-        }
-        .buyButtons {
-            background-color: #FFD700;
+
+        .dropdown-custom select:focus {
+            outline: none;
+            box-shadow: none;
         }
 
-        /* Navbar Lateral */
-        .sidebar {
-            background-color: #532d02;
-            opacity: 50%;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 120px;
-            padding-top: 20px;
+        .quantity-container {
             display: flex;
-            flex-direction: column;
             align-items: center;
-        }
-        .sidebar button {
-            width: 100%;
-            height: 115px;
-            color: white;
-            border: none;
-            background: none;
-            font-family: 'League Spartan', sans-serif;
-            text-align: center;
-        }
-        .sidebar button:hover {
-            background-color: #371E01;
-        }
-        .content {
-            margin-left: 130px; 
-            padding-top: 20px; 
-            display: flex;
-            flex-direction: column;
-        }
-        .titulo-productos {
-            font-family: 'League Spartan', sans-serif;
-            font-style: italic;
-            font-weight: bold;
-            font-size: 50px;
-            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
-        }
-        .subtitulo-productos {
-            font-family: 'League Spartan', sans-serif;
-            font-style: italic;
-            font-weight: bold;
-            font-weight: bold;
-            font-size: 20px;
-            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
+            gap: 8px;
         }
 
-        /* Estilos de la tabla */
-        .table {
-            margin-top: 20px;
-            border: 1px solid #ddd;
-            background-color: white;
+        .quantity-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background-color: #f0f0f0;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
         }
-        .table th, .table td {
+
+        .quantity-input {
+            width: 50px;
             text-align: center;
-            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
-        .table th {
+
+        .image-container {
+            width: 100%;
+            padding-top: 56.25%;
+            /* Aspecto 16:9 */
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            /* Opcional: bordes redondeados */
             background-color: #f8f9fa;
-            color: #333;
+            /* Fondo claro para imágenes faltantes */
         }
-        .table-striped tbody tr:nth-of-type(odd) {
-            background-color: #f9f9f9;
+
+        .image-container img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Asegura que la imagen se recorte para llenar el contenedor */
+            object-position: center;
+            /* Centra la imagen */
+            transform: translate(-50%, -50%);
         }
-        .table-bordered th, .table-bordered td {
-            border: 1px solid #ddd;
+
+        .image-container p {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            margin: 0;
+            font-size: 1rem;
+            color: #6c757d;
         }
-        .table-hover tbody tr:hover {
-            background-color: #f1f1f1;
+
+        .table-scroll table {
+            width: 100%;
+            height: 90%;
         }
-        .table td .text-success {
-            font-weight: bold;
+
+        a.btn {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .nav-link {
+            color: #8B4513;
+        }
+
+        .nav-link:hover {
+            color: #fff;
+            background-color: #8B4513;
+        }
+
+        .nav-cs {
+            color: red;
+        }
+
+        .nav-cs:hover {
+            color: #fff;
+            text-emphasis-color: white;
+            background-color: red;
+        }
+
+        .inner-shadow {
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
@@ -116,60 +122,158 @@
     <div class="container-fluid">
         <div class="row vh-100">
             <!-- Navbar Lateral -->
-            <nav class="col-md-1 col-lg-1 d-md-block sidebar text-center">
-                <div class="position-sticky pt-3">
-                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px;">
-                        <i class="fa fa-2x fa-home"></i><br>
-                        <b>Inicio</b>
-                    </button>
-                    <button href="{{ url_for('clientes') }}" class="btn border-0 rounded-4 text-white btn-hover font-Spartan position-relative" style="width: 100%; height: 115px" data-bs-toggle="offcanvas" href="#modalCarrito">
-                        <i class="fas fa-2x fa-shopping-cart"></i> 
-                        {% if carrito|length > 0 %}
-                            <span class="position-absolute top-0 start-100 badge rounded-pill bg-danger d-flex align-items-center justify-content-center" 
-                                style="font-size: 0.8rem; width: 22px; height: 22px; transform: translate(-20px, -50%);">
-                                {{ carrito|length }} 
-                            </span>
-                        {% endif %}
-                        <br><b>Carrito</b>
-                    </button>          
-                    <button class="btn border-0 rounded-4 text-white btn-hover font-Spartan" style="width: 100%; height: 115px">
-                        <i class="fa fa-2x fa-history"></i><br>
-                        <b>Historial</b>
-                    </button>                                      
+            <nav class="col-auto d-flex flex-column flex-shrink-0 p-3 bg-white shadow-sm vh-100" style="width: 280px;">
+                <div class="d-flex justify-content-between align-items-center mx-auto">
+                    <img src="../../static/img/donGalleto2.png" alt="Logo" class="img-fluid ms-4"
+                        style="max-width: 100px; height: auto;">
+                    <a href="#"
+                        class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none ms-2">
+                        <span class="fs-4">Dulce Rebaño</span>
+                    </a>
                 </div>
+                <hr>
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <!-- Inicio -->
+                    <li class="nav-item">
+                        <a href="/" class="nav-link">
+                            <i class="fa fa-home me-2"></i> Inicio
+                        </a>
+                    </li>
+
+                    <!-- Pedidos -->
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" data-bs-toggle="offcanvas" href="#modalCarrito">
+                            <i class="fas fa-receipt me-2"></i> Pedidos
+                            {% if carrito|length > 0 %}
+                            <span
+                                class="position-absolute top-50 ms-4 translate-middle badge rounded-pill bg-danger text-white">
+                                {{ carrito|length }}
+                                <span class="visually-hidden">Pedidos en carrito</span>
+                            </span>
+                            {% endif %}
+                        </a>
+                    </li>
+
+                    <!-- Historial -->
+                    <li class="nav-item">
+                        <a href="{{ url_for('historialCompras') }}" class="nav-link">
+                            <i class="fa fa-history me-2"></i> Historial
+                        </a>
+                    </li>
+                </ul>
+
+                <hr>
+                <a href="{{ url_for('logout') }}"
+                    class="d-flex justify-content-between align-items-center nav-link nav-cs rounded-2 border-0"
+                    style="height: 48px;">
+                    <strong class="ms-3">Cerrar Sesión</strong>
+                    <i class="fa fa-power-off me-3 text-white"></i>
+                </a>
             </nav>
-            <div class="col-md-11 col-lg-11 content">
+
+            <!-- Contenido Principal -->
+            <div class="col p-3 scrol col-10 mx-auto mb-3" style="max-height: 1112px; overflow-y: auto;">
                 <div class="d-flex justify-content-between align-items-center">
                     <h2 class="titulo-productos">
                         Historial <span>de compras</span>
                     </h2>
-                    <img src="../../static/img/donGalleto2.png" alt="Logo" class="img-fluid ms-3" style="max-width: 100px; height: auto;">
                 </div>
-                {% if ventas %}
+                {% if venta %}
                 <h5 class="subtitulo-productos">Hola {{ ventas[0].nombreCliente }}, tus compras fueron:</h5>
                 {% endif %}
-                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                    <table class="table table-hover text-center mb-0 table-borderless">
+                {% if pedidos_hoy %}
+
+                <div class="card border-0 shadow rounded-3 bg-white">
+                    <div class="card-header border-0 rounded-top-3 text-center bg-white">
+                        <h5 class="subtitulo-productos">Pedidos por recojer</h5>
+                    </div>
+                    <div class="table-responsive" style="max-height: 700px;">
+                        <table class="table table-hover table-borderless table-scroll">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Sabor</th>
+                                    <th>Cantidad</th>
+                                    <th>Tipo</th>
+                                    <th>Total</th>
+                                    <th>Estatus</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for venta in pedidos_hoy %}
+                                <tr>
+                                    <td>{{ venta.fechaEntrega }}</td>
+                                    <td>{{ venta.nombreSabor }}</td>
+                                    <td>{{ venta.cantidad }}</td>
+                                    <td>{{ venta.tipoProducto }}</td>
+                                    <td><b>${{ venta.total }}</b></td>
+                                    <td>
+                                        {% if venta.estatus == 1 %}
+                                        <span class="text-warning badge rounded-pill">Pendiente</span>
+                                        {% elif venta.estatus == 0 %}
+                                        <span class="text-danger badge rounded-pill">Cancelado</span>
+                                        {% elif venta.estatus == 2 %}
+                                        <span class="text-success badge rounded-pill">Realizado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if venta.estatus == 1 %}
+                                        <form method="POST"
+                                            action="{{ url_for('cancelar_pedido', idVentasCliente=venta.idVentasCliente) }}">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button class="btn btn-danger btn-sm">Cancelar</button>
+                                        </form>
+                                        {% else %}
+                                        <span class="text-muted">Sin acción</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer border-0 rounded-bottom-3 bg-white pt-0"></div>
+                </div>
+                {% endif %}
+
+                {% if pedidos_anteriores %}
+                <h5 class="subtitulo-productos mt-3">Pedidos anteriores</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered">
                         <thead>
                             <tr>
+                                <th>Fecha</th>
                                 <th>Sabor</th>
                                 <th>Cantidad</th>
                                 <th>Tipo</th>
                                 <th>Total</th>
+                                <th>Estatus</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for venta in ventas %}
+                            {% for venta in pedidos_anteriores %}
                             <tr>
+                                <td>{{ venta.fechaEntrega }}</td>
                                 <td>{{ venta.nombreSabor }}</td>
                                 <td>{{ venta.cantidad }}</td>
                                 <td>{{ venta.tipoProducto }}</td>
-                                <td class="text-success"><b>${{ venta.total }}</b></td>
+                                <td><b>${{ venta.total }}</b></td>
+                                <td>
+                                    {% if venta.estatus == 1 %}
+                                    <span class="text-warning badge rounded-pill">Pendiente</span>
+                                    {% elif venta.estatus == 0 %}
+                                    <span class="text-danger badge rounded-pill">Cancelado</span>
+                                    {% elif venta.estatus == 2 %}
+                                    <span class="text-success badge rounded-pill">Realizado</span>
+                                    {% endif %}
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -179,4 +283,5 @@
     <script src="static/sweetalert2/sweetalert2.all.min.js"></script>
     <script src="static/fontawesome-free-6.4.0-web/js/all.js"></script>
 </body>
+
 </html>

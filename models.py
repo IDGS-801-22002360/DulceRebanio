@@ -37,8 +37,11 @@ class MateriasPrimas(db.Model):
     materiaPrima = db.Column(db.String(100))
     cantidadDisponible = db.Column(db.Numeric(10, 2))
     unidadMedida = db.Column(db.String(100))
+    idProveedor = db.Column(db.Integer, db.ForeignKey('proveedores.idProveedor'))
+    precioUnitario = db.Column(db.Numeric(10, 2))
     fechaCaducidad = db.Column(db.Date)
     estatus = db.Column(db.Integer, default=1)
+    proveedor = db.relationship('Proveedores', backref='materias_primas')
 
 class Proveedores(db.Model):
     __tablename__ = 'proveedores'
@@ -128,4 +131,5 @@ class VentasCliente(db.Model):
     cantidad = db.Column(db.Integer)
     tipoProducto = db.Column(db.String(100))
     total = db.Column(db.Float)
-    estatus=db.Column(db.Integer, default=1) 
+    estatus = db.Column(db.Integer, default=1)
+    fechaEntrega = db.Column(db.Date, nullable=True)

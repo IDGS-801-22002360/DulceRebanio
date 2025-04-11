@@ -1,183 +1,177 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Dulce Rebaño</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="static/bootstrap/css/bootstrap-utilities.min.css"/>
-    <link rel="stylesheet" href="static/bootstrap/css/bootstrap-grid.min.css"/>
+    <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="static/bootstrap/css/bootstrap-utilities.min.css" />
+    <link rel="stylesheet" href="static/bootstrap/css/bootstrap-grid.min.css" />
     <link rel="stylesheet" href="static/sweetalert2/sweetalert2.min.css">
-    <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.css"/>
-    <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.min.css"/>
+    <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.css" />
+    <link rel="stylesheet" href="static/fontawesome-free-6.4.0-web/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 
     <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700&display=swap" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
-        /*.form-container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .font-Spartan {
-            font-family: 'Roboto', sans-serif;
-        }
-        .btn-color {
-            background-color: #542E02;
-        }
-        .btn-hover:hover {
-            background-color: #371E01;
-        }
-        .btn-del {
-            background-color: #FF0000;
-        }
-        .btn-del-hover:hover {
-            background-color: #D90000;
-        }
-        .bg-danger-light {
-            background-color: rgba(255, 0, 0, 0.1);
-        }
-        .buyButtons {
-            background-color: #FFD700;
-        }
-        .last-login {
-            position: fixed; 
-            top: 20px; 
-            right: 20px; 
-            color: #000; 
-            font-size: 14px; 
-            z-index: 1000; 
-        }
-        .table-scroll {
-            max-height: 200px;
-            overflow-y: auto;
-            border: 0px;
-        }
-        */
-        
         .table-scroll table {
-            width: 100%; /* Asegurar que la tabla ocupe todo el ancho del contenedor */
+            width: 100%;
             height: 90%;
         }
+
         a.btn {
-            display: flex; 
+            display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-decoration: none;
             color: inherit;
         }
+
         .nav-link {
-            color: #8B4513; /* Color café claro */
+            color: #8B4513;
         }
-    
+
         .nav-link:hover {
-            color: #fff; /* Color café cremoso */
+            color: #fff;
             background-color: #8B4513;
         }
+
         .nav-cs {
-            color:red;
+            color: red;
         }
-        .nav-cs:hover{
+
+        .nav-cs:hover {
             color: #fff;
             text-emphasis-color: white;
             background-color: red;
         }
 
+        .inner-shadow {
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
     </style>
 </head>
+
 <body class="" style="background-color: #f1f1f1">
-    <div class="">
-        <div class="d-flex vh-100">
-            <!--* Navbar Lateral -->
-            <nav class="d-flex flex-column flex-shrink-0 p-3 bg-white shadow-sm vh-100" style="width: 280px;">
-                <a href="#" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+    <div class="d-flex vh-100">
+        <!--* Navbar Lateral -->
+        <nav class="d-flex flex-column flex-shrink-0 p-3 bg-white shadow-sm vh-100" style="width: 280px;">
+            <div class="d-flex justify-content-between align-items-center mx-auto">
+                <img src="../../static/img/donGalleto2.png" alt="Logo" class="img-fluid ms-4"
+                    style="max-width: 100px; height: auto;">
+                <a href="#"
+                    class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none ms-2">
                     <span class="fs-4">Dulce Rebaño</span>
                 </a>
-                <hr>
-                <ul class="nav nav-pills flex-column mb-auto">
-                    <li class="nav-item">
-                        <a href="{{ url_for('puntoVenta') }}" class="nav-link">
-                            <i class="fa fa-cookie-bite me-2"></i> Ventas
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ url_for('galletas') }}" class="nav-link position-relative">
-                            <i class="fa fa-box-open me-2"></i> Inventario
-                            {% if productos_bajo_stock > 0 %}
-                            <span class="position-absolute top-50 ms-4 translate-middle badge rounded-pill bg-danger text-white">
-                                {{ productos_bajo_stock }}
-                                <span class="visually-hidden">Productos con bajo stock</span>
-                            </span>
-                            {% endif %}
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ url_for('recetas') }}" class="nav-link">
-                            <i class="fa fa-file-alt me-2"></i> Recetas
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ url_for('insumos') }}" class="nav-link">
-                            <i class="fa fa-layer-group me-2"></i> Insumos
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ url_for('comprasInsumos') }}" class="nav-link">
-                            <i class="fa fa-truck me-2"></i> Compra Insumos
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ url_for('proveedores') }}" class="nav-link">
-                            <i class="fa fa-users me-2"></i> Proveedores
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ url_for('miembros') }}" class="nav-link">
-                            <i class="fa fa-address-book me-2"></i> Usuarios
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ url_for('dashboard') }}" class="nav-link">
-                            <i class="fa fa-bar-chart me-2"></i> Dashboard
-                        </a>
-                    </li>
-                </ul>
-                
-                <div class="last-login">
-                    <p class="mb-0">
-                        <b>Último inicio de sesión:</b><br>
-                        {{ ultimo_login.strftime('%Y-%m-%d') if ultimo_login else 'Nunca' }}<br>
-                        {{ ultimo_login.strftime('%H:%M:%S') if ultimo_login else '' }}
-                    </p>
-                </div>
-                <hr>
-                <a href="{{ url_for('logout') }}" class="d-flex justify-content-between align-items-center nav-link nav-cs rounded-2 border-0" style="height: 48px;">
-                    <strong class="ms-3">Cerrar Sesión</strong>
-                    <i class="fa fa-power-off me-3 text-white"></i>
-                </a>
-            </nav>
-            
-            <!-- Contenido principal -->
-            <div class="flex-grow-1 p-3">
-                {% block container %}
-                
-                {% endblock %}
             </div>
+            <hr>
+            <ul class="nav nav-pills flex-column mb-auto">
+                {% if current_user.rol == 'Ventas' or current_user.rol == 'Admin' %}
+                <li class="nav-item">
+                    <a href="{{ url_for('puntoVenta') }}" class="nav-link">
+                        <i class="fa fa-cookie-bite me-2"></i> Ventas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('pedidos') }}" class="nav-link position-relative">
+                        <i class="fa fa-user-tag me-2"></i> Pedidos
+                        {% if pedidos_pendientes > 0 %}
+                        <span
+                            class="position-absolute top-50 ms-4 translate-middle badge rounded-pill bg-danger text-white">
+                            {{ pedidos_pendientes }}
+                            <span class="visually-hidden">Pedidos pendientes</span>
+                        </span>
+                        {% endif %}
+                    </a>
+                </li>
+                {% endif %}
+
+                {% if current_user.rol == 'Produccion' or current_user.rol == 'Admin' or current_user.rol ==
+                'Ventas' %}
+                <li>
+                    <a href="{{ url_for('galletas') }}" class="nav-link position-relative">
+                        <i class="fa fa-box-open me-2"></i> Inventario
+                        {% if productos_bajo_stock > 0 %}
+                        <span
+                            class="position-absolute top-50 ms-4 translate-middle badge rounded-pill bg-danger text-white">
+                            {{ productos_bajo_stock }}
+                            <span class="visually-hidden">Productos con bajo stock</span>
+                        </span>
+                        {% endif %}
+                    </a>
+                </li>
+                {% endif %}
+
+                {% if current_user.rol == 'Produccion' or current_user.rol == 'Admin' %}
+                <li>
+                    <a href="{{ url_for('recetas') }}" class="nav-link">
+                        <i class="fa fa-file-alt me-2"></i> Recetas
+                    </a>
+                </li>
+                {% endif %}
+
+                {% if current_user.rol == 'Admin' %}
+                <li>
+                    <a href="{{ url_for('insumos') }}" class="nav-link">
+                        <i class="fa fa-layer-group me-2"></i> Insumos
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('comprasInsumos') }}" class="nav-link">
+                        <i class="fa fa-truck me-2"></i> Compra Insumos
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('proveedores') }}" class="nav-link">
+                        <i class="fa fa-users me-2"></i> Proveedores
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('miembros') }}" class="nav-link">
+                        <i class="fa fa-address-book me-2"></i> Usuarios
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('dashboard') }}" class="nav-link">
+                        <i class="fa fa-bar-chart me-2"></i> Dashboard
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+
+            <div class="last-login">
+                <p class="mb-0">
+                    <b>Último inicio de sesión:</b><br>
+                    {{ ultimo_login.strftime('%Y-%m-%d') if ultimo_login else 'Nunca' }}<br>
+                    {{ ultimo_login.strftime('%H:%M:%S') if ultimo_login else '' }}
+                </p>
+            </div>
+            <hr>
+            <a href="{{ url_for('logout') }}"
+                class="d-flex justify-content-between align-items-center nav-link nav-cs rounded-2 border-0"
+                style="height: 48px;">
+                <strong class="ms-3">Cerrar Sesión</strong>
+                <i class="fa fa-power-off me-3 text-white"></i>
+            </a>
+        </nav>
+
+        <!-- Contenido principal -->
+        <div class="flex-grow-1 p-3">
+            {% block container %}
+
+            {% endblock %}
         </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="static/bootstrap/js/bootstrap.esm.min.js"></script>
+    <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="static/sweetalert2/sweetalert2.all.min.js"></script>
+    <script src="static/fontawesome-free-6.4.0-web/js/all.js"></script>
+    <script src="{{url_for('static', filename='js/galletas.js')}}"></script>
+    <script src="{{url_for('static', filename='js/recetas.js')}}"></script>
 </body>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="static/bootstrap/js/bootstrap.esm.min.js"></script>
-<script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="static/sweetalert2/sweetalert2.all.min.js"></script>
-<script src="static/fontawesome-free-6.4.0-web/js/all.js"></script>
-<script src="{{url_for('static', filename='js/galletas.js')}}"></script>
-<script src="{{url_for('static', filename='js/recetas.js')}}"></script>
 </html>
