@@ -119,3 +119,16 @@
 2025-04-06 19:57:05,454 - action_logger - INFO - Usuario: markolfin@gmail.com - Acción: Guardar paquete - Receta: 6 - Tipo: 700 gr - Cantidad: 10 - Fecha: 2025-04-06 20:27:33.122034
 2025-04-07 16:21:42,449 - action_logger - INFO - Usuario: markolfin@gmail.com - Acción: Guardar paquete - Receta: 1 - Tipo: 700 gr - Cantidad: 10 - Fecha: 2025-04-07 16:21:42.449920
 2025-04-07 16:21:56,204 - action_logger - INFO - Usuario: markolfin@gmail.com - Acción: Mermar producto - Producto ID: 126 - Cantidad mermada: 0 - Fecha: 2025-04-07 16:21:56.204188
+2025-04-07 18:10:18,437 - action_logger - INFO - Usuario: admin@gmail.com - Acción: Guardar lote - Receta: 6 - Cantidad: 150 - Fecha: 2025-04-07 18:10:18.437100
+2025-04-07 18:10:20,676 - action_logger - INFO - Usuario: admin@gmail.com - Acción: Guardar lote - Receta: 1 - Cantidad: 150 - Fecha: 2025-04-07 18:10:20.676130
+2025-04-07 18:10:21,458 - action_logger - INFO - Usuario: admin@gmail.com - Acción: Guardar lote - Receta: 1 - Cantidad: 150 - Fecha: 2025-04-07 18:10:21.458577
+2025-04-07 18:10:22,225 - action_logger - INFO - Usuario: admin@gmail.com - Acción: Guardar lote - Receta: 1 - Cantidad: 150 - Fecha: 2025-04-07 18:10:22.225907
+2025-04-07 18:10:37,284 - action_logger - INFO - Usuario: admin@gmail.com - Acción: Guardar lote - Receta: 6 - Cantidad: 150 - Fecha: 2025-04-07 18:10:37.284891
+2025-04-07 18:10:44,011 - action_logger - INFO - Usuario: admin@gmail.com - Acción: Mermar producto - Producto ID: 128 - Cantidad mermada: 150 - Fecha: 2025-04-07 18:10:44.011227
+2025-04-07 18:10:48,140 - action_logger - INFO - Usuario: admin@gmail.com - Acción: Mermar producto - Producto ID: 129 - Cantidad mermada: 150 - Fecha: 2025-04-07 18:10:48.140145
+2025-04-07 18:10:52,324 - action_logger - INFO - Usuario: admin@gmail.com - Acción: Mermar producto - Producto ID: 130 - Cantidad mermada: 150 - Fecha: 2025-04-07 18:10:52.324528
+2025-04-07 18:10:58,075 - action_logger - INFO - Usuario: admin@gmail.com - Acción: Guardar lote - Receta: 6 - Cantidad: 150 - Fecha: 2025-04-07 18:10:58.075434
+2025-04-07 19:39:55,191 - action_logger - INFO - Usuario: admin@gmail.com - Acción: Guardar lote - Receta: 4 - Cantidad: 200 - Fecha: 2025-04-07 19:39:55.191942
+2025-04-07 19:40:32,670 - action_logger - INFO - Usuario: admin@gmail.com - Acción: Mermar producto - Producto ID: 26 - Cantidad mermada: 5 - Fecha: 2025-04-07 19:40:32.670576
+2025-04-07 19:40:48,044 - action_logger - INFO - Usuario: admin@gmail.com - Acción: Mermar producto - Producto ID: 133 - Cantidad mermada: 5 - Fecha: 2025-04-07 19:40:48.044956
+2025-04-07 19:41:23,308 - action_logger - INFO - Usuario: admin@gmail.com - Acción: Guardar paquete - Receta: 2 - Tipo: Kilo - Cantidad: 4 - Fecha: 2025-04-07 19:41:23.308797

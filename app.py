@@ -107,11 +107,29 @@ def index():
     register_form = RegisterForm()
     recuperar_contrasena_form = RecuperarContrasenaForm()
     show_recuperar_modal = request.args.get('show_recuperar_modal', False)
-    return render_template("client/mainClientes.html", 
-                        login_form=login_form, 
-                        register_form=register_form,
-                        recuperar_contrasena_form=recuperar_contrasena_form,
-                        show_recuperar_modal=show_recuperar_modal)
+
+    # Obtener todas las recetas desde la base de datos
+    recetas = Receta.query.filter_by(estatus=1).all()  # Filtrar solo recetas activas
+    print(f"Recetas cargadas: {recetas}")  # Depuración
+
+    return render_template(
+        "client/mainClientes.html", 
+        login_form=login_form, 
+        register_form=register_form,
+        recuperar_contrasena_form=recuperar_contrasena_form,
+        show_recuperar_modal=show_recuperar_modal,
+        recetas=recetas  # Pasar las recetas al contexto de la plantilla
+    )
+
+@app.route("/verDetalles/<int:receta_id>")
+def ver_detalles(receta_id):
+    # Verificar si el usuario está autenticado
+    if "user_id" not in session:  # Cambia "user_id" según tu implementación de sesión
+        flash("Por favor, inicia sesión para ver los detalles del producto.", "warning")
+        return redirect(url_for("index"))  # Redirigir a la página de inicio o login
+
+    # Si el usuario está autenticado, redirigir al módulo de clientes
+    return redirect(url_for("modulo_clientes", receta_id=receta_id))
 
 @app.context_processor
 def inject_notifications():
@@ -597,7 +615,7 @@ def guardarLote():
             # Crear el nuevo producto terminado
             nuevo_producto = ProductosTerminados(
                 idReceta=idReceta,
-                cantidadDisponible=300,
+                cantidadDisponible=200,
                 fechaCaducidad=date.today() + timedelta(days=7),
                 tipoProducto=id_detalle,
                 estatus=1
@@ -1029,14 +1047,16 @@ def asignar_imagen():
 def page_not_found(e):
     return render_template('404.html'), 404
 
-#@app.errorhandler(Exception)
-#def handle_general_error(e):
-#    status_code = getattr(e, 'code', 500)
-#    
-#    error_logger.info(f"Usuario: {current_user.correo} - Fecha: {datetime.now()}")
-#    
-#    return render_template('codeError.html', error_message=str(e), status_code=status_code), status_code
-
+@app.errorhandler(Exception)
+def handle_general_error(e):
+    status_code = getattr(e, 'code', 500)
+    
+    if current_user.is_authenticated:
+        error_logger.info(f"Usuario: {current_user.correo} - Fecha: {datetime.now()}")
+    else:
+        error_logger.info(f"Usuario: Anónimo - Fecha: {datetime.now()}")
+    
+    return render_template('codeError.html', error_message=str(e), status_code=status_code), status_code
 
 #!============================== Modulo de Insumos ==============================#
 #INSERCIÓN INSUMOS
