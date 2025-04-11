@@ -1,5 +1,16 @@
 # Dulce Rebaño - Proyecto Final IDGS
 
+---
+
+## Documento Final
+[Ver documento](/Entrega%20Proyecto%20Final.pdf)
+
+---
+
+## Copia de seguridad BD
+[Ver documento](/DulceRebanioSecurityCopy.sql)
+
+---
 ## Descripción del Proyecto
 
 **Dulce Rebaño** es un sistema de gestión para una empresa dedicada a la producción y venta de galletas. Este software permite controlar las ventas de productos, compras de materias primas y producción de galletas, asegurando un flujo eficiente en la operativa del negocio.
